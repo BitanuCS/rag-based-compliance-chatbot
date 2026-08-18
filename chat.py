@@ -4,24 +4,34 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-llm = HuggingFaceEndpoint(
-    repo_id = "Qwen/Qwen2.5-7B-Instruct",
-    task = "text-generation"
-)
-model = ChatHuggingFace(llm = llm)
+DEFAULT_REPO_ID = "Qwen/Qwen2.5-7B-Instruct"
+DEFAULT_SYSTEM_PROMPT = "You are a helpful AI assistant."
 
-chat_history = [
-    SystemMessage(content="You are a helpful AI assistant.")
-]
-while True:
-    user_input = input("User: ")
-    chat_history.append(HumanMessage(content=user_input))
-    if user_input == 'exit':
-        break
-    results = model.invoke(chat_history)
-    chat_history.append(AIMessage(results.content))
-    print("AI: ", results.content)
-    
-# result = model.invoke("Who is the PM of india?")
 
-print(chat_history)
+def build_model(repo_id = DEFAULT_REPO_ID):
+    llm = HuggingFaceEndpoint(
+        repo_id = repo_id,
+        task = "text-generation"
+    )
+    return ChatHuggingFace(llm = llm)
+
+
+def main():
+    model = build_model()
+    chat_history = [
+        SystemMessage(content=DEFAULT_SYSTEM_PROMPT)
+    ]
+    while True:
+        user_input = input("User: ")
+        chat_history.append(HumanMessage(content=user_input))
+        if user_input == 'exit':
+            break
+        results = model.invoke(chat_history)
+        chat_history.append(AIMessage(results.content))
+        print("AI: ", results.content)
+
+    print(chat_history)
+
+
+if __name__ == "__main__":
+    main()
