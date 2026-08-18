@@ -1,0 +1,17 @@
+{
+  "framework_id": "RBI_KYC_MASTER_DIRECTIONS",
+  "framework_name": "RBI Master Direction — Know Your Customer (KYC) Direction, 2016",
+  "regulator": "Reserve Bank of India (RBI)",
+  "version": "Master Direction as amended (consolidated)",
+  "effective_date": "2016-02-25",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
+  "penalty_max_inr": 500000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 107,
+  "file_hash_sha256": "e525b18753fd08ffad04898202402cad37ad9be10ffa088b7ec2a37e288670ad"
+}

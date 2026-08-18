@@ -1,0 +1,17 @@
+{
+  "framework_id": "SEBI_INVESTMENT_ADVISER_REGS_2013",
+  "framework_name": "SEBI (Investment Advisers) Regulations, 2013",
+  "regulator": "Securities and Exchange Board of India (SEBI)",
+  "version": "As amended December 16, 2024",
+  "effective_date": "2013-01-21",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.sebi.gov.in/legal/regulations.html",
+  "penalty_max_inr": 250000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 45,
+  "file_hash_sha256": "e46c39a70713f743b277adda4436470946f8e25dbdeb47c24ecdc46a2db27ce6"
+}

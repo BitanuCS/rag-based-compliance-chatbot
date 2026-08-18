@@ -1,0 +1,22 @@
+{
+  "framework_id": "LABOUR_CODES_2020",
+  "framework_name": "Four Labour Codes, 2019-2020 (Compliance Handbook)",
+  "regulator": "Ministry of Labour and Employment",
+  "version": "Compliance Handbook for Employers (Central Government Sphere)",
+  "effective_date": "2020-09-28",
+  "last_verified": "2026-06-05",
+  "source_url": "https://labour.gov.in/",
+  "penalty_max_inr": 300000,
+  "applies_to": [
+    "web_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 38,
+  "file_hash_sha256": "bbc851624beb6011c550fa6b8c6b6f29f0c5add6be6b8f5be5e9bc2f3b0288ec"
+}

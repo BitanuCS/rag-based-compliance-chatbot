@@ -1,0 +1,18 @@
+{
+  "framework_id": "PCI_DSS_V4",
+  "framework_name": "Payment Card Industry Data Security Standard (PCI DSS) v4.0.1",
+  "regulator": "PCI Security Standards Council",
+  "version": "v4.0.1 (June 2024)",
+  "effective_date": "2024-06-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.pcisecuritystandards.org/document_library/",
+  "penalty_max_inr": 0,
+  "applies_to": [
+    "fintech",
+    "ecommerce",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 397,
+  "file_hash_sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7"
+}

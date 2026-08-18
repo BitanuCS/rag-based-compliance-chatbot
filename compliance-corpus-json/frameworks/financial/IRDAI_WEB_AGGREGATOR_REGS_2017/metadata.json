@@ -1,0 +1,18 @@
+{
+  "framework_id": "IRDAI_WEB_AGGREGATOR_REGS_2017",
+  "framework_name": "IRDAI (Insurance Web Aggregators) Regulations, 2017",
+  "regulator": "Insurance Regulatory and Development Authority of India (IRDAI)",
+  "version": "2017 Regulations",
+  "effective_date": "2017-01-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://irdai.gov.in/web/guest/regulations",
+  "penalty_max_inr": 10000000,
+  "applies_to": [
+    "insurtech",
+    "ecommerce",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 8,
+  "file_hash_sha256": "1218d50a4f1c2c2ef1fd47cc3741102906ab4857129e8a1c10207e5a1854c4c3"
+}

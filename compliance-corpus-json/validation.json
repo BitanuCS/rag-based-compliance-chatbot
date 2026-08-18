@@ -1,0 +1,119 @@
+{
+  "chunks": 2602,
+  "frameworks": 25,
+  "chunks_per_framework": {
+    "COMPANIES_ACT_2013": 564,
+    "PCI_DSS_V4": 424,
+    "GDPR_2018": 190,
+    "IRDAI_CYBER_SECURITY_GUIDELINES_2023": 179,
+    "IRDAI_AML_CFT_GUIDELINES": 155,
+    "SEBI_CYBERSECURITY_FRAMEWORK_2024": 132,
+    "RBI_KYC_MASTER_DIRECTIONS": 123,
+    "RBI_CYBERSECURITY_FRAMEWORK": 115,
+    "IT_ACT_2000": 106,
+    "IRDAI_WEB_AGGREGATOR_REGS_2017": 83,
+    "PMLA_AML_CFT": 75,
+    "RBI_ACCOUNT_AGGREGATOR_FRAMEWORK": 67,
+    "DPDP_ACT_2023": 51,
+    "SEBI_INVESTMENT_ADVISER_REGS_2013": 51,
+    "TELEMEDICINE_GUIDELINES_2020": 42,
+    "LABOUR_CODES_2020": 39,
+    "ISO_27001_2022": 37,
+    "DPDP_RULES_2025": 34,
+    "SEBI_AML_CFT_GUIDELINES": 34,
+    "RBI_DIGITAL_LENDING_2025": 33,
+    "RBI_IT_OUTSOURCING_DIRECTIONS": 25,
+    "CONSUMER_PROTECTION_ECOMMERCE_RULES_2020": 12,
+    "SEBI_ALGO_TRADING_CIRCULAR_2025": 12,
+    "IT_RULES_2011": 11,
+    "CERT_IN_DIRECTIONS_2022": 8
+  },
+  "checks": [
+    {
+      "check": "schema: all required fields present",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "chunk_id uniqueness",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "no length spike indicating a hard cap (worst: 3182 chars x11)",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "no chunk ends mid-word",
+      "status": "FAIL",
+      "failed": 1,
+      "checked": 2602,
+      "examples": [
+        "RBI_KYC_MASTER_DIRECTIONS-0072-c25"
+      ]
+    },
+    {
+      "check": "no fused footnote markers ('28\u201cShell Bank')",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "no footnote bodies spliced into clause text",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "no control characters",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "embed_text contains the chunk text verbatim",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "chunk within size budget (<= 4000 chars)",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "page range is sane",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "breadcrumb non-trivial",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 2602,
+      "examples": []
+    },
+    {
+      "check": "every document has provenance (sha256 + source_url)",
+      "status": "PASS",
+      "failed": 0,
+      "checked": 27,
+      "examples": []
+    }
+  ]
+}

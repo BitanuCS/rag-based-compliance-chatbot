@@ -1,0 +1,25 @@
+{
+  "framework_id": "IT_ACT_2000",
+  "framework_name": "Information Technology Act, 2000",
+  "regulator": "Ministry of Electronics and Information Technology (MeitY)",
+  "version": "Act No. 21 of 2000 (amended 2008)",
+  "effective_date": "2000-10-17",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.meity.gov.in/content/information-technology-act",
+  "penalty_max_inr": 50000000,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech",
+    "insurtech",
+    "govtech"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 34,
+  "file_hash_sha256": "645e37dc0d249d15ef4fc4e36b453f1ecd992d7ef5342dc3348dda1c134cc81b"
+}

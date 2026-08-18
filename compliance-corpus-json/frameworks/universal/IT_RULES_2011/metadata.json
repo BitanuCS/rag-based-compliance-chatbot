@@ -1,0 +1,19 @@
+{
+  "framework_id": "IT_RULES_2011",
+  "framework_name": "Information Technology (Intermediary Guidelines) Rules, 2011",
+  "regulator": "Ministry of Electronics and Information Technology (MeitY)",
+  "version": "GSR 314(E), April 11, 2011",
+  "effective_date": "2011-04-11",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.meity.gov.in/content/information-technology-intermediary-guidelines-and-digital-media-ethics-code-rules-2021",
+  "penalty_max_inr": 50000000,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "ecommerce"
+  ],
+  "document_status": "needs_review",
+  "total_pages": 9,
+  "file_hash_sha256": "43767447421ec64eaf44d4e64bbbebcc645260147947c377a36f6be637e67c4c"
+}

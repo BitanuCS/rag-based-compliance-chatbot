@@ -1,0 +1,17 @@
+{
+  "framework_id": "SEBI_ALGO_TRADING_CIRCULAR_2025",
+  "framework_name": "SEBI Circular on Safer Participation of Retail Investors in Algorithmic Trading, 2025",
+  "regulator": "Securities and Exchange Board of India (SEBI)",
+  "version": "2025 Circular",
+  "effective_date": "2025-01-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.sebi.gov.in/legal/circulars.html",
+  "penalty_max_inr": 250000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 7,
+  "file_hash_sha256": "c4cb25b37b98e3cbd9244361324a5fe040755c172e372cdcbd71b3e6bd848cc4"
+}

@@ -1,0 +1,25 @@
+{
+  "framework_id": "DPDP_ACT_2023",
+  "framework_name": "Digital Personal Data Protection Act, 2023",
+  "regulator": "Ministry of Electronics and Information Technology (MeitY)",
+  "version": "Act No. 22 of 2023",
+  "effective_date": "2023-08-11",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.meity.gov.in/writereaddata/files/Digital%20Personal%20Data%20Protection%20Act%202023.pdf",
+  "penalty_max_inr": 25000000000,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech",
+    "insurtech",
+    "govtech"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 21,
+  "file_hash_sha256": "4deb23981d3010c8225a2ff6149e7243dc2268455b299e283afebdd7b72a7d15"
+}

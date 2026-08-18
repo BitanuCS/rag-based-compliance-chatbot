@@ -1,0 +1,36 @@
+# Compliance RAG — pinned runtime
+# Python 3.11, Apple Silicon (torch uses MPS)
+
+# --- vector store + retrieval ---
+chromadb==0.5.23
+sentence-transformers==3.3.1
+rank-bm25==0.2.2
+
+# --- orchestration (retrieval components only; LangGraph owns control flow) ---
+langchain==0.3.27
+langchain-core==0.3.74
+langchain-community==0.3.27
+langgraph==0.6.4
+langgraph-checkpoint-sqlite==2.0.11
+
+# --- LLM providers (all behind the single wrapper in config.py) ---
+# Default is Hugging Face Inference Providers; huggingface_hub also ships as a
+# sentence-transformers dependency, pinned here because config.py imports it.
+huggingface_hub==0.36.2
+# Optional alternates, same wrapper. google-genai supersedes the end-of-life
+# google-generativeai package.
+google-genai==2.18.1
+groq==1.2.0
+
+# --- evaluation + tracing ---
+ragas==0.2.10
+datasets==3.2.0
+langsmith>=0.3.45
+
+# --- UI ---
+streamlit==1.48.0
+
+# --- misc ---
+pydantic==2.13.4
+python-dotenv==1.0.1
+numpy==1.26.4

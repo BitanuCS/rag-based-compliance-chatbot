@@ -1,0 +1,25 @@
+{
+  "framework_id": "DPDP_RULES_2025",
+  "framework_name": "Digital Personal Data Protection Rules, 2025",
+  "regulator": "Ministry of Electronics and Information Technology (MeitY)",
+  "version": "Draft Rules November 2025",
+  "effective_date": "2025-11-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.meity.gov.in/",
+  "penalty_max_inr": 25000000000,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech",
+    "insurtech",
+    "govtech"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 18,
+  "file_hash_sha256": "63bc7ca508ae4ebbbbf8731d336914d94ee6067e918b719d019193371fcc0763"
+}

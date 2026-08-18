@@ -1,0 +1,17 @@
+{
+  "framework_id": "IRDAI_AML_CFT_GUIDELINES",
+  "framework_name": "IRDAI Master Guidelines on Anti-Money Laundering, 2022",
+  "regulator": "Insurance Regulatory and Development Authority of India (IRDAI)",
+  "version": "Master Guidelines 2022",
+  "effective_date": "2022-01-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://irdai.gov.in/web/guest/regulations",
+  "penalty_max_inr": 10000000,
+  "applies_to": [
+    "insurtech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 20,
+  "file_hash_sha256": "c30108032e680460d999860405ebd07f642b02cd61d3e57205d3c688d667da18"
+}

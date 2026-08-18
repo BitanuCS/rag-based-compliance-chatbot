@@ -1,0 +1,173 @@
+{
+  "framework_id": "SEBI_ALGO_TRADING_CIRCULAR_2025",
+  "framework_name": "SEBI Circular on Safer Participation of Retail Investors in Algorithmic Trading, 2025",
+  "regulator": "Securities and Exchange Board of India (SEBI)",
+  "sector": "financial",
+  "effective_date": "2025-01-01",
+  "document_status": "verified_latest",
+  "source_url": "https://www.sebi.gov.in/legal/circulars.html",
+  "source_pdf": "SEBI_ALGO_TRADING_CIRCULAR_2025.pdf",
+  "sha256": "c4cb25b37b98e3cbd9244361324a5fe040755c172e372cdcbd71b3e6bd848cc4",
+  "parsed_at": "2026-08-18T07:02:44.073252+00:00",
+  "parser": "pymupdf+tesseract",
+  "ocr_used": true,
+  "structure_strategy": "gazette_section",
+  "structure_confidence": 0.94,
+  "structure_scores": {
+    "gazette_section": 0.94,
+    "decimal_clause": 0.0,
+    "article": 0.0,
+    "rule": 0.0,
+    "bare_numeric": 0.0,
+    "paren_roman": 0.0,
+    "chapter_titled": 0.0
+  },
+  "extraction": {
+    "body_font_size": 32.0,
+    "pages": 7,
+    "text_pages": 6,
+    "text_page_ratio": 0.857,
+    "chars_extracted": 9367,
+    "footnote_marker_chars_removed": 0,
+    "footnote_body_lines_removed": 13,
+    "running_header_lines_removed": 12,
+    "distinct_running_patterns": 2,
+    "toc_lines_removed": 0,
+    "ocr": true,
+    "ocr_dpi": 250,
+    "ocr_mean_confidence": 95.6,
+    "ocr_low_conf_lines_dropped": "see MIN_LINE_CONF"
+  },
+  "sections": [
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0001",
+      "number": "0",
+      "title": "Preamble",
+      "chapter": null,
+      "path": [
+        "0"
+      ],
+      "page_start": 1,
+      "page_end": 1,
+      "char_count": 240,
+      "text": "CIRCULAR SEBI/HO/MIRSD/MIRSD-PoD/P/CIR/2025/0000013 February 4, 2025 To, All Recognized Stock Exchanges Stock Brokers through Recognized Stock Exchanges Dear Sir/Madam, Subject: Safer participation of retail investors in Algorithmic trading"
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0002",
+      "number": "1",
+      "title": "SEBI, vide circular no. CIR/MRD/DP/09/2012 dated March 30, 2012, provided",
+      "chapter": null,
+      "path": [
+        "1"
+      ],
+      "page_start": 1,
+      "page_end": 1,
+      "char_count": 269,
+      "text": "1. SEBI, vide circular no. CIR/MRD/DP/09/2012 dated March 30, 2012, provided broad guidelines on Algorithmic Trading (\"Algo\" - orders generated using automated execution logic). Thereafter, SEBI has introduced measures to strengthen controls around Algorithmic Trading."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0003",
+      "number": "2",
+      "title": "Algo trading provides significant advantages of timed and programmed order",
+      "chapter": null,
+      "path": [
+        "2"
+      ],
+      "page_start": 1,
+      "page_end": 1,
+      "char_count": 226,
+      "text": "2. Algo trading provides significant advantages of timed and programmed order execution. At present, there are mechanisms such as Direct Market Access Facility, which enable institutional investors to trade through Algorithms."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0004",
+      "number": "3",
+      "title": "There has been an increasing demand for algo trading by retail investors. In",
+      "chapter": null,
+      "path": [
+        "3"
+      ],
+      "page_start": 1,
+      "page_end": 1,
+      "char_count": 503,
+      "text": "3. There has been an increasing demand for algo trading by retail investors. In order to facilitate safer participation of retail investors in algo trading, with Stock Brokers (hereinafter referred to as \"Brokers\") and Stock Exchanges (hereinafter referred to as \"Exchanges'\") playing the required roles in risk management, it has been decided to review and refine the existing regulatory framework to ensure proper checks and balances, to safeguard investor interest as well as integrity of the market."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0005",
+      "number": "4",
+      "title": "The regulatory environment envisaged is aimed at spelling out the rights and",
+      "chapter": null,
+      "path": [
+        "4"
+      ],
+      "page_start": 1,
+      "page_end": 2,
+      "char_count": 334,
+      "text": "4. The regulatory environment envisaged is aimed at spelling out the rights and responsibilities of the main stakeholders of the trading ecosystem i.e. investors, brokers, algo providers/vendors and Market Infrastructure Institutions (MIls), so that the retail investors are enabled to avail algo facilities with requisite safeguards."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0006",
+      "number": "5",
+      "title": "SEBI had issued a discussion paper dated December 09, 2021 on \"Algorithmic",
+      "chapter": null,
+      "path": [
+        "5"
+      ],
+      "page_start": 2,
+      "page_end": 6,
+      "char_count": 6412,
+      "text": "5. SEBI had issued a discussion paper dated December 09, 2021 on \"Algorithmic Trading by Retail Investors\", on the use of API access and automation of trades using the same. Further, SEBI had extensive discussions with the Exchanges, Brokers and Algo Providers. The proposal was also discussed in the meeting of the Intermediary Advisory Committee and with the Broker's Industry Standards Forum (ISF), which comprises of industry representatives.\nAccordingly, after extensive deliberations, the following regulatory framework is being proposed to facilitate safer participation of retail investors in Algorithmic trading through brokers -\nI. Use of Application Programming Interface (API)' for Algo trading\na) For the purpose of provision of algo trading through APIs, brokers shall be the principal while any algo provider or fintech/vendor (hereinafter referred to as \"Algo Provider') shall act as its agent, while using the API provided by the broker.\nb) All algo orders originating/flowing through Application Programming Interface (API) extended by brokers to algo providers, shall be tagged with a unique identifier provided by Stock Exchange.\nc) Algos developed by tech-savvy retail investors themselves, using programming knowledge, shall also be registered with the Exchange, through their broker, only if they cross the specified order per second Further, the same registered Algo shall be permitted to be used by such retail investors for their family (but not for other investors).\n'Family' for this purpose would mean self, spouse, dependent children and dependent parents.\nd) Brokers shall:\ne ensure that they have systems and procedures in place to detect/identify and categorize all orders above the specified threshold as algo orders;\ne notpermit open APIs and allow access only through a unique vendor client specific API key and static IP whitelisted by the broker to ensure identification and traceability of the algo provider and the end user (i.e. investor);\ne have OAuth (Open Authentication)? based authentication only and all other authentication mechanisms shall be discontinued;\ne authenticate access to API through two factor authentication;\ne deal with empaneled algo providers only and handle all related complaints, as such algo providers are agents of such broker.\nIl. Roles and responsibilities of Stock Brokers:\nBrokers providing the facility of algo trading to investors shall continue to abide by the extant provisions related to algo trading including (but not limited to) the following -\na) The facility of algo trading shall be provided by the broker only after obtaining requisite permission of the stock exchange for each algo.\nb) All algo orders shall be tagged with a unique identifier provided by the Exchange in order to establish audit trail and the broker shall seek approval from the Exchange for any modification or change to the approved algos.\nc) Brokers shall be solely responsible for handling investor grievances related to algo trading and the monitoring of APIs for prohibited activities.\nill. Empanelment and Registration of Algo Providers:\na) While algo providers shall not be regulated by SEBI, for better oversight, any algo provider, providing the facility to place algo orders with Brokers through API, shall require to be empaneled with Exchanges in a manner as stipulated by Exchanges.\nb) Exchanges shall specify the empanelment criteria for the algo providers.\nc) Before onboarding an empaneled algo provider on its platform, the broker shall also do the necessary due diligence.\nd) Algo providers and brokers may share the subscription charges and brokerage collected from the client. However, prominent and complete disclosures of all the charges shall be made to the client. The broker shall also ensure that such arrangements do not result in any conflict of interest.\nIV. Role and Responsibilities of Exchanges:\na) Exchanges shall continue to be responsible for supervising algorithmic trading while ensuring the following:\ni. putting in place a comprehensive Standard Operating Procedure\n(SOP) for testing of algos;\nii. surveillance on all algo orders and monitoring their behaviour at all times including simulation testing of all algos;\niii. continue to have the ability to use the kill switch* for orders emanating from a particular algo id;\niv. defining the roles and responsibilities of brokers; and\nv. defining the roles, criteria and process of empanelment of algo providers;\nb) Exchanges shall supervise/inspect that brokers have the ability to distinguish between algo and non algo Orders.\nc) The detailed operational modalities and/or Frequently asked questions (FAQs), covering the following aspects, shall be issued by stock exchanges, in consultation with SEBI, e roles and responsibilities of the brokers including risk management system of brokers for orders through API.\ne roles of algo providers along with the criteria and process of empanelment of algo providers.\ne registration process for algos and the circumstances in which a re- approval shall be required.\ne measures to enhance the confidentiality of retail algo strategies including confidentiality clauses, non-disclosure agreements, encrypted submissions etc.\ne data flow between the algo provider, broker and the Exchange, while ensuring that the broker remains responsible for compliance with the outsourcing guidelines specified by SEBI from time to time.\nd) Exchanges shall specify the turnaround time (TAT) to register certain types of algos (eg. Execution algos) on a fast track basis while registering other types of algos on a normal basis. For both these scenarios, TAT shall be decided by the stock exchanges and mentioned in their SOP, disclosed on their website.\nV. Categorization of Algos\na) Algos shall be categorized into two categories:\ni. Algos where logic is disclosed and replicable i.e. Execution Algos or White box® Algos;\nii. where the logic is not known to the user and is not replicable, i.e. Black box® Algos - For Algos in category (ii), the algo provider shall:\ne Register as a Research Analyst and maintain a detailed research report for each such algo and confirm to the exchanges that such report has been maintained.\ne Incase of any change in the logic governing the algo, register such algo as a fresh algo and maintain a detailed research report for the new algo, and confirm to the exchanges that such report has been maintained."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0007",
+      "number": "6",
+      "title": "Exchanges and brokers shall continue to comply with existing provisions",
+      "chapter": null,
+      "path": [
+        "6"
+      ],
+      "page_start": 6,
+      "page_end": 6,
+      "char_count": 121,
+      "text": "6. Exchanges and brokers shall continue to comply with existing provisions prescribed with regard to Algorithmic trading."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0008",
+      "number": "7",
+      "title": "Schedule of Implementation",
+      "chapter": null,
+      "path": [
+        "7"
+      ],
+      "page_start": 6,
+      "page_end": 6,
+      "char_count": 301,
+      "text": "7. Schedule of Implementation:\na) The implementation standards shall be formulated by the Broker's Industry Standards Forum, under the aegis of the stock exchanges and in consultation with SEBI by April 01, 2025.\nb) The provisions of this circular shall be applicable with effect from August 01, 2025."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0009",
+      "number": "8",
+      "title": "Exchanges, are hereby, directed to",
+      "chapter": null,
+      "path": [
+        "8"
+      ],
+      "page_start": 6,
+      "page_end": 6,
+      "char_count": 385,
+      "text": "8. Exchanges, are hereby, directed to:\na) take necessary steps and put in place necessary systems and procedures for implementation of the above.\nb) make necessary amendments to the relevant bye-laws, rules and regulations for the implementation of the above provisions.\nc) bring the provisions of this circular to the notice of their brokers and disseminate the same on their website."
+    },
+    {
+      "section_id": "SEBI_ALGO_TRADING_CIRCULAR_2025-0010",
+      "number": "9",
+      "title": "This circular is issued in exercise of powers conferred under Section 11(1) of",
+      "chapter": null,
+      "path": [
+        "9"
+      ],
+      "page_start": 6,
+      "page_end": 6,
+      "char_count": 494,
+      "text": "9. This circular is issued in exercise of powers conferred under Section 11(1) of Section 30 of the Securities and Exchange Board of India (Stock Brokers) Regulations, 1992 to protect the interests of investors in securities, to promote the development of and to regulate the securities market.\n10.This circular is available on SEBI website at www.sebi.gov.in under the category: 'Legal - Circulars'.\nYours faithfully, Aradhana Verma General Manager\nTel. No: 022 26449633 aradhanad @sebi.gov.in"
+    }
+  ]
+}

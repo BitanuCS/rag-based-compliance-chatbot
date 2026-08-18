@@ -1,0 +1,17 @@
+{
+  "framework_id": "RBI_CYBERSECURITY_FRAMEWORK",
+  "framework_name": "RBI Cybersecurity Framework for Banks",
+  "regulator": "Reserve Bank of India (RBI)",
+  "version": "Circular DBS.CO/CSITE/BC.11/33.01.001/2015-16 (June 2, 2016)",
+  "effective_date": "2016-06-02",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=10435",
+  "penalty_max_inr": 500000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 33,
+  "file_hash_sha256": "e31db04429b1f5b4e188eccf6792409aad498cbd05dbf630918dab87f36950f7"
+}

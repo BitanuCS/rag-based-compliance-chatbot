@@ -1,0 +1,17 @@
+{
+  "framework_id": "RBI_IT_OUTSOURCING_DIRECTIONS",
+  "framework_name": "RBI Directions on Outsourcing of IT Services",
+  "regulator": "Reserve Bank of India (RBI)",
+  "version": "Directions dated April 10, 2023",
+  "effective_date": "2023-10-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
+  "penalty_max_inr": 500000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 31,
+  "file_hash_sha256": "dcef635ce9c93f58199e6715a65212524230b49d34d35e6a8f44e63a3e95e8d4"
+}

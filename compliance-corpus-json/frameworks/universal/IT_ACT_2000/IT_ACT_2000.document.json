@@ -1,0 +1,1368 @@
+{
+  "framework_id": "IT_ACT_2000",
+  "framework_name": "Information Technology Act, 2000",
+  "regulator": "Ministry of Electronics and Information Technology (MeitY)",
+  "sector": "universal",
+  "effective_date": "2000-10-17",
+  "document_status": "verified_latest",
+  "source_url": "https://www.meity.gov.in/content/information-technology-act",
+  "source_pdf": "IT_ACT_2000.pdf",
+  "sha256": "645e37dc0d249d15ef4fc4e36b453f1ecd992d7ef5342dc3348dda1c134cc81b",
+  "parsed_at": "2026-08-18T07:24:42.584027+00:00",
+  "parser": "pymupdf",
+  "ocr_used": false,
+  "structure_strategy": "gazette_section",
+  "structure_confidence": 0.835,
+  "structure_scores": {
+    "gazette_section": 0.835,
+    "decimal_clause": 0.0,
+    "article": 0.0,
+    "rule": 0.0,
+    "bare_numeric": 0.0,
+    "paren_roman": 0.0,
+    "chapter_titled": 0.0
+  },
+  "extraction": {
+    "body_font_size": 10.0,
+    "pages": 34,
+    "text_pages": 33,
+    "text_page_ratio": 0.971,
+    "chars_extracted": 103710,
+    "footnote_marker_chars_removed": 0,
+    "footnote_body_lines_removed": 1,
+    "running_header_lines_removed": 0,
+    "distinct_running_patterns": 0,
+    "toc_lines_removed": 0
+  },
+  "sections": [
+    {
+      "section_id": "IT_ACT_2000-0001",
+      "number": "0",
+      "title": "Preamble",
+      "chapter": null,
+      "path": [
+        "0"
+      ],
+      "page_start": 2,
+      "page_end": 2,
+      "char_count": 1730,
+      "text": "MINISTRY OF LAW, JUSTICE AND COMPANY AFFAIRS (Legislative Department) New Delhi, the 9th June, 2000/Jyaistha 19, 1922 (Saka) The following Act of Parliament received the assent of the President on the 9th June, 2000, and is hereby published for general information:- THE INFORMATION TECHNOLOGY ACT, 2000\n(No. 21 OF 2000) [9th June, 2000] An Act to provide legal recognition for transactions carried out by means of electronic data interchange and other means of electronic communication, commonly referred to as \"electronic commerce\", which involve the use of alternatives to paper-based methods of communication and storage of information, to facilitate electronic filing of documents with the Government agencies and further to amend the Indian Penal Code, the Indian Evidence Act, 1872, the Bankers' Books Evidence Act, 1891 and the Reserve Bank of India Act, 1934 and for matters connected therewith or incidental thereto.\nWHEREAS the General Assembly of the United Nations by resolution A/RES/51/162, dated the 30th January, 1997 has adopted the Model Law on Electronic Commerce adopted by the United Nations Commission on International Trade Law;\nAND WHEREAS the said resolution recommends inter alia that all States give favourable consideration to the said Model Law when they enact or revise their laws, in view of the need for uniformity of the law applicable to alternatives to paper-cased methods of communication and storage of information;\nAND WHEREAS it is considered necessary to give effect to the said resolution and to promote efficient delivery of Government services by means of reliable electronic records.\nBE it enacted by Parliament in the Fifty-first Year of the Republic of India as follows:- PRELIMINARY"
+    },
+    {
+      "section_id": "IT_ACT_2000-0002",
+      "number": "1",
+      "title": "Short title, extent, commencement and application",
+      "chapter": "I",
+      "path": [
+        "I",
+        "1"
+      ],
+      "page_start": 2,
+      "page_end": 3,
+      "char_count": 1281,
+      "text": "1. Short title, extent, commencement and application\n(1) This Act may be called the Information Technology Act, 2000.\n(2) It shall extend to the whole of India and, save as otherwise provided in this Act, it applies also to any offence or contravention thereunder committed outside India by any person.\n(3) It shall come into force on such date as the Central Government may, by notification, appoint and different dates may be appointed for different provisions of this Act and any reference in any such provision to the commencement of this Act shall be construed as a reference to the commencement of that provision.\n(4) Nothing in this Act shall apply to, -\n(a) a negotiable instrument as defined in section 13 of the Negotiable Instruments Act, 1881;\n(b) a power-of-attorney as defined in section 1A of the Powers-of-Attorney Act, 1882;\n(c) a trust as defined in section 3 of the Indian Trusts Act, 1882;\n(d) a will as defined in clause (h) of section 2 of the Indian Succession Act, 1925 including any other testamentary disposition by whatever name called;\n(e) any contract for the sale or conveyance of immovable property or any interest in such property;\n(f) any such class of documents or transactions as may be notified by the Central Government in the Official Gazette."
+    },
+    {
+      "section_id": "IT_ACT_2000-0003",
+      "number": "2",
+      "title": "Definitions",
+      "chapter": "I",
+      "path": [
+        "I",
+        "2"
+      ],
+      "page_start": 3,
+      "page_end": 5,
+      "char_count": 7361,
+      "text": "2. Definitions\n(1) In this Act, unless the context otherwise requires, -\n(a) \"access\" with its grammatical variations and cognate expressions means gaining entry into, instructing or communicating with the logical, arithmetical, or memory function resources of a computer, computer system or computer network;\n(b) \"addressee\" means a person who is intended by the originator to receive the electronic record but does not include any intermediary;\n(c) \"adjudicating officer\" means an adjudicating officer appointed under subsection (1) of section 46;\n(d) \"affixing digital signature\" with its grammatical variations and cognate expressions means adoption of any methodology or procedure by a person for the purpose of authenticating an electronic record by means of digital signature;\n(e) \"appropriate Government\" means as respects any matter,-\n(i) Enumerated in List II of the Seventh Schedule to the Constitution;\n(ii) relating to any State law enacted under List III of the Seventh Schedule to the Constitution, the State Government and in any other case, the Central Government;\n(f) \"asymmetric crypto system\" means a system of a secure key pair consisting of a private key for creating a digital signature and a public key to verify the digital signature;\n(g) \"Certifying Authority\" means a person who has been granted a licence to issue a Digital Signature Certificate under section 24;\n(h) \"certification practice statement\" means a statement issued by a Certifying Authority to specify the practices that the Certifying Authority employs in issuing Digital Signature Certificates;\n(i) \"computer\" means any electronic magnetic, optical or other high-speed data processing device or system which performs logical, arithmetic, and memory functions by manipulations of electronic, magnetic or optical impulses, and includes all input, output, processing, storage, computer software, or communication facilities which are connected or related to the computer in a computer system or computer network;\n(j) \"computer network\" means the interconnection of one or more computers through-\n(i) the use of satellite, microwave, terrestrial line or other communication media; and\n(ii) terminals or a complex consisting of two or more interconnected computers whether or not the interconnection is continuously maintained;\n(k) \"computer resource\" means computer, computer system, computer network, data,computer data base or software;\n(l) \"computer system\" means a device or collection of devices, including input and output support devices and excluding calculators which are not programmable and capable of being used in conjunction with external files, which contain computer programmes, electronic instructions, input data and output data, that performs logic, arithmetic, data storage and retrieval, communication control and other functions;\n(m) \"Controller\" means the Controller of Certifying Authorities appointed under sub-section\n(l) of section 17;\n(n) \"Cyber Appellate Tribunal\" means the Cyber Regulations Appellate Tribunal established under sub-section (1) of section 48;\n(o) \"data\" means a representation of information, knowledge, facts, concepts or instructions which are being prepared or have been prepared in a formalised manner, and is intended to be processed, is being processed or has been processed in a computer system or computer network, and may be in any form (including computer printouts magnetic or optical storage media, punched cards, punched tapes) or stored internally in the memory of the computer;\n(p) \"digital signature\" means authentication of any electronic record by a subscriber by means of an electronic method or procedure in accordance with the provisions of section 3;\n(q) \"Digital Signature Certificate\" means a Digital Signature Certificate issued under sub- section (4) of section 35;\n(r) \"electronic form\" with reference to information means any information generated, sent, received or stored in media, magnetic, optical, computer memory, micro film, computer generated micro fiche or similar device;\n(s) \"Electronic Gazette\" means the Official Gazette published in the electronic form;\n(t) \"electronic record\" means data, record or data generated, image or sound stored, received or sent in an electronic form or micro film or computer generated micro fiche;\n(u) \"function\", in relation to a computer, includes logic, control arithmetical process, deletion, storage and retrieval and communication or telecommunication from or within a computer;\n(v) \"information\" includes data, text, images, sound, voice, codes, computer programmes, software and databases or micro film or computer generated micro fiche:\n(w) \"intermediary\" with respect to any particular electronic message means any person who on behalf of another person receives, stores or transmits that message or provides any service with respect to that message;\n(x) \"key pair\", in an asymmetric crypto system, means a private key and its mathematically related public key, which are so related that the public key can verify a digital signature created by the private key;\n(y) \"law\" includes any Act of Parliament or of a State Legislature, Ordinances promulgated by the President or a Governor, as the case may be. Regulations made by the President under article 240, Bills enacted as President's Act under sub-clause (a) of clause (1) of article 357 of the Constitution and includes rules, regulations, bye- laws and orders issued or made thereunder;\n(z) \"licence\" means a licence granted to a Certifying Authority under section 24;\n(za) \"originator\" means a person who sends, generates, stores or transmits any electronic message or causes any electronic message to be sent, generated, stored or transmitted to any other person but does not include an intermediary;\n(zb) \"prescribed\" means prescribed by rules made under this Act;\n(zc) \"private key\" means the key of a key pair used to create a digital signature;\n(zd) \"public key\" means the key of a key pair used to verify a digital signature and listed in the Digital Signature Certificate;\n(ze) \"secure system\" means computer hardware, software, and procedure that-\n(a) are reasonably secure from unauthorised access and misuse;\n(b) provide a reasonable level of reliability and correct operation;\n(c) are reasonably suited to performing the intended functions; and\n(d) adhere to generally accepted security procedures;\n(zf) \"security procedure\" means the security procedure prescribed under section 16 by the Central Government;\n(zg) \"subscriber\" means a person in whose name the Digital Signature Certificate is issued;\n(zh) \"verify\" in relation to a digital signature, electronic record or public key, with its grammatical variations and cognate expressions means to determine whether-\n(a) the initial electronic record was affixed with the digital signature by the use of private key corresponding to the public key of the subscriber;\n(b) the initial electronic record is retained intact or has been altered since such electronic record was so affixed with the digital signature.\n(2) Any reference in this Act to any enactment or any provision thereof shall, in relation to an area in which such enactment or such provision is not in force, be construed as a reference to the corresponding law or the relevant provision of the corresponding law, if any, in force in that area.\nDIGITAL SIGNATURE"
+    },
+    {
+      "section_id": "IT_ACT_2000-0004",
+      "number": "3",
+      "title": "Authentication of electronic records",
+      "chapter": "II",
+      "path": [
+        "II",
+        "3"
+      ],
+      "page_start": 5,
+      "page_end": 6,
+      "char_count": 1176,
+      "text": "3. Authentication of electronic records.\n(1) Subject to the provisions of this section any subscriber may authenticate an electronic record by affixing his digital signature.\n(2) The authentication of the electronic record shall be effected by the use of asymmetric crypto system and hash function which envelop and transform the initial electronic record into another electronic record.\nExplanation.-For the purposes of this sub-section, \"hash function\" means an algorithm mapping or translation of one sequence of bits into another, generally smaller, set known'as \"hash result\" such that an electronic record yields the same hash result every time the algorithm is executed with the same electronic record as its input making it computationally infeasible-\n(a) to derive or reconstruct the original electronic record from the hash result produced by the algorithm;\n(b) that two electronic records can produce the same hash result using the algorithm.\n(3) Any person by the use of a public key of the subscriber can verify the electronic record.\n(4) The private key and the public key are unique to the subscriber and constitute a functioning key pair.\nELECTRONIC GOVERNANCE"
+    },
+    {
+      "section_id": "IT_ACT_2000-0005",
+      "number": "4",
+      "title": "Legal recognition of electronic records",
+      "chapter": "III",
+      "path": [
+        "III",
+        "4"
+      ],
+      "page_start": 6,
+      "page_end": 6,
+      "char_count": 426,
+      "text": "4. Legal recognition of electronic records.\nWhere any law provides that information or any other matter shall be in writing or in the typewritten or printed form, then, notwithstanding anything contained in such law, such requirement shall be deemed to have been satisfied if such information or matter is-\n(a) rendered or made available in an electronic form; and\n(b) accessible so as to be usable for a subsequent reference."
+    },
+    {
+      "section_id": "IT_ACT_2000-0006",
+      "number": "5",
+      "title": "Legal recognition of digital signatures",
+      "chapter": "III",
+      "path": [
+        "III",
+        "5"
+      ],
+      "page_start": 6,
+      "page_end": 6,
+      "char_count": 763,
+      "text": "5. Legal recognition of digital signatures.\nWhere any law provides that information or any other matter shall be authenticated by affixing the signature or any document shall be signed or bear the signature of any person (hen, notwithstanding anything contained in such law, such requirement shall be deemed to have been satisfied, if such information or matter is authenticated by means of digital signature affixed in such manner as may be prescribed by the Central Government.\nExplanation.-For the purposes of this section, \"signed\", with its grammatical variations and cognate expressions, shall, with reference to a person, mean affixing of his hand written signature or any mark on any document and the expression \"signature\" shall be construed accordingly."
+    },
+    {
+      "section_id": "IT_ACT_2000-0007",
+      "number": "6",
+      "title": "Use of electronic records and digital signatures in Government and its agencies",
+      "chapter": "III",
+      "path": [
+        "III",
+        "6"
+      ],
+      "page_start": 6,
+      "page_end": 7,
+      "char_count": 1096,
+      "text": "6. Use of electronic records and digital signatures in Government and its agencies.\n(1) Where any law provides for-\n(a) the filing of any form. application or any other document with any office, authority, body or agency owned or controlled by the appropriate Government in a particular manner;\n(b) the issue or grant of any licence, permit, sanction or approval by whatever name called in a particular manner;\n(c) the receipt or payment of money in a particular manner, then, notwithstanding anything contained in any other law for the time being in force, such requirement shall be deemed to have been satisfied if such filing, issue, grant, receipt or payment, as the case may be, is effected by means of such electronic form as may be prescribed by the appropriate Government.\n(2) The appropriate Government may, for the purposes of sub-section (1), by rules, prescribe-\n(a) the manner and format in which such electronic records shall be filed, created or issued;\n(b) the manner or method of payment of any fee or charges for filing, creation or issue any electronic record under clause (a)."
+    },
+    {
+      "section_id": "IT_ACT_2000-0008",
+      "number": "7",
+      "title": "Retention of  electronic records",
+      "chapter": "III",
+      "path": [
+        "III",
+        "7"
+      ],
+      "page_start": 7,
+      "page_end": 7,
+      "char_count": 1154,
+      "text": "7. Retention of  electronic records.\n(1) Where any law provides that documents, records or information shall be retained for any specific period, then, that requirement shall be deemed to have been satisfied if such documents, records or information are retained in the electronic form, if-\n(a) the information contained therein remains accessible so as to be usable for a subsequent reference;\n(b) the electronic record is retained in the format in which it was originally generated, sent or received or in a format which can be demonstrated to represent accurately the information originally generated, sent or received;\n(c) the details which will facilitate the identification of the origin, destination, date and time of despatch or receipt of such electronic record are available in the electronic record:\nProvided that this clause does not apply to any information which is automatically generated solely for the purpose of enabling an electronic record to be despatched or received.\n(2) Nothing in this section shall apply to any law that expressly provides for the retention of documents, records or information in the form of electronic records."
+    },
+    {
+      "section_id": "IT_ACT_2000-0009",
+      "number": "8",
+      "title": "Publication of rule, regulation, etc., in Electronic Gazette",
+      "chapter": "III",
+      "path": [
+        "III",
+        "8"
+      ],
+      "page_start": 7,
+      "page_end": 7,
+      "char_count": 665,
+      "text": "8.  Publication of rule, regulation, etc., in Electronic Gazette.\nWhere any law provides that any rule, regulation, order, bye-law, notification or any other matter shall be published in the Official Gazette, then, such requirement shall be deemed to have been satisfied if such rule, regulation, order, bye-law, notification or any other matter is published in the Official Gazette or Electronic Gazette:\nProvided that where any rule, regulation, order, bye-law, notification or any other matter is published in the Official Gazette or Electronic Gazette, the date of publication shall be deemed to be the date of the Gazette which was first published in any form."
+    },
+    {
+      "section_id": "IT_ACT_2000-0010",
+      "number": "9",
+      "title": "Sections 6,7 and 8 not to confer right to insist document should be accepted",
+      "chapter": "III",
+      "path": [
+        "III",
+        "9"
+      ],
+      "page_start": 7,
+      "page_end": 7,
+      "char_count": 542,
+      "text": "9.  Sections 6,7 and 8 not to confer right to insist document should be accepted in electronic form.\nNothing contained in sections 6, 7 and 8 shall confer a right upon any person to insist that any Ministry or Department of the Central Government or the State Government or any authority or body established by or under any law or controlled or funded by the Central or State Government should accept, issue, create, retain and preserve any document in the form of electronic records or effect any monetary transaction in the electronic form."
+    },
+    {
+      "section_id": "IT_ACT_2000-0011",
+      "number": "10",
+      "title": "Power to make rules by Central Government in respect of digital signature",
+      "chapter": "III",
+      "path": [
+        "III",
+        "10"
+      ],
+      "page_start": 7,
+      "page_end": 7,
+      "char_count": 657,
+      "text": "10. Power to make rules by Central Government in respect of digital signature.\nThe Central Government may, for the purposes of this Act, by rules, prescribe-\n(a) the type of digital signature;\n(b) the manner and format in which the digital signature shall be affixed;\n(c) the manner or procedure which facilitates identification of the person affixing the digital signature;\n(d) control processes and procedures to ensure adequate integrity, security and confidentiality of electronic records or payments; and\n(e) any other matter which is necessary to give legal effect to digital signatures.\nATTRIBUTION, ACKNOWLEDGMENT AND DESPATCH OF ELECTRONIC  RECORDS"
+    },
+    {
+      "section_id": "IT_ACT_2000-0012",
+      "number": "11",
+      "title": "Attribution of electronic records",
+      "chapter": "IV",
+      "path": [
+        "IV",
+        "11"
+      ],
+      "page_start": 7,
+      "page_end": 8,
+      "char_count": 358,
+      "text": "11. Attribution of electronic records.\nAn electronic record shall be attributed to the originator-\n(a) if it was sent by the originator himself;\n(b) by a person who had the authority to act on behalf of the originator in respect of that electronic record; or\n(c) by an information system programmed by or on behalf of the originator to operate automatically."
+    },
+    {
+      "section_id": "IT_ACT_2000-0013",
+      "number": "12",
+      "title": "Acknowledgment of receipt",
+      "chapter": "IV",
+      "path": [
+        "IV",
+        "12"
+      ],
+      "page_start": 8,
+      "page_end": 8,
+      "char_count": 1383,
+      "text": "12.  Acknowledgment of receipt.\n(1) Where the originator has not agreed with the addressee that the acknowledg- ment of receipt of electronic record be given in a particular form or by a particular method, an acknowledgment may be given by-\n(a) any communication by the addressee, automated or otherwise; or\n(b) any conduct of the addressee, sufficient to indicate to the originator that the electronic record has been received.\n(2) Where the originator has stipulated that the electronic record shall be binding only on receipt of an acknowledgment of such electronic record by him, then unless acknowledgment has been so received, the electronic record shall be deemed to have been never sent by the originator.\n(3) Where the originator has not stipulated that the electronic record shall be binding only on receipt of such acknowledgment, and the acknowledgment has not been received by the originator within the time specified or agreed or, if no time has been specified or agreed to within a reasonable time, then the originator may give notice to the addressee stating that no acknowledgment has been received by him and specifying a reasonable time by which the acknowledgment must be received by him and if no acknowledgment is received within the aforesaid time limit he may after giving notice to the addressee, treat the electronic record as though it has never been sent."
+    },
+    {
+      "section_id": "IT_ACT_2000-0014",
+      "number": "13",
+      "title": "Time and place of despatch and receipt of electronic record",
+      "chapter": "IV",
+      "path": [
+        "IV",
+        "13"
+      ],
+      "page_start": 8,
+      "page_end": 9,
+      "char_count": 2016,
+      "text": "13. Time and place of despatch and receipt of electronic record.\n(1) Save as otherwise agreed to between the originator and the addressee, the dispatch of an electronic record occurs when it enters a computer resource outside the control of the originator.\n(2) Save as otherwise agreed between the originator and the addressee, the time of receipt of an electronic record shall be determined as follows, namely :-\n(a) if the addressee has designated a computer resource for the purpose of receiving electronic records,-\n(i) receipt occurs at the time when the electronic, record enters the designated computer resource; or\n(ii) if the electronic record is sent to a computer resource of the addressee that is not the designated computer resource, receipt occurs at the time when the electronic record is retrieved by the addressee;\n(b) if the addressee has not designated a computer resource along with specified timings, if any, receipt occurs when the electronic record enters the computer resource of the addressee.\n(3) Save as otherwise agreed to between the originator and the addressee, an electronic record is deemed to be dispatched at the place where the originator has his place of business, and is deemed to be received at the place where the addressee has his place of business.\n(4) The provisions of sub-section (2) shall apply notwithstanding that the place where the computer resource is located may be different from the place where the electronic record is deemed to have been received under sub-section (3).\n(5) For the purposes of this section, -\n(a) if the originator or the addressee has more than one place of business, the principal place of business, shall be the place of business;\n(b) if the originator or the addressee does not have a place of business, his usual place of residence shall be deemed to be the place of business;\n(c) \"usual place of residence\", in relation to a body corporate, means the place where it is registered.\nSECURE  ELECTRONIC RECORDS AND SECURE DIGITAL SIGNATURES"
+    },
+    {
+      "section_id": "IT_ACT_2000-0015",
+      "number": "14",
+      "title": "Secure electronic record",
+      "chapter": "V",
+      "path": [
+        "V",
+        "14"
+      ],
+      "page_start": 9,
+      "page_end": 9,
+      "char_count": 248,
+      "text": "14.  Secure electronic record.\nWhere any security procedure has been applied to an electronic record at a specific point of time. then such record shall be deemed to be a secure electronic record from such point of time to the time of verification."
+    },
+    {
+      "section_id": "IT_ACT_2000-0016",
+      "number": "15",
+      "title": "Secure digital signature",
+      "chapter": "V",
+      "path": [
+        "V",
+        "15"
+      ],
+      "page_start": 9,
+      "page_end": 9,
+      "char_count": 600,
+      "text": "15.  Secure digital signature.\nIf, by application of a security procedure agreed to by the parties concerned, it can be verified that a digital signature, at the time it was affixed, was-\n(a) unique to the subscriber affixing it;\n(b) capable of identifying such subscriber;\n(c) created in a manner or using a means under the exclusive control of the subscriber and is linked to the electronic record to which it relates in such a manner that if the electronic record was altered the digital signature would be invalidated, then such digital signature shall be deemed to be a secure digital signature."
+    },
+    {
+      "section_id": "IT_ACT_2000-0017",
+      "number": "16",
+      "title": "Security procedure",
+      "chapter": "V",
+      "path": [
+        "V",
+        "16"
+      ],
+      "page_start": 9,
+      "page_end": 9,
+      "char_count": 661,
+      "text": "16.  Security procedure.\nThe Central Government shall for the purposes of this Act prescribe the security procedure having regard to commercial circumstances prevailing at the time when the procedure was used, including-\n(a) the nature of the transaction;\n(b) the level of sophistication of the parties with reference to their technological capacity;\n(c) the volume of similar transactions engaged in by other parties;\n(a) the availability of alternatives offered to but rejected by any party;\n(e) the cost of alternative procedures; and\n(f) the procedures in general use for similar types of transactions or communications.\nREGULATION OF CERTIFYING AUTHORITIES"
+    },
+    {
+      "section_id": "IT_ACT_2000-0018",
+      "number": "17",
+      "title": "Appointment of Controller and other officers",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "17"
+      ],
+      "page_start": 9,
+      "page_end": 9,
+      "char_count": 1124,
+      "text": "17.  Appointment of Controller and other officers.\n(1) The Central Government may, by notification in the Official Gazette, appoint a Controller of Certifying Authorities for the purposes of this Act and may also by the same or subsequent notification appoint such number of Deputy Controllers and Assistant Controllers as it deems fit.\n(2) The Controller shall discharge his functions under this Act subject to the general control and directions of the Central Government.\n(3) The Deputy Controllers and Assistant Controllers shall perform the functions assigned to them by the Controller under the general superintendence and control of the Controller.\n(4) The qualifications, experience and terms and conditions of service of Controller, Deputy Controllers and Assistant Controllers shall be such as may be prescribed by the Central Government.\n(5) The Head Office and Branch Office of the office of the Controller shall be at such places as the Central Government may specify, and these may be established at such places as the Central Government may think fit.\n(6) There shall be a seal of the Office of the Controller."
+    },
+    {
+      "section_id": "IT_ACT_2000-0019",
+      "number": "18",
+      "title": "Functions of Controller",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "18"
+      ],
+      "page_start": 9,
+      "page_end": 10,
+      "char_count": 1666,
+      "text": "18.  Functions of Controller.\nThe Controller may perform all or any of the following functions, namely:-\n(a) exercising supervision over the activities of the Certifying Authorities;\n(b) certifying public keys of the Certifying Authorities;\n(c) laying down the standards to be maintained by the Certifying Authorities;\n(d) specifying the qualifications and experience which employees of the Certifying Authorities should possess;\n(e) specifying the conditions subject to which the Certifying Authorities shall conduct their business;\n(f) specifying the contents of written, printed or visual materials and advertisements that may be distributed or used in respect of a Digital Signature Certificate and the public key;\n(g) specifying the form and content of a Digital Signature Certificate and the key,\n(h) specifying the form and manner in which accounts shall be maintained by the Certifying Authorities;\n(i) specifying the terms and conditions subject to which auditors may be appointed and the remuneration to be paid to them;\n(j) facilitating the establishment of any electronic system by a Certifying Authority either solely or jointly with other Certifying Authorities and regulation of such systems;\n(k) specifying the manner in which the Certifying Authorities shall conduct their dealings with the subscribers;\n(l) resolving any conflict of interests between the Certifying Authorities and the subscribers;\n(m) laying down the duties of the Certifying Authorities;\n(n) maintaining a data base containing the disclosure record of every Certifying Authority containing such particulars as may be specified by regulations, which shall be accessible to public."
+    },
+    {
+      "section_id": "IT_ACT_2000-0020",
+      "number": "19",
+      "title": "Recognition of foreign Certifying Authorities",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "19"
+      ],
+      "page_start": 10,
+      "page_end": 10,
+      "char_count": 846,
+      "text": "19. Recognition of foreign Certifying Authorities.\n(1) Subject to such conditions and restrictions as may be specified by regulations, the Controller may with the previous approval of the Central Government, and by notification in the Official Gazette, recognise any foreign Certifying Authority as a Certifying Authority for the purposes of this Act.\n(2) Where any Certifying Authority is recognised under sub-section (1), the Digital Signature Certificate issued by such Certifying Authority shall be valid for the purposes of this Act.\n(3) The Controller may, if he is satisfied that any Certifying Authority has contravened any of the conditions and restrictions subject to which it was granted recognition under sub- section (1) he may, for reasons to be recorded in writing, by notification in the Official Gazette, revoke such recognition."
+    },
+    {
+      "section_id": "IT_ACT_2000-0021",
+      "number": "20",
+      "title": "Controller to act as repository",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "20"
+      ],
+      "page_start": 10,
+      "page_end": 10,
+      "char_count": 597,
+      "text": "20. Controller to act as repository.\n(1) The Controller shall be the repository of all Digital Signature Certificates issued under this Act.\n(2) The Controller shall-\n(a) make use of hardware, software and procedures that are secure .iJm intrusion and misuse;\n(b) observe such other standards as may be prescribed by the Central Government, to ensure that the secrecy and security of the digital signatures are assured.\n(3) The Controller shall maintain a computerised data base of all public keys in such a manner that such data base and the public keys are available to any member of the public."
+    },
+    {
+      "section_id": "IT_ACT_2000-0022",
+      "number": "21",
+      "title": "Licence to issue Digital Signature Certificates",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "21"
+      ],
+      "page_start": 10,
+      "page_end": 11,
+      "char_count": 778,
+      "text": "21.  Licence to issue Digital Signature Certificates.\n(1) Subject to the provisions of sub-section (2), any person may make an application, to the Controller, for a licence to issue Digital Signature Certificates.\n(2) No licence shall be issued under sub-section (1), unless the applicant fulfills such requirements with respect to qualification, expertise, manpower, financial resources and other infrastructure facilities, which are necessary to issue Digital Signature Certificates as may be prescribed by the Central Government\n(3) A licence granted under this section shall-\n(a) be valid for such period as may be prescribed by the Central Government;\n(b) not be transferable or heritable;\n(c) be subject to such terms and conditions as may be specified by the regulations."
+    },
+    {
+      "section_id": "IT_ACT_2000-0023",
+      "number": "22",
+      "title": "Application for licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "22"
+      ],
+      "page_start": 11,
+      "page_end": 11,
+      "char_count": 533,
+      "text": "22. Application for licence.\n(1) Every application for issue of a licence shall be in such form as may be prescribed by the Central Government.\n(2) Every application for issue of a licence shall be accompanied by-\n(a) a certification practice statement;\n(b) a statement including the procedures with respect to identification of the applicant;\n(c) payment of such fees, not exceeding twenty-five thousand rupees as may be prescribed by the Central Government;\n(d) such other documents, as may be prescribed by the Central Government."
+    },
+    {
+      "section_id": "IT_ACT_2000-0024",
+      "number": "23",
+      "title": "Renewal of licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "23"
+      ],
+      "page_start": 11,
+      "page_end": 11,
+      "char_count": 320,
+      "text": "23. Renewal of licence.\nAn application for renewal of a licence shall be-\n(a) in such form;\n(b) accompanied by such fees, not exceeding five thousand rupees, as may be prescribed by the Central Government and shall be made not less than forty-five days before the date of expiry of the period of validity of the licence."
+    },
+    {
+      "section_id": "IT_ACT_2000-0025",
+      "number": "24",
+      "title": "Procedure for grant or rejection of licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "24"
+      ],
+      "page_start": 11,
+      "page_end": 11,
+      "char_count": 432,
+      "text": "24. Procedure for grant or rejection of licence.\nThe Controller may, on receipt of an application under sub-section (1) of section 21, after considering the documents accompanying the application and such other factors, as he deems fit, grant the licence or reject the application:\nProvided that no application shall be rejected under this section unless the applicant has been given a reasonable opportunity of presenting his case."
+    },
+    {
+      "section_id": "IT_ACT_2000-0026",
+      "number": "25",
+      "title": "Suspension of licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "25"
+      ],
+      "page_start": 11,
+      "page_end": 12,
+      "char_count": 1313,
+      "text": "25. Suspension of licence.\n(1) The Controller may, if he is satisfied after making such inquiry, as he may think fit, that a Certifying Authority has,-\n(a) made a statement in, or in relation to, the application for the issue or renewal of the licence, which is incorrect or false in material particulars;\n(b) failed to comply with the terms and conditions subject to which the licence was granted;\n(c) failed to maintain the standards specified under clause (b) of sub-section\n(2) of section 20;\n(d) contravened any provisions of this Act, rule, regulation or order made thereunder, revoke the licence:\nProvided that no licence shall be revoked unless the Certifying Authority has been given a reasonable opportunity of showing cause against the proposed revocation.\n(2) The Controller may, if he has reasonable cause to believe that there is any ground for revoking a licence under sub-section (1), by order suspend such licence pending the completion of any inquiry ordered by him:\nProvided that no licence shall be suspended for a period exceeding ten days unless the Certifying Authority has been given a reasonable opportunity of showing cause against the proposed suspension.\n(3) No Certifying Authority whose licence has been suspended shall issue any Digital Signature Certificate during such suspension."
+    },
+    {
+      "section_id": "IT_ACT_2000-0027",
+      "number": "26",
+      "title": "Notice of suspension or revocation of licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "26"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 778,
+      "text": "26. Notice of suspension or revocation of licence.\n(1) Where the licence of the Certifying Authority is suspended or revoked, the Controller shall publish notice of such suspension or revocation, as the case may be, in the database maintained by him.\n(2) Where one or more repositories are specified, the Controller shall publish notices of such suspension or revocation, as the case may be, in all such repositories:\nProvided that the data base containing the notice of such suspension or revocation, as the case may be, shall be made available through a web site which shall be accessible round the clock:\nProvided further that the Controller may, if he considers necessary, publicise the contents of database in such electronic or other media, as he may consider appropriate."
+    },
+    {
+      "section_id": "IT_ACT_2000-0028",
+      "number": "27",
+      "title": "Power to delegate",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "27"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 191,
+      "text": "27. Power to delegate.\nThe Controller may, in writing, authorise the Deputy Controller, Assistant Controller or any officer to exercise any of the powers of the Controller under this Chapter."
+    },
+    {
+      "section_id": "IT_ACT_2000-0029",
+      "number": "28",
+      "title": "Power to investigate contraventions",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "28"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 503,
+      "text": "28. Power to investigate contraventions.\n(1) The Controller or any officer authorised by him in this behalf shall take up for investigation any contravention of the provisions of this Act, rules or regulations made thereunder.\n(2) The Controller or any officer authorised by him in this behalf shall exercise the like powers which are conferred on Income-tax authorities under Chapter XIII of the Income-tax Act, 1961 and shall exercise such powers, subject to such limitations laid down under that Act."
+    },
+    {
+      "section_id": "IT_ACT_2000-0030",
+      "number": "29",
+      "title": "Access to computers and data",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "29"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 890,
+      "text": "29. Access to computers and data.\n(1)Without prejudice to the provisions of sub-section (1) of section 69, the Controller or any person authorised by him shall, if he has reasonable cause to suspect that any contravention of the provisions of this Act, rules or regulations made thereunder has been committed, have access to any computer system, any apparatus, data or any other material connected with such system, for the purpose of searching or causing a search to be made for obtaining any information or data contained in or available to such computer system.\n(2) For the purposes of sub-section (1), the Controller or any person authorised by him may, by order, direct any person incharge of, or otherwise concerned with the operation of, the computer system, data apparatus or material, to provide him with such reasonable technical and other assistance as he may consider necessary."
+    },
+    {
+      "section_id": "IT_ACT_2000-0031",
+      "number": "30",
+      "title": "Certifying Authority to follow certain procedures",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "30"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 500,
+      "text": "30. Certifying Authority to follow certain procedures.\nEvery Certifying Authority shall, -\n(a) make use of hardware, software and procedures that are secure from intrusion and misuse;\n(b) provide a reasonable level of reliability in its services which are reasonably suited to the performance of intended functions;\n(c) adhere to security procedures to ensure that the secrecy and privacy of the digital signatures are assured; and\n(d) observe such other standards as may be specified by regulations."
+    },
+    {
+      "section_id": "IT_ACT_2000-0032",
+      "number": "31",
+      "title": "Certifying Authority to ensure compliance of the Act, etc",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "31"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 293,
+      "text": "31. Certifying Authority to ensure compliance of the Act, etc.\nEvery Certifying Authority shall ensure that every person employed or otherwise engaged by it complies, in the course of his employment or engagement, with the provisions of this Act, rules, regulations and orders made thereunder."
+    },
+    {
+      "section_id": "IT_ACT_2000-0033",
+      "number": "32",
+      "title": "Display of licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "32"
+      ],
+      "page_start": 12,
+      "page_end": 12,
+      "char_count": 152,
+      "text": "32. Display of licence.\nEvery Certifying Authority shall display its licence at a conspicuous place of the premises in which it carries on its business."
+    },
+    {
+      "section_id": "IT_ACT_2000-0034",
+      "number": "33",
+      "title": "Surrender of licence",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "33"
+      ],
+      "page_start": 12,
+      "page_end": 13,
+      "char_count": 496,
+      "text": "33. Surrender of licence.\n(1) Every Certifying Authority whose licence is suspended or revoked shall immediately after such suspension or revocation, surrender the licence to the Controller.\n(2) Where any Certifying Authority fails to surrender a licence under sub-section (1), the person in whose favour a licence is issued, shall be guilty of an offence and shall be punished with imprisonment which may extend up to six months or a fine which may extend up to ten thousand rupees or with both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0035",
+      "number": "34",
+      "title": "Disclosure",
+      "chapter": "VI",
+      "path": [
+        "VI",
+        "34"
+      ],
+      "page_start": 13,
+      "page_end": 13,
+      "char_count": 1212,
+      "text": "34. Disclosure.\n(1) Every Certifying Authority shall disclose in the manner specified by regulations-\n(a) its Digital Signature Certificate which contains the public key corresponding to the private key used by that Certifying Authority to digitally sign another Digital Signature Certificate;\n(b)  any certification practice statement relevant thereto;\n(c) notice of the revocation or suspension of its Certifying Authority certificate, if any; and\n(d) any other fact that materially and adversely affects either the reliability of a Digital Signature Certificate, which that Authority has issued, or the Authority's ability to perform its services.\n(2) Where in the opinion of the Certifying Authority any event has occurred or any situation has arisen which may materially and adversely affect the integrity of its computer system or the conditions subject to which a Digital Signature Certificate was granted, then, the Certifying Authority shall-\n(a) use reasonable efforts to notify any person who is likely to be affected by that occurrence; or\n(b) act in accordance with the procedure specified in its certification practice statement to deal with such event or situation.\nDIGITAL  SIGNATURE CERTIFICATES"
+    },
+    {
+      "section_id": "IT_ACT_2000-0036",
+      "number": "35",
+      "title": "Certifying Authority to issue Digital Signature Certificate",
+      "chapter": "VII",
+      "path": [
+        "VII",
+        "35"
+      ],
+      "page_start": 13,
+      "page_end": 14,
+      "char_count": 1746,
+      "text": "35. Certifying Authority to issue Digital Signature Certificate.\n(1) Any person may make an application to the Certifying Authority for the issue of a Digital Signature Certificate in such form as may be prescribed by the Central Government\n(2) Every such application shall be accompanied by such fee not exceeding twenty- five thousand rupees as may be prescribed by the Central Government, to be paid to the Certifying Authority:\nProvided that while prescribing fees under sub-section (2) different fees may be prescribed for different classes of applicants'.\n(3) Every such application shall be accompanied by a certification practice statement or where there is no such statement, a statement containing such particulars, as may be specified by regulations.\n(4) On receipt of an application under sub-section (1), the Certifying Authority may, after consideration of the certification practice statement or the other statement under sub- section (3) and after making such enquiries as it may deem fit, grant the Digital Signature Certificate or for reasons to be recorded in writing, reject the application:\nProvided that no Digital Signature Certificate shall be granted unless the Certifying Authority is satisfied that-\n(a) the applicant holds the private key corresponding to the public key to be listed in the Digital Signature Certificate;\n(b) the applicant holds a private key, which is capable of creating a digital signature;\n(c) the public key to be listed in the certificate can be used to verify a digital signature affixed by the private key held by the applicant:\nProvided further that no application shall be rejected unless the applicant has been given a reasonable opportunity of showing cause against the proposed rejection."
+    },
+    {
+      "section_id": "IT_ACT_2000-0037",
+      "number": "36",
+      "title": "Representations upon issuance of Digital Signature Certificate",
+      "chapter": "VII",
+      "path": [
+        "VII",
+        "36"
+      ],
+      "page_start": 14,
+      "page_end": 14,
+      "char_count": 897,
+      "text": "36.  Representations upon issuance of Digital Signature Certificate.\nA Certifying Authority while issuing a Digital Signature Certificate shall certify that--\n(a) it has complied with the provisions of this Act and the rules and regulations made thereunder,\n(b) it has published the Digital Signature Certificate or otherwise made it available to such person relying on it and the subscriber has accepted it;\n(c) the subscriber holds the private key corresponding to the public key, listed in the Digital Signature Certificate;\n(d) the subscriber's public key and private key constitute a functioning key pair,\n(e) the information contained in the Digital Signature Certificate is accurate;\nand\n(f) it has no knowledge of any material fact, which if it had been included in the Digital Signature Certificate would adversely affect the reliability of the representations made in clauses (a) to (d)."
+    },
+    {
+      "section_id": "IT_ACT_2000-0038",
+      "number": "37",
+      "title": "Suspension of Digital Signature Certificate",
+      "chapter": "VII",
+      "path": [
+        "VII",
+        "37"
+      ],
+      "page_start": 14,
+      "page_end": 14,
+      "char_count": 830,
+      "text": "37.  Suspension of Digital Signature Certificate.\n(1) Subject to the provisions of sub-section (2), the Certifying Authority which has issued a Digital Signature Certificate may suspend such Digital Signature Certificate,-\n(a) on receipt of a request to that effect from-\n(i) the subscriber listed in toe Digital Signature Certificate; or\n(ii) any person duly authorised to act on behalf of that subscriber,\n(b) if it is of opinion that the Digital Signature Certificate should be suspended in public interest\n(2) A Digital Signature Certificate shall not be suspended for a period exceeding fifteen days unless the subscriber has been given an opportunity of being heard in the matter.\n(3) On suspension of a Digital Signature Certificate under this section, the Certifying Authority shall communicate the same to the subscriber."
+    },
+    {
+      "section_id": "IT_ACT_2000-0039",
+      "number": "38",
+      "title": "Revocation of Digital Signature Certificate",
+      "chapter": "VII",
+      "path": [
+        "VII",
+        "38"
+      ],
+      "page_start": 14,
+      "page_end": 15,
+      "char_count": 1420,
+      "text": "38.  Revocation of Digital Signature Certificate.\n(1) A Certifying Authority may revoke a Digital Signature Certificate issued by it-\n(a) where the subscriber or any other person authorised by him makes a request to that effect; or\n(b) upon the death of the subscriber, or\n(c) upon the dissolution of the firm or winding up of the company where the subscriber is a firm or a company.\n(2) Subject to the provisions of sub-section (3) and without prejudice to the provisions of sub-section (1), a CertifyingAuthority may revoke a Digital Signature Certificate which has been issued by it at any time, if it is of opinion that-\n(a) a material fact represented in the Digital Signature Certificate is false or has been concealed;\n(b) a requirement for issuance of the Digital Signature Certificate was not satisfied;\n(c) the Certifying Authority's private key or security system was compromised in a manner materially affecting the Digital Signature Certificate's reliability;\n(d) the subscriber has been declared insolvent or dead or where a subscriber is a firm or a company, which has been dissolved, wound-up or otherwise ceased to exist\n(3) A Digital Signature Certificate shall not be revoked unless the subscriber has been given an opportunity of being heard in the matter.\n(4) On revocation of a Digital Signature Certificate under this section, the Certifying Authority shall communicate the same to the subscriber."
+    },
+    {
+      "section_id": "IT_ACT_2000-0040",
+      "number": "39",
+      "title": "Notice of suspension or revocation",
+      "chapter": "VII",
+      "path": [
+        "VII",
+        "39"
+      ],
+      "page_start": 15,
+      "page_end": 15,
+      "char_count": 536,
+      "text": "39.  Notice of suspension or revocation.\n(1) Where a Digital Signature Certificate is suspended or revoked under section 37 or section 38, the Certifying Authority shall publish a notice of such suspension or revocation, as the case may be, in the repository specified in the Digital Signature Certificate for publication of such notice.\n(2) Where one or more repositories are specified, the Certifying Authority shall publish notices of such suspension or revocation, as the case may he. in all such repositories.\nDUTIES OF SUBSCRIBERS"
+    },
+    {
+      "section_id": "IT_ACT_2000-0041",
+      "number": "40",
+      "title": "Generating key pair",
+      "chapter": "VIII",
+      "path": [
+        "VIII",
+        "40"
+      ],
+      "page_start": 15,
+      "page_end": 15,
+      "char_count": 318,
+      "text": "40. Generating key pair.\nWhere any Digital Signature Certificate, the public key of which corresponds to the private key of that subscriber which is to be listed in the Digital Signature Certificate has been accepted by a subscriber, then, the subscriber shall generate the key pair by applying the security procedure."
+    },
+    {
+      "section_id": "IT_ACT_2000-0042",
+      "number": "41",
+      "title": "Acceptance of Digital Signature Certificate",
+      "chapter": "VIII",
+      "path": [
+        "VIII",
+        "41"
+      ],
+      "page_start": 15,
+      "page_end": 15,
+      "char_count": 967,
+      "text": "41.  Acceptance of Digital Signature Certificate.\n(1) A subscriber shall be deemed to have accepted a Digital Signature Certificate if he publishes or authorises the publication of a Digital Signature Certificate-\n(a) to one or more persons;\n(b) in a repository, or otherwise demonstrates his approval of the Digital Signature Certificate in any manner.\n(2) By accepting a Digital Signature Certificate the subscriber certifies to all who reasonably rely on the information contained in the Digital Signature Certificate that-\n(a) the subscriber holds the private key corresponding to the public key listed in the Digital Signature Certificate and is entitled to hold the same;\n(b) all representations made by the subscriber to the Certifying Authority and all material relevant to the information contained in the Digital Signature Certificate are true;\n(c) all information in the Digital Signature Certificate that is within the knowledge of the subscriber is true."
+    },
+    {
+      "section_id": "IT_ACT_2000-0043",
+      "number": "42",
+      "title": "Control of private key",
+      "chapter": "VIII",
+      "path": [
+        "VIII",
+        "42"
+      ],
+      "page_start": 15,
+      "page_end": 15,
+      "char_count": 801,
+      "text": "42. Control of private key.\n(1) Every subscriber shall exercise reasonable care to retain control of the private key corresponding to the public key listed in his Digital Signature Certificate and take all steps to prevent its disclosure to a person not authorised to affix the digital signature of the subscriber.\n(2) If the private key corresponding to the public key listed in the Digital Signature Certificate has been compromised, then, the subscriber shall communicate the same without any delay to the Certifying Authority in such manner as may be specified by .the regulations.\nExplanation.- For the removal of doubts, it is hereby declared that the subscriber shall be liable till he has informed the Certifying Authority that the private key has been compromised.\nPENALTIES AND  ADJUD1CATION"
+    },
+    {
+      "section_id": "IT_ACT_2000-0044",
+      "number": "43",
+      "title": "Penalty for damage to computer, computer system, etc",
+      "chapter": "IX",
+      "path": [
+        "IX",
+        "43"
+      ],
+      "page_start": 15,
+      "page_end": 16,
+      "char_count": 2720,
+      "text": "43.  Penalty for damage to computer, computer system, etc.\nIf any person without permission of the owner or any other person who is incharge of a computer, computer system or computer network, -\n(a) accesses or secures access to such computer, computer system or computer network;\n(b) downloads, copies or extracts any data, computer data base or information from such computer, computer system or computer network including information or data held or stored in any removable storage medium;\n(c) i ntroduces or causes to be introduced any computer contaminant or computer virus into any computer, computer system or computer network;\n(d) damages or causes to be damaged any computer, computer system or computer network, data, computer data base or any other programmes residing in such computer, computer system or computer network;\n(e) disrupts or causes disruption of any computer, computer system or computer network;\n(f) denies or causes the denial of access to any person authorised to access any computer, computer system or computer network by any means;\n(g) provides any assistance to any person to facilitate access to a computer, computer system or computer network in contravention of the provisions of this Act, rules or regulations made thereunder;\n(h) charges the services availed of by a person to the account of another person by tampering with or manipulating any computer, computer system, or computer network, he shall be liable to pay damages by way of compensation not exceeding one crore rupees to the person so affected.\nExplanation.-For the purposes of this section,-\n(i) \"computer contaminant\" means any set of computer instructions that are designed-\n(a) to modify, destroy, record, transmit data or programme residing within a computer, computer system or computer network; or\n(b) by any means to usurp the normal operation of the computer, computer system, or computer network;\n(ii) \"computer data base\" means a representation of information, knowledge, facts, concepts or instructions in text, image, audio, video that are being prepared or have been prepared in a formalised manner or have been produced by a computer, computer system or computer network and are intended for use in a computer, computer system or computer network;\n(iii) \"computer virus\" means any computer instruction, information, data or programme that destroys, damages, degrades or adversely affects the performance of a computer resource or attaches itself to another computer resource and operates when a programme, daia or instruction is executed or some other event takes place in that computer resource;\n(iv) \"damage\" means to destroy, alter, delete, add, modify or rearrange any computer resource by any means."
+    },
+    {
+      "section_id": "IT_ACT_2000-0045",
+      "number": "44",
+      "title": "Penalty for failure to furnish information return, etc",
+      "chapter": "IX",
+      "path": [
+        "IX",
+        "44"
+      ],
+      "page_start": 16,
+      "page_end": 17,
+      "char_count": 900,
+      "text": "44.  Penalty for failure to furnish information return, etc.\nIf any person who is required under this Act or any rules or regulations made thereunder to-\n(a) furnish any document, return or report to the Controller or ?he Certifying Authority fails to furnish the same, he shall be liable to a penalty not exceeding one lakh and fifty thousand rupees for each such failure;\n(b) file any return or furnish any information, books or other documents within the time specified therefor in the regulations fails to file return or furnish the same within the time specified therefor in the regulations, he shall be liable to a penalty not exceeding five thousand rupees for every day during which such failure continues;\n(c) maintain books of account or records, fails to maintain the same, he shall be liable to a penalty not exceeding ten thousand rupees for every day during which the failure continues."
+    },
+    {
+      "section_id": "IT_ACT_2000-0046",
+      "number": "45",
+      "title": "Residuary penalty",
+      "chapter": "IX",
+      "path": [
+        "IX",
+        "45"
+      ],
+      "page_start": 17,
+      "page_end": 17,
+      "char_count": 343,
+      "text": "45.  Residuary penalty.\nWhoever contravenes any rules or regulations made under this Act, for .the contravention of which no penalty has been separately provided, shall be liable to pay a compensation not exceeding twenty-five thousand rupees to the person affected by such contravention or a penalty not exceeding twenty-five thousand rupees."
+    },
+    {
+      "section_id": "IT_ACT_2000-0047",
+      "number": "46",
+      "title": "Power  to adjudicate",
+      "chapter": "IX",
+      "path": [
+        "IX",
+        "46"
+      ],
+      "page_start": 17,
+      "page_end": 17,
+      "char_count": 1748,
+      "text": "46.  Power  to adjudicate.\n(1) For the purpose of adjudging under this Chapter whether any person has committed a contravention of any of the provisions of this Act or of any rule, regulation, direction or order made thereunder the Central Government shall, subject to the provisions of sub-section (3), appoint any officer not below the rank of a Director to the Government of India or an equivalent officer of a State Government to be an adjudicating officer'for holding an inquiry in the manner prescribed by the Central Government.\n(2) The adjudicating officer shall, after giving the person referred to in sub-section\n(1) a reasonable opportunity for making representation in the matter and if, on such inquiry, he is satisfied that the person has committed the contravention, he may impose such penalty or award such compensation as he thinks fit in accordance with the provisions of that section.\n(3) No person shall be appointed as an adjudicating officer unless he possesses such experience in the field of Information Technology and legal or judicial experience as may be prescribed by the Central Government.\n(4) Where more than one adjudicating officers are appointed, the Central Government shall specify by order the matters and places with respect to which such officers shall exercise their jurisdiction.\n(5) Every adjudicating officer shall have the powers of a civil court which are conferred oh the Cyber Appellate Tribunal under sub-section (2) of section 58, and-\n(a) all proceedings before it shall be deemed to be judicial proceedings within the meaning of sections 193 and 228 of the Indian Penal Code;\n(b) shall be deemed to be a civil court for the purposes of sections 345 and 346 of the Code of Criminal Procedure, 1973."
+    },
+    {
+      "section_id": "IT_ACT_2000-0048",
+      "number": "47",
+      "title": "Factors to be taken into account by the adjudicating officer",
+      "chapter": "IX",
+      "path": [
+        "IX",
+        "47"
+      ],
+      "page_start": 17,
+      "page_end": 17,
+      "char_count": 466,
+      "text": "47.  Factors to be taken into account by the adjudicating officer.\nWhile adjudging the quantum of compensation under this Chapter, the adjudicating officer shall have due regard to the following factors, namely:-\n(a) the amount of gain of unfair advantage, wherever quantifiable, made as a result of the default;\n(b) the amount of loss caused to any person as a result of the default;\n(c) the repetitive nature of the default THE CYBER REGULATIONS APPELLATE TRIBUNAL"
+    },
+    {
+      "section_id": "IT_ACT_2000-0049",
+      "number": "48",
+      "title": "Establishment of Cyber Appellate Tribunal",
+      "chapter": "X",
+      "path": [
+        "X",
+        "48"
+      ],
+      "page_start": 17,
+      "page_end": 17,
+      "char_count": 397,
+      "text": "48.  Establishment of Cyber Appellate Tribunal.\n(1) The Central Government shall, by notification, establish one or more appellate tribunals to be known as the Cyber Regulations Appellate Tribunal.\n(2) The Central Government shall also specify, in the notification referred to in sub- section (1), the matters and places in relation to which the Cyber Appellate Tribunal may exercise jurisdiction."
+    },
+    {
+      "section_id": "IT_ACT_2000-0050",
+      "number": "49",
+      "title": "Composition of Cyber Appellate Tribunal",
+      "chapter": "X",
+      "path": [
+        "X",
+        "49"
+      ],
+      "page_start": 17,
+      "page_end": 18,
+      "char_count": 247,
+      "text": "49.  Composition of Cyber Appellate Tribunal.\nA Cyber Appellate Tribunal shall consist of one person only (hereinafter referred to as the Residing Officer of the Cyber Appellate Tribunal) to be appointed, by notification, by the Central Government"
+    },
+    {
+      "section_id": "IT_ACT_2000-0051",
+      "number": "50",
+      "title": "Qualifications for appointment as Presiding Officer of the Cyber Appellate",
+      "chapter": "X",
+      "path": [
+        "X",
+        "50"
+      ],
+      "page_start": 18,
+      "page_end": 18,
+      "char_count": 418,
+      "text": "50.  Qualifications for appointment as Presiding Officer of the Cyber Appellate Tribunal.\nA person shall not be qualified for appointment as the Presiding Officer of a Cyber Appellate Tribunal unless he-\n(a) is, or has been. or is qualified to be, a Judge of a High Court; or\n(b) is or has been a member of the Indian Legal Service and is holding or has held a post in Grade I of that Service for at least three years."
+    },
+    {
+      "section_id": "IT_ACT_2000-0052",
+      "number": "51",
+      "title": "Term of office",
+      "chapter": "X",
+      "path": [
+        "X",
+        "51"
+      ],
+      "page_start": 18,
+      "page_end": 18,
+      "char_count": 233,
+      "text": "51. Term of office The Presiding Officer of a Cyber Appellate Tribunal shall hold office for a term of five years from the date on which he enters upon his office or until he attains the age of sixty-five years, whichever is earlier."
+    },
+    {
+      "section_id": "IT_ACT_2000-0053",
+      "number": "52",
+      "title": "Salary, allowances and other terms and conditions of service of Presiding",
+      "chapter": "X",
+      "path": [
+        "X",
+        "52"
+      ],
+      "page_start": 18,
+      "page_end": 18,
+      "char_count": 494,
+      "text": "52. Salary, allowances and other terms and conditions of service of Presiding Officer.\nThe salary and allowances payable to, and the other terms and conditions of service including pension, gratuity and other retirement benefits of. the Presiding Officer of a Cyber Appellate Tribunal shall be such as may be prescribed:\nProvided that neither the salary and allowances nor the other terms and conditions of service of the Presiding Officer shall be varied to his disadvantage after appointment."
+    },
+    {
+      "section_id": "IT_ACT_2000-0054",
+      "number": "53",
+      "title": "Filling up of vacancies",
+      "chapter": "X",
+      "path": [
+        "X",
+        "53"
+      ],
+      "page_start": 18,
+      "page_end": 18,
+      "char_count": 405,
+      "text": "53.  Filling up of vacancies.\nIf, for reason other than temporary absence, any vacancy occurs in the office n the Presiding Officer of a Cyber Appellate Tribunal, then the Central Government shall appoint another person in accordance with the provisions of this Act to fill the vacancy and the proceedings may be continued before the Cyber Appellate Tribunal from the stage at which the vacancy is filled."
+    },
+    {
+      "section_id": "IT_ACT_2000-0055",
+      "number": "54",
+      "title": "Resignation and removal",
+      "chapter": "X",
+      "path": [
+        "X",
+        "54"
+      ],
+      "page_start": 18,
+      "page_end": 18,
+      "char_count": 1112,
+      "text": "54. Resignation and removal.\n(1) The Presiding Officer of a Cyber Appellate Tribunal may, by notice in writing under his hand addressed to the Central Government, resign his office:\nProvided that the said Presiding Officer shall, unless he is permitted by the Central Government to relinquish his office sooner, continue to hold office until the expiry of three months from the date of receipt of such notice or until a person duly appointed as his successor enters upon his office or until the expiry of his term of office, whichever is the earliest.\n(2) The Presiding Officer of a Cyber Appellate Tribunal shall not be removed from his office except by an order by the Central Government on the ground of proved misbehaviour or incapacity after an inquiry made by a Judge of the Supreme Court in which the Presiding Officer concerned has been informed of the charges against him and given a reasonable opportunity of being heard in respect of these charges.\n(3) The Central Government may, by rules, regulate the procedure for the investigation of misbehaviour or incapacity of the aforesaid Presiding Officer."
+    },
+    {
+      "section_id": "IT_ACT_2000-0056",
+      "number": "55",
+      "title": "Orders constituting Appellate Tribunal to be final and not to invalidate its",
+      "chapter": "X",
+      "path": [
+        "X",
+        "55"
+      ],
+      "page_start": 18,
+      "page_end": 18,
+      "char_count": 435,
+      "text": "55.  Orders constituting Appellate Tribunal to be final and not to invalidate its proceedings.\nNo order of the Central Government appointing any person as the Presiding Officer of a Cyber Appellate Tribunal shall be called in question in any manner and no act or proceeding before a Cyber Appellate Tribunal shall be called in question in any manner on the ground merely of any defect in the constitution of a Cyber Appellate Tribunal."
+    },
+    {
+      "section_id": "IT_ACT_2000-0057",
+      "number": "56",
+      "title": "Staff of the Cyber Appellate Tribunal",
+      "chapter": "X",
+      "path": [
+        "X",
+        "56"
+      ],
+      "page_start": 18,
+      "page_end": 19,
+      "char_count": 518,
+      "text": "56.  Staff of the Cyber Appellate Tribunal.\n(1) The Central Government shall provide the Cyber Appellate Tribunal with such officers and employees as that Government may think fit\n(2) The officers and employees of the Cyber Appellate Tribunal shall discharge their functions under general superintendence of the Presiding Officer.\n(3) The salaries, allowances and other conditions of service of the officers and employees or' the Cyber   Appellate Tribunal shall be such as may be prescribed by the Central Government."
+    },
+    {
+      "section_id": "IT_ACT_2000-0058",
+      "number": "57",
+      "title": "Appeal to Cyber Appellate Tribunal",
+      "chapter": "X",
+      "path": [
+        "X",
+        "57"
+      ],
+      "page_start": 19,
+      "page_end": 19,
+      "char_count": 1595,
+      "text": "57.  Appeal to Cyber Appellate Tribunal.\n(1) Save as provided in sub-section (2), any person aggrieved by an order made by Controller or an adjudicating officer under this Act may prefer an appeal to a Cyber Appellate Tribunal having jurisdiction in the matter.\n(2) No appeal shall lie to the Cyber Appellate Tribunal from an order made by an adjudicating officer with the consent of the parties.\n(3) Every appeal under sub-section (1) shall be filed within a period of tony-five days from the date on which a copy of the order made by the Controller or the adjudicating officer is received by the person aggrieved and it shall be in such form and be accompanied by such fee as may be prescribed:\nProvided that the Cyber Appellate Tribunal may entertain an appeal after the expiry of the said period of tony-five days if it is satisfied that there was sufficient cause tor not filing it within that period.\n(4) On receipt of an appeal under sub-section (1), the Cyber Appellate Tribunal may, after giving the parties to the appeal, an opportunity of being heard, pass such orders thereon as it thinks fit, confirming, modifying or setting aside the order appealed against.\n(5) The Cyber Appellate Tribunal shall send a copy of every order made by it to\" the parties to the appeal and to the concerned Controller or adjudicating officer.\n(6) The appeal filed before the Cyber Appellate Tribunal under sub-section (1) shall be dealt with by it as expeditiously as possible and endeavour shall be made by it to dispose of the appeal finally within six months from the date of receipt of the appeal."
+    },
+    {
+      "section_id": "IT_ACT_2000-0059",
+      "number": "58",
+      "title": "Procedure and powers of  the Cyber Appellate Tribunal",
+      "chapter": "X",
+      "path": [
+        "X",
+        "58"
+      ],
+      "page_start": 19,
+      "page_end": 19,
+      "char_count": 1479,
+      "text": "58.  Procedure and powers of  the Cyber Appellate Tribunal.\n(1) The Cyber Appellate Tribunal shall not be bound by the procedure laid down by the Code of civil Procedure, 1908 but shall be guided by the principles of natural justice and, subject to the other provisions of this Act and of any rules, the Cyber Appellate Tribunal shall have powers to regulate its own procedure including the place at which it shall have its sittings.\n(2) The Cyber Appellate Tribunal shall have, for the purposes of discharging its functions under this Act, the same powers as are vested in a civil court under the Code of Civil Procedure, 1908, while trying a suit, in respect of the following matters, namely:-\n(a) summoning and enforcing the attendance of any person and examining him on oath;\n(b) requiring the discovery and production of documents or other electronic records;\n(c) receiving evidence on affidavits;\n(d) issuing commissions for the examination of witnesses or documents;\n(e) reviewing its decisions;\n(f) dismissing an application for default or deciding it ex pane;\n(g) any other matter which may be prescribed.\n(3) Every proceeding before the Cyber Appellate Tribunal shall be deemed to be a judicial proceeding within the meaning of sections 193 and 228, and for the purposes of section 196 of the Indian Penal Code and the Cyber Appellate Tribunal shall be deemed to be a civil court for the purposes of section 195 and Chapter XXVI of the Code of Criminal Procedure, 1973."
+    },
+    {
+      "section_id": "IT_ACT_2000-0060",
+      "number": "59",
+      "title": "Right to legal representation",
+      "chapter": "X",
+      "path": [
+        "X",
+        "59"
+      ],
+      "page_start": 19,
+      "page_end": 20,
+      "char_count": 209,
+      "text": "59.  Right to legal representation.\nThe appellant may either appear in person or authorise one or more legal practitioners or any of its officers to present his or its case before the Cyber Appellate Tribunal."
+    },
+    {
+      "section_id": "IT_ACT_2000-0061",
+      "number": "60",
+      "title": "Limitation",
+      "chapter": "X",
+      "path": [
+        "X",
+        "60"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 143,
+      "text": "60.  Limitation.\nThe provisions of the Limitation Act, 1963, shall, as far as may be, apply to an  appeal made to the Cyber Appellate Tribunal."
+    },
+    {
+      "section_id": "IT_ACT_2000-0062",
+      "number": "61",
+      "title": "Civil court not to have jurisdiction",
+      "chapter": "X",
+      "path": [
+        "X",
+        "61"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 468,
+      "text": "61.  Civil court not to have jurisdiction.\nNo court shall have jurisdiction to entertain any suit or proceeding in respect of any matter which an adjudicating officer appointed under this Act or the Cyber Appellate Tribunal constituted under this Act is empowered by or under this Act to determine and no injunction shall be granted by any court or other authority in respect of any action taken or to be taken in pursuance of any power conferred by or under this Act."
+    },
+    {
+      "section_id": "IT_ACT_2000-0063",
+      "number": "62",
+      "title": "Appeal to High Court",
+      "chapter": "X",
+      "path": [
+        "X",
+        "62"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 536,
+      "text": "62.   Appeal to High Court.\nAny person aggrieved by any decision or order of the Cyber Appellate Tribunal may file an appeal to the High Court within sixty days from the date of communication of the decision or order of the Cyber Appellate Tribunal to him on any question of fact or law arising out of such order Provided that the High Court may, if it is satisfied that the appellant was prevented by sufficient cause from filing the appeal within the said period, allow it to be filed within a further period not exceeding sixty days."
+    },
+    {
+      "section_id": "IT_ACT_2000-0064",
+      "number": "63",
+      "title": "Compounding of contraventions",
+      "chapter": "X",
+      "path": [
+        "X",
+        "63"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 1286,
+      "text": "63.   Compounding of contraventions.\n(1) Any contravention under this Chapter may, either before or after the institution of adjudication proceedings, be compounded by the Controller or such other officer as may be specially authorised by him in this behalf or by the adjudicating officer, as the case may be, subject to such conditions as the Controller or such other officer or the adjudicating officer may specify:\nProvided that such sum shall not, in any case, exceed the maximum amount of the penalty which may be imposed under this Act for the contravention so compounded.\n(2) Nothing in sub-section (1) shall apply to a person who commits the same or similar contravention within a period of three years from the date on which the first contravention, committed by him, was compounded.\nExplanation.-For the purposes of this sub-section, any second or subsequent contravention committed after the expiry of a period of three years from the date on which the contravention was previously compounded shall be deemed to be a first contravention.\n(3) Where any contravention has been compounded under sub-section (1), no proceeding or further proceeding, as the case may be, shall be taken against the person guilty of such contravention in respect of the contravention so compounded."
+    },
+    {
+      "section_id": "IT_ACT_2000-0065",
+      "number": "64",
+      "title": "Recovery of penalty",
+      "chapter": "X",
+      "path": [
+        "X",
+        "64"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 253,
+      "text": "64.  Recovery of penalty A penalty imposed under this Act, if it is not paid, shall be recovered as an arrear of land revenue and the licence or the Digital Signature Certificate, as the case may be, shall be suspended till the penalty is paid.\nOFFENCES"
+    },
+    {
+      "section_id": "IT_ACT_2000-0066",
+      "number": "65",
+      "title": "Tampering with computer  source documents",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "65"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 713,
+      "text": "65.   Tampering with computer  source documents.\nWhoever knowingly or intentionally conceals, destroys or alters or intentionally or knowingly causes another to conceal, destroy or alter any computer source code used for a computer, computer programme, computer system or computer network, when the computer source code is required to be kept or maintained by law for the time being in force, shall be punishable with imprisonment up to three years, or with fine which may extend up to two lakh rupees, or with both.\nExplanation.-For the purposes of this section, \"computer source code\" means the listing of programmes, computer commands, design and layout and programme analysis of computer resource in any form."
+    },
+    {
+      "section_id": "IT_ACT_2000-0067",
+      "number": "66",
+      "title": "Hacking with computer system",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "66"
+      ],
+      "page_start": 20,
+      "page_end": 20,
+      "char_count": 477,
+      "text": "66.  Hacking with computer system.\n(1) Whoever with the intent to cause or knowing that he is likely to cause wrongful loss or damage to the public or any person destroys or deletes or alters any information residing in a computer resource or diminishes its value or utility or affects it injuriously by any means, commits hack:\n(2) Whoever commits hacking shall be punished with imprisonment up to three years, or with fine which may extend upto two lakh rupees, or with both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0068",
+      "number": "67",
+      "title": "Publishing of information which is obscene in electronic form",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "67"
+      ],
+      "page_start": 20,
+      "page_end": 22,
+      "char_count": 767,
+      "text": "67.  Publishing of information which is obscene in electronic form.\nWhoever publishes or transmits or causes to be published in the electronic form, any material which is lascivious or appeals to the prurient interest or if its effect is such as to tend to deprave and corrupt persons who are likely, having regard to all relevant circumstances, to read, see or hear the matter contained or embodied in it, shall be punished on first conviction with imprisonment of either description for a term which may extend to five years and with fine which may extend to one lakh rupees and in the event of a second or subsequent conviction with imprisonment of either description for a term which may extend to ten years and also with fine which may extend to two lakh rupees."
+    },
+    {
+      "section_id": "IT_ACT_2000-0069",
+      "number": "68",
+      "title": "Power of Controller to give directions",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "68"
+      ],
+      "page_start": 22,
+      "page_end": 22,
+      "char_count": 590,
+      "text": "68.  Power of Controller to give directions.\n(1) The Controller may, by order, direct a Certifying Authority or any employee of such Authority to take such measures or cease carrying on such activities as specified in the order if those are necessary to ensure compliance with the provisions of this Act, rules or any regulations made thereunder.\n(2) Any person who fails to comply with any order under sub-section (1) shall be guilty of an offence and shall be liable on conviction to imprisonment for a term not exceeding three years or to a Fine not exceeding two lakh rupees or to both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0070",
+      "number": "69",
+      "title": "Directions of Controller to a subscriber to extend facilities to decrypt information",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "69"
+      ],
+      "page_start": 22,
+      "page_end": 22,
+      "char_count": 944,
+      "text": "69.  Directions of Controller to a subscriber to extend facilities to decrypt information.\n(1) If the Controller is satisfied that it is necessary or expedient so to do in the interest of the sovereignty or integrity of India, the security of the State, friendly relations with foreign Stales or public order or for preventing incitement to the commission of any cognizable offence, for reasons to be recorded in writing, by order, direct any agency of the Government to intercept any information transmitted through any computer resource.\n(2) The subscriber or any person incharge of the computer resource shall, when called upon by any agency which has been directed under sub-section (1), extend all facilities and technical assistance to decrypt the information.\n(3) The subscriber or any person who fails to assist the agency referred to in sub-section (2) shall be punished with an imprisonment for a term which may extend to seven years."
+    },
+    {
+      "section_id": "IT_ACT_2000-0071",
+      "number": "70",
+      "title": "Protected system",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "70"
+      ],
+      "page_start": 22,
+      "page_end": 22,
+      "char_count": 614,
+      "text": "70. Protected system.\n(1) The appropriate Government may, by notification in the Official Gazette, declare that any computer, computer system or computer network to be a protected system.\n(2) The appropriate Government may, by order in writing, authorise the persons who are authorised to access protected systems notified under sub-section (1).\n(3) Any person who secures access or attempts to secure access to a protected system in contravention of the provisions of this section shall be punished with imprisonment of either description for a term which may extend to ten years and shall also be liable to fine."
+    },
+    {
+      "section_id": "IT_ACT_2000-0072",
+      "number": "71",
+      "title": "Penalty for misrepresentation",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "71"
+      ],
+      "page_start": 22,
+      "page_end": 22,
+      "char_count": 378,
+      "text": "71.  Penalty for misrepresentation.\nWhoever makes any misrepresentation to, or suppresses any material fact from, the Controller or the Certifying Authority for obtaining any licence or Digital Signature Certificate, as the case may\nbe. shall be punished with imprisonment for a term which may extend to two years, or with fine which may extend to one lakh rupees, or with both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0073",
+      "number": "72",
+      "title": "Penalty for breach of confidentiality and privacy",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "72"
+      ],
+      "page_start": 22,
+      "page_end": 22,
+      "char_count": 683,
+      "text": "72.  Penalty for breach of confidentiality and privacy.\nSave as otherwise provided in this Act or any other law for the time being in force, any person who, in pursuance of any of the powers conferred under this Act, rules or regulations made thereunder, has secured access to any electronic record, book, register, correspondence, information, document or other material without the consent of the person concerned discloses such electronic record, book.\nregister, correspondence, information, document or other material to any other person shall be punished with imprisonment for a term which may extend to two years, or with fine which may extend to one lakh rupees, or with both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0074",
+      "number": "73",
+      "title": "Penalty for publishing Digital Signature Certificate false in certain particulars",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "73"
+      ],
+      "page_start": 22,
+      "page_end": 23,
+      "char_count": 751,
+      "text": "73.  Penalty for publishing Digital Signature Certificate false in certain particulars.\n(1) No person shall publish a Digital Signature Certificate or otherwise make it available to any other person with the knowledge that-\n(a) the Certifying Authority listed in the certificate has not issued it; or\n(b) the subscriber listed in the certificate has not accepted it; or\n(c) the certificate has been revoked or suspended, unless such publication is for the purpose of verifying a digital signature created prior to such suspension or revocation.\n(2) Any person who contravenes the provisions of sub-section (1) shall be punished with imprisonment for a term which may extend to two years, or with fine which may extend to one lakh rupees, or with both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0075",
+      "number": "74",
+      "title": "Publication for fraudulent purpose",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "74"
+      ],
+      "page_start": 23,
+      "page_end": 23,
+      "char_count": 319,
+      "text": "74.  Publication for fraudulent purpose.\nWhoever knowingly creates, publishes or otherwise makes available a Digital Signature Certificate for any fraudulent or unlawful purpose shall be punished with imprisonment for a term which may extend to two years, or with fine which may extend to one lakh rupees, or with both."
+    },
+    {
+      "section_id": "IT_ACT_2000-0076",
+      "number": "75",
+      "title": "Act to apply for offence or contravention commited outside India",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "75"
+      ],
+      "page_start": 23,
+      "page_end": 23,
+      "char_count": 537,
+      "text": "75.  Act to apply for offence or contravention commited outside India.\n(1) Subject to the provisions of sub-section (2), the provisions of this Act shall apply also to any offence or contravention committed outside India by any person irrespective of his nationality.\n(2) For the purposes of sub-section (1), this Act shall apply to an offence or contravention committed outside India by any person if the act or conduct constituting the offence or contravention involves a computer, computer system or computer network located in India."
+    },
+    {
+      "section_id": "IT_ACT_2000-0077",
+      "number": "76",
+      "title": "Confiscation",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "76"
+      ],
+      "page_start": 23,
+      "page_end": 23,
+      "char_count": 1033,
+      "text": "76. Confiscation.\nAny computer, computer system, floppies, compact disks, tape drives or any other accessories related thereto, in respect of which any provision of this Act. rules, orders or regulations made thereunder has been or is being contravened, shall be liable to confiscation:\nProvided that where it is established to the satisfaction of the court adjudicating the confiscation that the person in whose possession, power or control of any such computer, computer system, floppies, compact disks, tape drives or any other accessories relating thereto is found is not responsible for the contravention of the provisions of this Act, rules, orders or regulations made thereunder, the court may, instead of making an order for confiscation of such computer, computer system, floppies, compact disks, tape drives or any other accessories related thereto, make such other order authorised by this Act against the person contravening of the provisions of this Act, rules, orders or regulations made thereunder as it may think fit."
+    },
+    {
+      "section_id": "IT_ACT_2000-0078",
+      "number": "77",
+      "title": "Penalties or confiscation not to interfere with other punishments",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "77"
+      ],
+      "page_start": 23,
+      "page_end": 23,
+      "char_count": 275,
+      "text": "77.  Penalties or confiscation not to interfere with other punishments.\nNo penalty imposed or confiscation made under this Act shall prevent the imposition of any other punishment to which the person affected thereby is liable under any other law for the time being in force."
+    },
+    {
+      "section_id": "IT_ACT_2000-0079",
+      "number": "78",
+      "title": "Power to investigate offences",
+      "chapter": "XI",
+      "path": [
+        "XI",
+        "78"
+      ],
+      "page_start": 23,
+      "page_end": 23,
+      "char_count": 289,
+      "text": "78.  Power to investigate offences.\nNotwithstanding anything contained in the Code of Criminal Procedure, 1973, a police officer not below the rank of Deputy Superintendent of Police shall investigate any offence under this Act.\nNETWORK  SERVICE PROVIDERS NOT TO BE LIABLE IN CERTAIN CASES"
+    },
+    {
+      "section_id": "IT_ACT_2000-0080",
+      "number": "79",
+      "title": "Network service providers not to be liable in certain cases",
+      "chapter": "XII",
+      "path": [
+        "XII",
+        "79"
+      ],
+      "page_start": 23,
+      "page_end": 24,
+      "char_count": 744,
+      "text": "79.  Network service providers not to be liable in certain cases.\nFor the removal of doubts, it is hereby declared that no person providing any service as a network service provider shall be liable under this Act, rules or regulations made thereunder for any third party information or data made available by him if he proves that the offence or contravention was committed without his knowledge or that he had exercised all due diligence to prevent the commission of such offence or contravention.\nExplanation.-For the purposes of this section, -\n(a) \"network service provider\" means an intermediary;\n(b) \"third party information\" means any information dealt with by a network service provider in his capacity as an intermediary;\nMISCELLANEOUS"
+    },
+    {
+      "section_id": "IT_ACT_2000-0081",
+      "number": "80",
+      "title": "Power of police officer and other officers to enter, search, etc",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "80"
+      ],
+      "page_start": 24,
+      "page_end": 24,
+      "char_count": 1246,
+      "text": "80.  Power of police officer and other officers to enter, search, etc.\n(1) Notwithstanding anything contained in the Code of Criminal Procedure, 1973, any police officer, not below the rank of a Deputy Superintendent of Police, or any other officer of the Central Government or a State Government authorised by the Central Government in this behalf may enter any public place and search and arrest without warrant any person found therein who is reasonably suspected or having committed or of committing or of being about to commit any offence under this Act Explanation.-For the purposes of this sub-section, the expression \"public place\"\nincludes any public conveyance, any hotel, any shop or any other place intended for use by, or accessible to the public.\n(2) Where any person is arrested under sub-section (1) by an officer other than a police officer, such officer shall, without unnecessary delay, take or send the person arrested before a magistrate having jurisdiction in the case or before the officer-in-charge of a police station.\n(3) The provisions of the Code of Criminal Procedure, 1973 shall, subject to the provisions of this section, apply, so far as may be, in relation to any entry, search or arrest, made under this section."
+    },
+    {
+      "section_id": "IT_ACT_2000-0082",
+      "number": "81",
+      "title": "Act to have overriding effect",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "81"
+      ],
+      "page_start": 24,
+      "page_end": 24,
+      "char_count": 184,
+      "text": "81.  Act to have overriding effect.\nThe provisions of this Act shall have effect notwithstanding anything inconsistent therewith contained in any other law for the time being in force."
+    },
+    {
+      "section_id": "IT_ACT_2000-0083",
+      "number": "82",
+      "title": "Controller, Deputy Controller and Assistant Controllers to be public",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "82"
+      ],
+      "page_start": 24,
+      "page_end": 24,
+      "char_count": 334,
+      "text": "82.  Controller, Deputy Controller and Assistant Controllers to be public servants.\nThe Presiding Officer and other officers and employees of a Cyber Appellate Tribunal, the Controller, the Deputy Controller and the Assistant Controllers shall be deemed to be public servants within the meaning of section 21 of the Indian Penal Code."
+    },
+    {
+      "section_id": "IT_ACT_2000-0084",
+      "number": "83",
+      "title": "Power to give directions",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "83"
+      ],
+      "page_start": 24,
+      "page_end": 24,
+      "char_count": 234,
+      "text": "83.  Power to give directions.\nThe Central Government may give directions to any State Government as to the carrying into execution in the State of any of the provisions of this Act or of any rule, regulation or order made thereunder."
+    },
+    {
+      "section_id": "IT_ACT_2000-0085",
+      "number": "84",
+      "title": "Protection of action taken in good faith",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "84"
+      ],
+      "page_start": 24,
+      "page_end": 24,
+      "char_count": 441,
+      "text": "84.  Protection of action taken in good faith.\nNo suit, prosecution or other legal proceeding shall lie against the Central Government, the State Government, the Controller or any person acting on behalf of him, the Presiding Officer, adjudicating officers and the staff of the Cyber Appellate Tribunal for anything which is in good faith done or intended to be done in pursuance of this Act or any rule, regulation or order made thereunder."
+    },
+    {
+      "section_id": "IT_ACT_2000-0086",
+      "number": "85",
+      "title": "Offences by companies",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "85"
+      ],
+      "page_start": 24,
+      "page_end": 25,
+      "char_count": 1508,
+      "text": "85.  Offences by companies.\n(1) Where a person committing a contravention of any of the provisions of this Act or of any rule, direction or order made thereunder is a company, every person who, at the time the contravention was committed, was in charge of, and was responsible to, the company for the conduct of business of the company as well as the company, shall be guilty of the contravention and shall be liable to be proceeded against and punished accordingly:\nProvided that nothing contained in this sub-section shall render any such person liable to punishment if he proves that the contravention took place without his knowledge or that he exercised all due diligence to prevent such contravention.\n(2) Notwithstanding anything contained in sub-section (1), where a contravention of any of the provisions of this Act or of any rule, direction or order made thereunder has been committed by a company and it is proved that the contravention has taken place with the consent or connivance of, or is attributable to any neglect on the part of, any director, manager, secretary or other officer of the company, such director, manager, secretary or other officer shall also be deemed to be guilty of the contravention and shall be liable to be proceeded against and punished accordingly.\nExplanation.-For the purposes of this section,-\n(i) \"company\" means any body corporate and includes a firm or other association of individuals; and\n(ii) \"director\", in relation to a firm, means a partner in the firm."
+    },
+    {
+      "section_id": "IT_ACT_2000-0087",
+      "number": "86",
+      "title": "Removal of difficulties",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "86"
+      ],
+      "page_start": 25,
+      "page_end": 25,
+      "char_count": 579,
+      "text": "86.   Removal of difficulties.\n(1) If any difficulty arises in giving effect to the provisions of this Act, the Central Government may, by order published in the Official Gazette, make such provisions not inconsistent with the provisions of this Act as appear to it to be necessary or expedient for removing the difficulty:\nProvided that no order shall be made under this section after the expiry of a period of two years from the commencement of this Act\n(2) Every order made under this section shall be laid, as soon as may be after it is made, before each House of Parliament."
+    },
+    {
+      "section_id": "IT_ACT_2000-0088",
+      "number": "87",
+      "title": "Power of Central Government to make rules",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "87"
+      ],
+      "page_start": 25,
+      "page_end": 26,
+      "char_count": 3866,
+      "text": "87.  Power of Central Government to make rules.\n(1) The Central Government may, by notification in the Official Gazette and in the Electronic Gazette make rules to carry out the provisions of this Act\n(2) In particular, and without prejudice to the generality of the foregoing power, such rules may provide for all or any of the following mailers, namely:-\n(a) the manner in which any information or matter may be authenticated by means of digital signature under section 5;\n(b) the electronic form in which filing, issue, grant or payment shall be effected under sub-section (1) of section 6;\n(c) the manner and format in which electronic records shall be filed, or issued and the method of .payment under sub-section (2) of section 6;\n(d) the matters relating to the type of digital signature, manner and format in which it may be affixed undersection 10;\n(e) the security procedure for the purpose of creating secure electronic record and secure digital signature under section 16;\n(f) the qualifications, experience and terms and conditions of service of Controller, Deputy Controllers and Assistant Controllers under section 17;\n(g) other standards to be observed by the Controller under clause (b) of sub- section (2) of section 20;\n(h) the requirements which an applicant must fulfil under sub-section (2) of section 21;\n(i) the period of validity of licence granted under clause (a) of sub-section (3) of section 21;\n(j) the form in which an application for licence may be made under sub-section\n(1) of section 22;\n(k) the amount of fees payable under clause (c) of sub-section (2) of section 22;\n(l) such other documents which shall accompany an application for licence under clause (a) of sub-section (2) of section 22;\n(m) the form and the fee for renewal of a licence and the fee payable there of under section 23;\n(n) the form in which application for issue of a Digital Signature Certificate may be made under sub-section (1) of section 35;\n(o) the fee to be paid to the CertifyingAuthority for issue of a Digital Signature Certificate under sub-section (2) of section 35;\n(p) the manner in which the adjudicating officer shall hold inquiry under subsection (1) of section 46;\n(q) the qualification and experience which the adjudicating officer shall possess under sub-section (3) of section 46;\n(r) the salary, allowances and the other terms and conditions of service of the Presiding Officer under section 52;\n(s) the procedure for investigation of misbehaviour or incapacity of the Presiding Officer under sub-section (3) of section 54;\n(t) the salary and allowances and other conditions of service of other officers and employees under sub-section (3} of section 56;\n(u) the form in which appeal may be filed and the fee thereof under sub -section (3) of section 57;\n(v) any other power of a civil court required to be prescribed under clause (g) of sub- section (2) of section 58; and\n(w) any other matter which is required to be, or may be, prescribed.\n(3) Every notification made by the Central Government under clause (f) of subsection (4) of section 1 and every rule made by it shall be laid, as soon as may be after it is made, before each House of Parliament, while it is in session, for a total period of thirty days which may be comprised in one session or in two or more successive sessions, and if, before the expiry of the session immediately following the session or the successive sessions aforesaid, both Houses agree in making any modification in the notification or the rule or both Houses agree that the notification or the rule should not be made, the notification or the rule shall thereafter have effect only in such modified form or be of no effect, as the case may be; so, however, that any such modification or annulment shall be without prejudice to the validity of anything previously done under that notification or rule."
+    },
+    {
+      "section_id": "IT_ACT_2000-0089",
+      "number": "88",
+      "title": "Constitution of Advisory Committee",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "88"
+      ],
+      "page_start": 26,
+      "page_end": 26,
+      "char_count": 850,
+      "text": "88.  Constitution of Advisory Committee.\n(1) The Central Government shall, as soon as may be after the commencement of this Act, constitute a Committee called the Cyber Regulations Advisory Committee.\n(2) The Cyber Regulations Advisory Committee shall consist of a Chairperson and such number of other official and non-official members representing the interests principally affected or having special knowledge of the subject-matter as the Central Government may deem fit.\n(3)The Cyber Regulations Advisory Committee shall advise-\n(a) the Central Government either generally as regards any rules or for any other purpose connected with this Act;\n(b) the Controller in framing the regulations under this Act.\n(4) There shall be paid to the non-official members of such Committee such travelling and other allowances as the Central Government may fix."
+    },
+    {
+      "section_id": "IT_ACT_2000-0090",
+      "number": "89",
+      "title": "Power of Controller to make regulations",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "89"
+      ],
+      "page_start": 26,
+      "page_end": 27,
+      "char_count": 2160,
+      "text": "89.  Power of Controller to make regulations.\n(1) The Controller may, after consultation with the Cyber Regulations Advisory Committee and with the previous approval of the Central Government, by notification in the Official Gazette, make regulations consistent with this Act and the rules made thereunder to carry out the purposes of this Act.\n(2) In particular, and without prejudice to the generality of the foregoing power, such regulations may provide for all or any of the following matters, namely: -\n(a) the particulars relating to maintenance of data-base containing the disclosure record of every Certifying Authority under clause (m) of section 18;\n(b) the conditions and restrictions subject to which the Controller may recognise any foreign Certifying Authority under sub-section (1) of section 19;\n(c) the terms and conditions subject to which a licence may be granted under clause (c) of sub-section (3) of section 21;\n(d) other standards to be observed by a Certifying Authority under clause (d) of section 30;\n(e) the manner in which the Certifying Authority shall disclose the matters specified in sub-section (1) of section 34;\n(f) the particulars of statement which shall accompany an application under sub-section (3) of section 35;\n(g) the manner in which the subscriber shall communicate the compromise of private key to the certifying Authority under sub-section (2) of section 42.\n(3) Every regulation made under this Act shall be laid, as soon as may be after it is made, before each House of Parliament, while it is in session, for a total period of thirty days which may be comprised in one session or in two or more successive sessions, and if, before the expiry of the session immediately following the session or the successive sessions aforesaid, both Houses agree in making any modification in the regulation or both Houses agree that the regulation should not be made, the regulation shall thereafter have effect only in such modified form or he of no effect, as the case may be; so, however, that any such modification or annulment shall be without prejudice to the validity of anything previously done under (hat regulation."
+    },
+    {
+      "section_id": "IT_ACT_2000-0091",
+      "number": "90",
+      "title": "Power of State Government to make rules",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "90"
+      ],
+      "page_start": 27,
+      "page_end": 27,
+      "char_count": 857,
+      "text": "90.  Power of State Government to make rules.\n(1) The State Government may, by notification in the Official Gazette, make rules to carry out the provisions of this Act.\n(2) In particular, and without prejudice to the generality of the foregoing power, such rules may provide for all or any of the following matters, namely: -\n(a) the electronic form in which filing, issue, grant receipt or payment shall be effected under sub-section (1) of section 6;\n(b) for matters specified in sub-section (2) of section 6;\n(c) any other matter which is required to be provided by rules by the State Government.\n(3) Every rule made by the State Government under this section shall be laid, as soon as may be after it is made, before each House of the State Legislature where it consists of two Houses, or where such Legislature consists of one House, before that House."
+    },
+    {
+      "section_id": "IT_ACT_2000-0092",
+      "number": "91",
+      "title": "Amendment of Act 45 of 1860",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "91"
+      ],
+      "page_start": 27,
+      "page_end": 27,
+      "char_count": 130,
+      "text": "91. Amendment of Act 45 of 1860.\nThe Indian Penal Code shall be amended in the manner specified in the First Schedule to this Act."
+    },
+    {
+      "section_id": "IT_ACT_2000-0093",
+      "number": "92",
+      "title": "Amendment of Act 1 of 1872",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "92"
+      ],
+      "page_start": 27,
+      "page_end": 27,
+      "char_count": 138,
+      "text": "92. Amendment of Act 1 of 1872.\nThe Indian Evidence Act, 1872 shall be amended in the manner specified in the Second Schedule to this Act."
+    },
+    {
+      "section_id": "IT_ACT_2000-0094",
+      "number": "93",
+      "title": "Amendment of Act 18 of 1891",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "93"
+      ],
+      "page_start": 27,
+      "page_end": 27,
+      "char_count": 147,
+      "text": "93.  Amendment of Act 18 of 1891.\nThe Bankers' Books Evidence Act, 1891 shall be amended in the manner specified in the Third Schedule to this Act."
+    },
+    {
+      "section_id": "IT_ACT_2000-0095",
+      "number": "94",
+      "title": "Amendment of Act 2 of 1834",
+      "chapter": "XIIL",
+      "path": [
+        "XIIL",
+        "94"
+      ],
+      "page_start": 27,
+      "page_end": 34,
+      "char_count": 23052,
+      "text": "94.  Amendment of Act 2 of 1834.\nThe Reserve Bank of India Act, 1934 shall be amended in the manner specified in the Fourth Schedule to this Act.\nTHE FIRST SCHEDULE (See section 91) AMENDMENTS TO THE INDIAN PENAL CODE (45 OF 1860) 1.\nAfter section 29, the following section shall be inserted, namely:- Electronic record.\n\"29A. The words \"electronic record\" shall have the meaning assigned to them in clause (t) of sub- section (1) of section 2 of the Information Technology Act, 2000.\".\n2. In section 167, for the words \"such public servant, charged with the preparation or translation of any document, frames or translates that document\", the words \"such public servant, charged with the preparation or translation of any document or electronic record, frames, prepares or translates that document or electronic record\" shall be substituted.\n3. In section 172, for the words \"produce a document in a Court of Justice\", the words \"produce a document or an electronic record in a Court of Justice\" shall be substituted.\n4. In section 173, for the words \"to produce a document in a Court of Justice\", the words \"to produce a document or electronic record in a Court of Justice\" shall be substituted.\n5. In section 175, for the word \"document\" at both the places where it occurs, the words \"document or electronic record\" shall be substituted.\n6. In section 192, for the words \"makes any false entry in any book or record, or makes any document containing a false statement\", the words \"makes any false entry in any book or record, or electronic record or makes any document or electronic record containing a false statement\" shall be substituted.\n7. In section 204, for the word \"document\" at both the places where it occurs, the words \"document or electronic record\" shall be substituted.\n8. In section 463, for the words \"Whoever makes any false documents or part of a document with intent to cause damage or injury\", the words \"Whoever makes any false documents or false electronic record or part of a document or electronic record, with intent to cause damage or injury\"\nshall be substituted.\n9. In section 464,-\n(a) for the portion beginning with the words \"A person is said to make a false document\"\nand ending with the words \"by reason of deception practised upon him, he does not know the contents of the document or the nature of the alteration\", the following shall be substituted, namely:- \"A person is said to make a false document or false electronic record- First-Who dishonestly or fraudulently-\n(a) makes, signs, seals or executes a document or part of a document;\n(b) makes or transmits any electronic record or part of any electronic record;\n(c) affixes any digital signature on any electronic record;\n(d) makes any mark denoting the execution of a document or the authenticity of the digital signature, with the intention of causing it to be believed that such document or part of document, electronic record or digital signature was made, signed, sealed, executed, transmitted or affixed by or by the authority of a person by whom or by whose authority he knows that it was not made, signed, sealed, executed or affixed; or Secondly-Who, without lawful authority, dishonestly or fraudulently, by cancellation or otherwise, alters a document or an electronic record in any material part thereof, after it has been made, executed or affixed with digital signature either by himself or by any other person, whether such person be living or dead at the time of such alteration; or Thirdly-Who dishonestly or fraudulently causes any person to sign, seal, execute or alter a document or an electronic record or to affix his digital signature on any electronic record knowing that such person by reason of unsoundness of mind or intoxication cannot, or that by reason of deception practised upon him, he does not know the contents of the document or electronic record or the nature of the alteration. \" ;\n(b) after Explanation 2, the following Explanation shall be inserted at the end, namely:- 'Explanation 3.-For the purposes of this section, the expression \"affixing digital signature\" shall have the meaning assigned to it in clause (d) of subsection (1) of section 2 of the Information Technology Act, 2000.'.\n10. In section 466,-\n(a) for the words \"Whoever forges a document\", the words \"Whoever forges a document or an electronic record\" shall be substituted;\n(b) the following Explanation shall be inserted at the end, namely:- 'Explanation.-For the purposes of this section, \"register\" includes any list, data or record of any entries maintained in the electronic form as defined in clause (r) of sub- section (1) of section 2 of the Information Technology Act, 2000.'.\n11. In section 468, for the words \"document forged\", the words \"document or electronic record forged\" shall be substituted.\n12. In section 469, for the words \"intending that the document forged\", the words \"intending that the document or electronic record forged\" shall be substituted.\n13. In section 470, for the word \"document\" in both the places where it occurs, the words \"document or electronic record\" shall be substituted.\n14. In section 471, for the word \"document\" wherever it occurs, the words \"document or electronic record\" shall be substituted.\n15. In section 474, for the portion beginning with the words \"Whoever has in his possession any document\" and ending with the words \"if the document is one of the description mentioned in section 466 of this Code\", the following shall be substituted, namely: - \"Whoever has in his possession any document or electronic record, knowing the same to be forged and intending that the same shall fraudulently or dishonestly be used as a genuine, shall, if the document or electronic record is one of the description mentioned in section 466 of this Code.\".\n16. In section 476, for the words \"any document\", the words \"any document or electronic record\" shall be substituted.\n17. In section 477A, for the words \"book, paper, writing\" at both the places where they occur, the words \"book, electronic record, paper, writing\" shall be substituted.\nTHE SECOND SCHEDULE (See section 92) AMENDMENTS TO THE INDIAN EVIDENCE ACT, 1872 (1 OF 1872)\n1. In section 3,-\n(a) in the definition of \"Evidence\", for the words \"all documents produced for the inspection of the Court\", the words \"all documents including electronic records produced for the inspection of the Court\" shall be substituted;\n(b) after the definition of \"India\", the following shall be inserted, namely:- 'the expressions \"Certifying Authority\", \"digital signature\", \"Digital Signature Certificate\", \"electronic form\", \"electronic records\", \"information\", \"secure electronic record\", \"secure digital signature\" and \"subscriber\" shall have the meanings respectively assigned to them in the Information Technology Act, 2000.'.\n2. In section 17, for the words \"oral or documentary,\", the words \"oral or documentary or contained in electronic form\" shall be substituted.\n2. After section 22, the following section shall be inserted, namely: - When oral admission as to contents of electronic records are relevant.\n\"22A. Oral admissions as to the contents of electronic records are not relevant, unless the genuineness of the electronic record produced is in question.\".\n4. In section 34, for the words \"Entries in the books of account\", the words \"Entries in the books of account, including those maintained in an electronic form\" shall be substituted.\n5. In section 35, for the word \"record\", in both the places where it occurs, the words \"record or an electronic record\" shall be substituted.\n6. For section 39, the following section shall be substituted, namely: - What evidence to be given when statement forms part of a conversation, document, electronic record, book or series of letters or papers.\n\"39. When any statement of which evidence is given forms part of a longer statement, or of a conversation or pan of an isolated document, or is contained in a document which forms part of a book, or is contained in part of electronic record or of a connected series of letters or papers, evidence shall be given of so much and no more of the statement, conversation, document, electronic record, book or series of letters or papers as the Court considers necessary in that particular case to the full understanding of the nature and effect of the statement, and of the circumstances under which it was made.\".\n7. After section 47, the following section shall be inserted, namely: - Opinion as to digital signature where relevant.\n\"47A. When the Court has 10 form an opinion as to the digital signature of any person, the opinion of the Certifying Authority which has issued the Digital Signature Certificate is a relevant fact.\".\n8. In section 59, for the words \"contents of documents\" the words \"contents of documents or electronic records\" shall be substituted.\n9. After section 65, the following sections shall be inserted, namely: - Special provisions as to evidence relating to electronic record.\n'65A. The contents of electronic records may be proved in accordance with the provisions of section 65B.\nAdmissibility of electronic records.\n65B. (1) Notwithstanding anything contained in this Act, any information contained in an electronic record which is printed on a paper, stored, recorded or copied in optical or magnetic media produced by a computer (hereinafter referred to as the computer output) shall be deemed to be also a document, if the conditions mentioned in this section are satisfied in relation to the information and computer in question and shall be admissible in any proceedings, without further proof or production of the original, as evidence of any contents of the original or of any fact stated therein of which direct evidence would be admissible.\n(2) The conditions referred to in sub-section (1) in respect of a computer output shall be the following, namely: -\n(a) the computer output containing the information was produced by the computer during the period over which the computer was used regularly to store or process information for the purposes of any activities regularly carried on over that period by the person having lawful control over the use of the computer;\n(b) during the said period, information of the kind contained in the electronic record or of the kind from which the information so contained is derived was regularly fed into the computer in the ordinary course of the said activities;\n(c) throughout the material part of the said period, the computer was operating properly or, if not, then in respect of any period in which it was not operating properly or was out of operation during that part of the period, was not such as to affect the electronic record or the accuracy of its contents; and\n(d) the information contained in the electronic record reproduces or is derived from such information fed into the computer in the ordinary course of the said activities.\n(3) Where over any period, the function of storing or processing information for the purposes of any activities regularly carried on over that period as mentioned in clause (a) of sub-section (2) was regularly performed by computers, whether-\n(a)  by a combination of computers operating over that period; or\n(b)  by different computers operating in succession over that period; or\n(c) by different combinations of computers operating in succession over that period; or\n(d) in any other manner involving the successive operation over that period, in whatever order, of one or more computers and one or more combinations of computers, all the computers used for that purpose during that period shall be treated for the purposes of this section as constituting a single computer; and references in this section to a computer shall be construed accordingly.\n(4) In any proceedings where it is desired to give a statement in evidence by virtue of this section, a certificate doing any of the following things, that is to say, -\n(a) identifying the electronic record containing the statement and describing the manner in which it was produced;\n(b) giving such particulars of any device involved in the production of that electronic record as may be appropriate for the purpose of showing that the electronic record was produced by a computer;\n(c) dealing with any of the matters to which the conditions mentioned in sub- section (2) relate, and purporting to be signed by a person occupying a responsible official position in relation to the operation of the relevant device or the management of the relevant activities (whichever is appropriate) shall be evidence of any matter stated in the certificate; and for the purposes of this sub-section it shall be sufficient for a matter to be stated to the best of the knowledge and belief of the person stating it.\n(5) For the purposes of this section, -\n(a) information shall be taken to be supplied to a computer if it is supplied thereto in any appropriate form and whether it is so supplied directly or (with or without human intervention) by means of any appropriate equipment;\n(b) whether in the course of activities carried on by any official, information is supplied with a view to its being stored or processed for the purposes of those activities by a computer operated otherwise than in the course of those activities, that information, if duly supplied to that computer, shall be taken to be supplied to it in the course of those activities;\n(c) a computer output shall be taken to have been produced by a computer whether it was produced by it directly or (with or without human intervention) by means of any appropriate equipment.\nExplanation.-For the purposes of this  section any reference to information being derived from other information shall be a reference to its being derived therefrom by calculation, comparison or any other process.\n10. After section 67, the following section shall be inserted, namely: - Proof as to digital signature.\n\"67A. Except in the case of a secure digital signature, if the digital signature of any subscriber is alleged to have been affixed to an electronic record the fact that such digital signature is the digital signature of the subscriber must be proved.\".\n11. After section 73, the following section shall be inserted, namely: - Proof as to verification of digital signature.\n'73A. In order to ascertain whether a digital signature is that of the person by whom it purports to have been affixed, the Court may direct-\n(a) that person or the Controller or the Certifying Authority to produce the Digital Signature Certificate;\n(b) any other person to apply the public key listed in the Digital Signature Certificate and verify the digital signature purported to have been affixed by that person.\nExplanation.-For the purposes of this section, \"Controller\" means the Controller appointed under sub-section (1) of section 17 of the Information Technology Act, 2000'.\n12.  Presumption as to Gazettes in electronic forms.\nAfter section 81, the following section shall be inserted, namely: - \"81 A. The Court shall presume the genuineness of every electronic record purporting to be the Official Gazette, or purporting to be electronic record directed by any law to be kept by any person, if such electronic record is kept substantially in the form required by law and is produced from proper custody.\".\n13.  Presumption as to electronic aggrements.\nAfter section 85, the following sections shall be inserted, namely: - \"85A. The Court shall presume that every electronic record purporting to be an agreement containing the digital signatures of the parties was so concluded by affixing the digital signature of the parties.\nPresumption as to electronic records and digital signatures.\n85B. (1) In any proceedings involving a secure electronic record, the Court shall presume unless contrary is proved, that the secure electronic record has not been altered since the specific point of time to which the secure status relates.\n(2) In any proceedings, involving secure digital signature, the Court shall presume unless the contrary is proved that-\n(a) the secure digital signature is affixed by subscriber with the intention of signing or approving the electronic record;\n(b) except in the case of a secure electronic record or a secure digital signature, nothing in this section shall create any presumption relating to authenticity and integrity of the electronic record or any digital signature.\nPresumption as to Digital Signature Certificates.\n85C. The Court shall presume, unless contrary is proved, that the information listed in a Digital Signature Certificate is correct, except for information specified as subscriber information which has not been verified, if the certificate was accepted by the subscriber.\".\n14. Presumption as to electronic messages.\nAfter section 88, the following section shall be inserted, namely: - '88A. The Court may presume that an electronic message forwarded by the originator through an electronic mail server to the addressee to whom the message purports to be addressed corresponds with the message as fed into his computer for transmission; but the Court shall not make any presumption as to the person by whom such message was sent.\nExplanation.-For the purposes of this section, the expressions \"addressee\" and \"originator\" shall have the same meanings respectively assigned to them in clauses (b) and (za) of sub-section (1) of section 2 of the Information Technology Act, 2000.'.\n15.  Presumption as to electronic records five years old.\nAfter section 90, the following section shall be inserted, namely: - \"90A. Where any electronic record, purporting or proved to be five years old, is produced from any custody which the Court in the particular case considers proper, the Court may presume that the digital signature which purports to be the digital signature of any particular person was so affixed by him or any person authorised by him in this behalf.\nExplanation.-Electronic records are said to be in proper custody if they are in the place in which, and under the care of the person with whom, they naturally be; but no custody is improper if it is proved to have had a legitimate origin, or the circumstances of the particular case are such as to render such an origin probable.\nThis Explanation applies also to section 81A.\".\n16. For section 131, the following section shall be substituted, namely: - Production of documents or electronic records which another person, having possession, could refuse to produce.\n\"131. No one shall be compelled to produce documents in his possession or electronic records under his control, which any other person would be entitled to refuse to produce if they were in his possession or control, unless such last-mentioned person consents to their production.\".\nTHE THIRD SCHEDULE (See section 93) AMENDMENTS TO THE BANKERS' BOOKS EVIDENCE ACT ' 891 (18 OF 1891)\n1. In section 2-\n(a) for clause (3), the following clause shall be substituted, namely:- '(3) \"bankers' books\" include ledgers, day-books, cash-books, account-books and all other books used in the ordinary business of a bank whether kept in the written form or as printouts of data stored in a floppy, disc, tape or any other form of electro-magnetic data storage device;\n(b) for clause (8), the following clause shall be substituted, namely: - '(8) \"certified copy\" means when the books of a bank,-\n(a) are maintained in written form, a copy of any entry in such books together with a certificate written;:: the foot of such copy that it is a true copy of such entry, that such entry is contained in one of the ordinary books of the bank and was made in the usual and ordinary course of business and that such book is still in the custody of the bank, and where the copy was obtained by a mechanical or other process which in itself ensured the accuracy of the copy, a further certificate to that effect, but where the book from which such copy was prepared has been destroyed in the usual course of the bank's business after the date on which the copy had been so prepared, a further certificate to that effect, each such certificate being dated and subscribed by the principal accountant or manager of the bank with his name and official title; and\n(b) consist of printouts of data stored in a floppy, disc, tape or any other electro-magnetic data storage device, a printout of such entry or a copy of such printout together with such statements certified in accordance with the provisions of section 2A.'.\n2. After section 2, the following section shall be inserted, namely: - Conditions in the printout.\n\"2A. A printout of entry or a copy of printout referred to in sub-section (8) of section 2 shall be accompanied by the following, namely: -\n(a) a certificate to the effect that it is a printout of such entry or a copy of such printout by the principal accountant or branch manager; and\n(b) a certificate by a person in-charge of computer system containing a brief description of the computer system and the particulars of-\n(A) the safeguards adopted by the system to ensure that data is entered or any other operation performed only by authorised persons;\n(B) the safeguards adopted to prevent and detect unauthorised change of data;\n(C) the safeguards available to retrieve data that is lost due to systemic failure or any other reasons;\n(D) the manner in which data is transferred from the system to removable media like floppies, discs, tapes or other electro-magnetic data storage devices;\n(E) the mode of verification in order to ensure that data has been accurately transferred to such removable media;\n(F} the mode of identification of such data storage devices;\n(G) the arrangements for the storage and custody of such storage devices;\n(H) the safeguards to prevent and detect any tampering with the system; and\n(I) any other factor which will vouch for the integrity and accuracy of the system.\n(c) a further certificate from the person in-charge of the computer system to the effect that to the best of his knowledge and belief, such computer system operated properly at the material time, he was provided with all the relevant data and the printout in question represents correctly, or is appropriately derived from, the relevant data.\".\nTHE FOURTH SCHEDULE (See section 94) AMENDMENT TO THE RESERVE BANK OF INDIA ACT, 1934 (2 OF 1934) In the Reserve Bank of IndiaAct, 1934, in section 58, in sub-section (2), after clause (p), the following clause shall be inserted, namely:- \"(pp) the regulation of fund transfer through electronic means between the banks or between the banks and other financial institutions referred to in clause (c) of section 45-1, including the laying down of the conditions subject to which banks and other financial institutions shall participate in such fund transfers, the manner of such fund transfers and the rights and obligations of the participants in such fund transfers;\".\nSUBHASH C. JAIN, Secy. to the\nGovt. of India.\nPRINTED BY THE MANAGER, GOVERNMENT OF INDIA PRESS (PLU), MINTO ROAD, NEW MGIP(PLU)MRND-1359G1-14-6-2000."
+    }
+  ]
+}

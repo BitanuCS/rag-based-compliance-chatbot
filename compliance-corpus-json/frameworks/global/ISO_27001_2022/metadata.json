@@ -1,0 +1,25 @@
+{
+  "framework_id": "ISO_27001_2022",
+  "framework_name": "ISO/IEC 27001:2022 — Information Security Management Systems",
+  "regulator": "International Organization for Standardization (ISO) / International Electrotechnical Commission (IEC)",
+  "version": "Third Edition, 2022-10",
+  "effective_date": "2022-10-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.iso.org/standard/27001",
+  "penalty_max_inr": 0,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech",
+    "insurtech",
+    "govtech"
+  ],
+  "document_status": "needs_review",
+  "total_pages": 26,
+  "file_hash_sha256": "843a6728009540947b2c5531f94b4cf1fb698d5bf3b51b324c8801e3e01c5b78"
+}

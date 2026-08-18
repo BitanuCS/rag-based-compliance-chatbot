@@ -1,0 +1,19 @@
+{
+  "framework_id": "CONSUMER_PROTECTION_ECOMMERCE_RULES_2020",
+  "framework_name": "Consumer Protection (E-Commerce) Rules, 2020",
+  "regulator": "Department of Consumer Affairs, Ministry of Consumer Affairs",
+  "version": "GSR 462(E), July 23, 2020",
+  "effective_date": "2020-07-23",
+  "last_verified": "2026-06-05",
+  "source_url": "https://consumeraffairs.nic.in/",
+  "penalty_max_inr": 50000000,
+  "applies_to": [
+    "ecommerce",
+    "saas",
+    "web_app",
+    "mobile_app"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 8,
+  "file_hash_sha256": "54fed9f2b119f487c66af671f338e7962f9cf22b55e1e8ba3456219e3394872a"
+}

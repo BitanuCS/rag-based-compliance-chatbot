@@ -1,0 +1,17 @@
+{
+  "framework_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024",
+  "framework_name": "SEBI Cybersecurity and Cyber Resilience Framework (CSCRF) 2024",
+  "regulator": "Securities and Exchange Board of India (SEBI)",
+  "version": "CSCRF 2024",
+  "effective_date": "2024-01-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.sebi.gov.in/legal/circulars.html",
+  "penalty_max_inr": 250000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 206,
+  "file_hash_sha256": "0bb23081b0aed08bbf0f547ece18aba45c04fdda4fd0ecbaf9ede322ef7f17b1"
+}

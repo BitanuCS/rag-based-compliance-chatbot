@@ -1,0 +1,17 @@
+{
+  "framework_id": "PMLA_AML_CFT",
+  "framework_name": "Prevention of Money Laundering Act (PMLA), 2002 & AML/CFT Regulations",
+  "regulator": "Financial Intelligence Unit — India (FIU-IND), Department of Revenue",
+  "version": "RBI Master Circular 2014-15 (KYC/AML/CFT)",
+  "effective_date": "2005-07-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://legislative.gov.in/sites/default/files/A2003-15.pdf",
+  "penalty_max_inr": 500000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "needs_review",
+  "total_pages": 70,
+  "file_hash_sha256": "a9eef862341b2ced34095a70b97631d46875edb15432509a159c1075bb608eb7"
+}

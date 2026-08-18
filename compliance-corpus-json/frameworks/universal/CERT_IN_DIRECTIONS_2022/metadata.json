@@ -1,0 +1,25 @@
+{
+  "framework_id": "CERT_IN_DIRECTIONS_2022",
+  "framework_name": "CERT-In Directions on Information Security Practices, 2022",
+  "regulator": "Indian Computer Emergency Response Team (CERT-In), MeitY",
+  "version": "Directions No. 70B, April 28, 2022",
+  "effective_date": "2022-06-28",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.cert-in.org.in/",
+  "penalty_max_inr": 100000,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech",
+    "insurtech",
+    "govtech"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 8,
+  "file_hash_sha256": "202c2f3953d792dcfb3ecb3634fc82ab75437ee596de89b8d59a211e8e42431f"
+}

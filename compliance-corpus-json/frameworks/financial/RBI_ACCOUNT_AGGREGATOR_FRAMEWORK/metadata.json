@@ -1,0 +1,17 @@
+{
+  "framework_id": "RBI_ACCOUNT_AGGREGATOR_FRAMEWORK",
+  "framework_name": "RBI Master Direction — Non-Banking Financial Company — Account Aggregator",
+  "regulator": "Reserve Bank of India (RBI)",
+  "version": "Master Direction as amended",
+  "effective_date": "2016-09-02",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
+  "penalty_max_inr": 500000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 24,
+  "file_hash_sha256": "6cfa6b0832d208e6d91de07267da0d19c7269bcd5662237109b8891c6c739354"
+}

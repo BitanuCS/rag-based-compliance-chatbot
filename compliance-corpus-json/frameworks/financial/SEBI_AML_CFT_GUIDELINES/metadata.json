@@ -1,0 +1,17 @@
+{
+  "framework_id": "SEBI_AML_CFT_GUIDELINES",
+  "framework_name": "SEBI Guidelines on Anti-Money Laundering (AML) Standards and Combating Financing of Terrorism (CFT)",
+  "regulator": "Securities and Exchange Board of India (SEBI)",
+  "version": "Master Circular (consolidated)",
+  "effective_date": "2008-01-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.sebi.gov.in/legal/master-circulars.html",
+  "penalty_max_inr": 250000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 38,
+  "file_hash_sha256": "51a0f2b833a0bec7d8da2a0e237eb389f7f4cd68ef337da5e6610399f7883252"
+}

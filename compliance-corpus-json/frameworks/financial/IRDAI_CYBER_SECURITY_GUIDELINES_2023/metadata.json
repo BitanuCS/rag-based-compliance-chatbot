@@ -1,0 +1,17 @@
+{
+  "framework_id": "IRDAI_CYBER_SECURITY_GUIDELINES_2023",
+  "framework_name": "IRDAI Information and Cyber Security Guidelines, 2023",
+  "regulator": "Insurance Regulatory and Development Authority of India (IRDAI)",
+  "version": "Guidelines dated April 24, 2023",
+  "effective_date": "2023-04-24",
+  "last_verified": "2026-06-05",
+  "source_url": "https://irdai.gov.in/web/guest/regulations",
+  "penalty_max_inr": 10000000,
+  "applies_to": [
+    "insurtech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 287,
+  "file_hash_sha256": "f96ff0108b898e984209066f680893561b6b52c3cca9f09d5cbfc468cc0e59e1"
+}

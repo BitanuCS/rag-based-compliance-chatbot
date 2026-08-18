@@ -1,0 +1,147 @@
+{
+  "framework_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024",
+  "framework_name": "SEBI Cybersecurity and Cyber Resilience Framework (CSCRF) 2024",
+  "regulator": "Securities and Exchange Board of India (SEBI)",
+  "sector": "financial",
+  "effective_date": "2024-01-01",
+  "document_status": "verified_latest",
+  "source_url": "https://www.sebi.gov.in/legal/circulars.html",
+  "source_pdf": "SEBI_CSCRF_Extension_Notice.pdf",
+  "sha256": "4556f08a3d2200ef3ef41494fc1b84f0e3623518b352fa41c2d602898a7f94d5",
+  "parsed_at": "2026-08-18T07:06:30.222280+00:00",
+  "parser": "pymupdf+tesseract",
+  "ocr_used": true,
+  "structure_strategy": "gazette_section",
+  "structure_confidence": 0.237,
+  "structure_scores": {
+    "gazette_section": 0.237,
+    "decimal_clause": 0.0,
+    "article": 0.0,
+    "rule": 0.0,
+    "bare_numeric": 0.0,
+    "paren_roman": 0.0,
+    "chapter_titled": 0.0
+  },
+  "extraction": {
+    "body_font_size": 32.0,
+    "pages": 4,
+    "text_pages": 3,
+    "text_page_ratio": 0.75,
+    "chars_extracted": 2766,
+    "footnote_marker_chars_removed": 0,
+    "footnote_body_lines_removed": 0,
+    "running_header_lines_removed": 3,
+    "distinct_running_patterns": 1,
+    "toc_lines_removed": 0,
+    "ocr": true,
+    "ocr_dpi": 250,
+    "ocr_mean_confidence": 94.1,
+    "ocr_low_conf_lines_dropped": "see MIN_LINE_CONF"
+  },
+  "sections": [
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0001",
+      "number": "0",
+      "title": "Preamble",
+      "chapter": null,
+      "path": [
+        "0"
+      ],
+      "page_start": 1,
+      "page_end": 2,
+      "char_count": 947,
+      "text": "and Board of / CIRCULAR March 28, 2025 To, All Alternative Investment Funds (AIFs) All Bankers to an Issue (BTI) and Self-Certified Syndicate Banks (SCSBs) All Collective Investment Schemes (CIS) All Credit Rating Agencies (CRAs) All Custodians All Debenture Trustees (DTs) All Depositories All Designated Depository Participants (DDPs) All Depository Participants through Depositories All Investment Advisors (IAs) / Research Analysts (RAs) All KYC Registration Agencies (KRAs) All Merchant Bankers (MBs) All Mutual Funds (MFs)/ Asset Management Companies (AMCs) All Portfolio Managers Association of Portfolio Managers in India (APMl) All Registrar to an Issue and Share Transfer Agents (RTAs) All Stock Brokers through Exchanges All Stock Exchanges All Venture Capital Funds (VCFs) Dear Sir / Madam, Subject: Extension towards Adoption and Implementation of Cybersecurity and Cyber Resilience Framework (CSCRF) for SEBI Regulated Entities (REs)"
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0002",
+      "number": "1",
+      "title": "Recognising the need for robust cybersecurity measures and protection of data",
+      "chapter": null,
+      "path": [
+        "1"
+      ],
+      "page_start": 2,
+      "page_end": 2,
+      "char_count": 600,
+      "text": "1. Recognising the need for robust cybersecurity measures and protection of data and IT infrastructure, Securities and Exchange Board of India (SEBI) has issued 'Cybersecurity and Cyber Resilience Framework (CSCRF) for SEBI Regulated Entities (REs) vide circular SEBI/HO/ 13 dated August 20, 2024. Upon receipt of various queries from REs seeking clarification on the aforementioned circular, SEBI has also issued 'Clarifications to Cybersecurity and Cyber Resilience Framework (CSCRF) for SEBI Regulated Entities (REs)' vide circular SEBI/HO/ ITD-1/TD_CSC_EXT/P/CIR/2024/184 dated December 31, 2024."
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0003",
+      "number": "2",
+      "title": "SEBI had received multiple requests for CSCRF compliance timelines extension",
+      "chapter": null,
+      "path": [
+        "2"
+      ],
+      "page_start": 2,
+      "page_end": 2,
+      "char_count": 398,
+      "text": "2. SEBI had received multiple requests for CSCRF compliance timelines extension to ensure ease of compliance for them. Therefore, it has been decided to extend the compliance timelines by three (3) months, i.e., till June 30, 2025 to all REs, except Market Infrastructure Institutions (MIls), KYC Registration Agencies (KRAs), and Qualified Registrars to an Issue and Share Transfer Agents (QRTAs)."
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0004",
+      "number": "3",
+      "title": "Stock Exchanges/ Depositories are directed to",
+      "chapter": null,
+      "path": [
+        "3"
+      ],
+      "page_start": 2,
+      "page_end": 2,
+      "char_count": 187,
+      "text": "3. Stock Exchanges/ Depositories are directed to:\n3.1. Bring the provisions of this circulars to the notice of their members/ participants and also disseminate the same on their websites."
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0005",
+      "number": "4",
+      "title": "The provisions of this Circular shall come into force with immediate effect",
+      "chapter": null,
+      "path": [
+        "4"
+      ],
+      "page_start": 2,
+      "page_end": 2,
+      "char_count": 79,
+      "text": "4. The provisions of this Circular shall come into force with immediate effect."
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0006",
+      "number": "5",
+      "title": "This circular is being issued in exercise of powers conferred under Section 11 (1)",
+      "chapter": null,
+      "path": [
+        "5"
+      ],
+      "page_start": 2,
+      "page_end": 2,
+      "char_count": 262,
+      "text": "5. This circular is being issued in exercise of powers conferred under Section 11 (1) of the Securities and Exchange of India Act, 1992, to protect the interests of investors in securities and to promote the development of, and to regulate the securities market."
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0007",
+      "number": "6",
+      "title": "This circular is issued with the approval of Competent Authority",
+      "chapter": null,
+      "path": [
+        "6"
+      ],
+      "page_start": 2,
+      "page_end": 3,
+      "char_count": 68,
+      "text": "6. This circular is issued with the approval of Competent Authority."
+    },
+    {
+      "section_id": "SEBI_CYBERSECURITY_FRAMEWORK_2024__SEBI_CSCRF_Extension_Notice-0008",
+      "number": "7",
+      "title": "This circular is available on SEBI website at www.sebi.gov.in under the category",
+      "chapter": null,
+      "path": [
+        "7"
+      ],
+      "page_start": 3,
+      "page_end": 3,
+      "char_count": 220,
+      "text": "7. This circular is available on SEBI website at www.sebi.gov.in under the category \"Legal\" and drop \"Circulars\".\nYours faithfully, Shweta Banerjee General Manager / Phone: 022-26449509 sac / Email: shwetas @sebi-.gov.in"
+    }
+  ]
+}

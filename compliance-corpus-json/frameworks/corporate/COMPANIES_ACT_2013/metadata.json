@@ -1,0 +1,24 @@
+{
+  "framework_id": "COMPANIES_ACT_2013",
+  "framework_name": "Companies Act, 2013",
+  "regulator": "Ministry of Corporate Affairs (MCA)",
+  "version": "Act No. 18 of 2013 (as amended)",
+  "effective_date": "2013-08-29",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.mca.gov.in/content/mca/global/en/acts-rules/ebooks/acts.html",
+  "penalty_max_inr": 2500000000,
+  "applies_to": [
+    "web_app",
+    "mobile_app",
+    "saas",
+    "fintech",
+    "healthtech",
+    "edtech",
+    "ecommerce",
+    "hrtech",
+    "insurtech"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 370,
+  "file_hash_sha256": "d6e286d2a3feec89a7d432a5a572e91af9f0135411b03e57f72b7a8ef72139af"
+}

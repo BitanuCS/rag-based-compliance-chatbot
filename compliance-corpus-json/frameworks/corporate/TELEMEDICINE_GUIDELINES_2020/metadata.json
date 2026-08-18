@@ -1,0 +1,18 @@
+{
+  "framework_id": "TELEMEDICINE_GUIDELINES_2020",
+  "framework_name": "NMC Guidelines for Practice of Telemedicine in India",
+  "regulator": "National Medical Commission (NMC) / formerly Medical Council of India (MCI)",
+  "version": "Guideline-11, 2022 edition (updated from 2020 MCI version)",
+  "effective_date": "2020-03-25",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.nmc.org.in/",
+  "penalty_max_inr": 0,
+  "applies_to": [
+    "healthtech",
+    "saas",
+    "mobile_app"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 45,
+  "file_hash_sha256": "7dde12875bc8c62c3d50060ab019b9a3f351ed164908840dfbd6bf462429b124"
+}

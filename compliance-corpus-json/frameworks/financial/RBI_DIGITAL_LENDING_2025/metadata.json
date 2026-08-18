@@ -1,0 +1,17 @@
+{
+  "framework_id": "RBI_DIGITAL_LENDING_2025",
+  "framework_name": "RBI Digital Lending Directions, 2025",
+  "regulator": "Reserve Bank of India (RBI)",
+  "version": "2025 Updated Directions",
+  "effective_date": "2025-01-01",
+  "last_verified": "2026-06-05",
+  "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
+  "penalty_max_inr": 500000000,
+  "applies_to": [
+    "fintech",
+    "saas"
+  ],
+  "document_status": "verified_latest",
+  "total_pages": 24,
+  "file_hash_sha256": "49b9c2d6b8ce2884e7eb4e26e29b5f58bc6e706d8377a447b60db98344608a14"
+}
