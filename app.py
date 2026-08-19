@@ -1,11 +1,19 @@
 import os
+import uuid
 
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 import store
-from chat import DEFAULT_REPO_ID, DEFAULT_SYSTEM_PROMPT, build_model
+from chat import (
+    DEFAULT_REPO_ID,
+    DEFAULT_SYSTEM_PROMPT,
+    build_model,
+    run_config,
+    tracing_enabled,
+    tracing_project,
+)
 
 load_dotenv()
 
@@ -33,26 +41,32 @@ def to_langchain(message):
     return AIMessage(content=message["content"])
 
 
-# active_id is None while a new chat is unsaved — the row is written to SQLite
-# only once a turn completes, so failed or abandoned chats leave nothing behind.
+def new_thread():
+    """Mint a thread id for a chat that has not been saved yet.
+
+    Minting up front (rather than at save time) means the very first turn is
+    already traced under the thread it belongs to, and the id later becomes the
+    conversation's primary key so LangSmith and SQLite agree on one identifier.
+    """
+    st.session_state.active_id = uuid.uuid4().hex
+
+
 if "active_id" not in st.session_state:
-    st.session_state.active_id = None
+    new_thread()
 
-# The DB is shared across browser sessions, so a chat may have been deleted
-# elsewhere since this session last rendered.
-if st.session_state.active_id and not store.conversation_exists(st.session_state.active_id):
-    st.session_state.active_id = None
-
+# The DB is shared across browser sessions, so a saved chat may have been
+# deleted elsewhere since this session last rendered.
+saved = store.conversation_exists(st.session_state.active_id)
 conversations = store.list_conversations()
-messages = store.load_messages(st.session_state.active_id) if st.session_state.active_id else []
+messages = store.load_messages(st.session_state.active_id) if saved else []
 
 with st.sidebar:
     st.title("⚖️ Compliance Chat")
 
     if st.button("➕  New chat", use_container_width=True):
-        # Already on an unsaved blank chat? Nothing to do.
-        if st.session_state.active_id is not None:
-            st.session_state.active_id = None
+        # Already on an unsaved blank chat? Its thread id is still unused.
+        if saved:
+            new_thread()
             st.rerun()
 
     st.divider()
@@ -75,8 +89,15 @@ with st.sidebar:
         if delete_col.button("🗑", key=f"del-{conv['id']}", help="Delete chat"):
             store.delete_conversation(conv["id"])
             if is_active:
-                st.session_state.active_id = None
+                new_thread()
             st.rerun()
+
+    st.divider()
+    if tracing_enabled():
+        st.caption(f"🔎 LangSmith: `{tracing_project()}`")
+        st.caption(f"thread `{st.session_state.active_id[:12]}`")
+    else:
+        st.caption("🔎 LangSmith: off")
 
 if not messages:
     st.markdown("### How can I help with compliance today?")
@@ -89,21 +110,27 @@ if user_input := st.chat_input("Ask a compliance question..."):
     with st.chat_message("user"):
         st.markdown(user_input)
 
+    conv_id = st.session_state.active_id
     history = [to_langchain(m) for m in messages]
     prompt = [SystemMessage(content=DEFAULT_SYSTEM_PROMPT), *history, HumanMessage(content=user_input)]
+
+    # Every turn of this chat carries the same thread id, so LangSmith stacks
+    # them into one conversation rather than a pile of unrelated runs.
+    config = run_config(conv_id, model=MODEL_REPO_ID, turn=len(messages) // 2 + 1)
 
     with st.chat_message("assistant"):
         try:
             model = get_model(MODEL_REPO_ID)
-            reply = st.write_stream(chunk.content for chunk in model.stream(prompt))
+            reply = st.write_stream(
+                chunk.content for chunk in model.stream(prompt, config=config)
+            )
         except Exception as exc:  # network/auth/model errors all surface the same way
             st.error(f"Request failed: {exc}")
         else:
-            # Persist only a completed turn, creating the conversation on first use.
-            conv_id = st.session_state.active_id
-            if conv_id is None:
-                conv_id = store.create_conversation(title_from(user_input))
-                st.session_state.active_id = conv_id
+            # Persist only a completed turn, creating the conversation on first
+            # use under the thread id the trace already used.
+            if not saved:
+                store.create_conversation(title_from(user_input), conv_id=conv_id)
             store.append_message(conv_id, "user", user_input)
             store.append_message(conv_id, "assistant", reply)
             # Refresh so the sidebar picks up the new/reordered conversation.

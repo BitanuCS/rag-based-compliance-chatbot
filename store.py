@@ -9,6 +9,7 @@ import os
 import sqlite3
 import time
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 DB_PATH = Path(os.getenv("CHAT_DB_PATH", Path(__file__).parent / "chat_history.db"))
@@ -31,23 +32,38 @@ CREATE INDEX IF NOT EXISTS idx_messages_conv ON messages(conv_id, id);
 """
 
 
-def _connect():
-    # A fresh connection per call: Streamlit reruns across threads, so a shared
-    # one would need locking for no real gain at this scale.
+@contextmanager
+def _session():
+    """One connection per call, committed and then closed.
+
+    Streamlit reruns across threads, so a shared connection would need locking
+    for no real gain at this scale. `with conn` alone commits but leaves the
+    connection open, which leaks descriptors in a long-running server — hence
+    the explicit close.
+    """
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
 
 
 def init_db():
-    with _connect() as conn:
+    with _session() as conn:
         conn.executescript(SCHEMA)
 
 
-def create_conversation(title):
-    conv_id = uuid.uuid4().hex
+def create_conversation(title, conv_id=None):
+    """Persist a new conversation.
+
+    The caller may supply the id so a thread id minted before the first message
+    (for LangSmith grouping) becomes this conversation's primary key.
+    """
+    conv_id = conv_id or uuid.uuid4().hex
     now = time.time()
-    with _connect() as conn:
+    with _session() as conn:
         conn.execute(
             "INSERT INTO conversations (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)",
             (conv_id, title, now, now),
@@ -57,7 +73,7 @@ def create_conversation(title):
 
 def list_conversations():
     """Every conversation, most recently used first."""
-    with _connect() as conn:
+    with _session() as conn:
         rows = conn.execute(
             "SELECT id, title FROM conversations ORDER BY updated_at DESC"
         ).fetchall()
@@ -65,7 +81,7 @@ def list_conversations():
 
 
 def conversation_exists(conv_id):
-    with _connect() as conn:
+    with _session() as conn:
         row = conn.execute(
             "SELECT 1 FROM conversations WHERE id = ?", (conv_id,)
         ).fetchone()
@@ -74,7 +90,7 @@ def conversation_exists(conv_id):
 
 def load_messages(conv_id):
     """Messages in send order, as {"role", "content"} dicts."""
-    with _connect() as conn:
+    with _session() as conn:
         rows = conn.execute(
             "SELECT role, content FROM messages WHERE conv_id = ? ORDER BY id",
             (conv_id,),
@@ -84,7 +100,7 @@ def load_messages(conv_id):
 
 def append_message(conv_id, role, content):
     now = time.time()
-    with _connect() as conn:
+    with _session() as conn:
         conn.execute(
             "INSERT INTO messages (conv_id, role, content, created_at) VALUES (?, ?, ?, ?)",
             (conv_id, role, content, now),
@@ -95,6 +111,70 @@ def append_message(conv_id, role, content):
 
 
 def delete_conversation(conv_id):
-    with _connect() as conn:
+    with _session() as conn:
         conn.execute("DELETE FROM messages WHERE conv_id = ?", (conv_id,))
         conn.execute("DELETE FROM conversations WHERE id = ?", (conv_id,))
+
+
+def clear_all():
+    """Wipe every conversation and message. Not reachable from the UI."""
+    with _session() as conn:
+        conn.execute("DELETE FROM messages")
+        conn.execute("DELETE FROM conversations")
+
+
+def vacuum():
+    """Shrink the file on disk.
+
+    Deletes free pages for reuse but never truncate the file, so chat_history.db
+    keeps its size until this runs. Cosmetic — VACUUM cannot run inside a
+    transaction, so it needs its own connection.
+    """
+    conn = sqlite3.connect(DB_PATH, isolation_level=None)
+    try:
+        conn.execute("VACUUM")
+    finally:
+        conn.close()
+
+
+def stats():
+    """Row counts plus any messages orphaned by a partial delete."""
+    with _session() as conn:
+        return {
+            "conversations": conn.execute("SELECT count(*) FROM conversations").fetchone()[0],
+            "messages": conn.execute("SELECT count(*) FROM messages").fetchone()[0],
+            "orphan_messages": conn.execute(
+                "SELECT count(*) FROM messages "
+                "WHERE conv_id NOT IN (SELECT id FROM conversations)"
+            ).fetchone()[0],
+        }
+
+
+if __name__ == "__main__":
+    import sys
+
+    command = sys.argv[1] if len(sys.argv) > 1 else "list"
+    init_db()
+
+    if command == "list":
+        print(f"{DB_PATH}\n")
+        for conv in list_conversations():
+            count = len(load_messages(conv["id"]))
+            print(f"  {conv['id'][:8]}  {count:>3} msgs  {conv['title']}")
+        print(f"\n{stats()}")
+    elif command == "delete" and len(sys.argv) > 2:
+        prefix = sys.argv[2]
+        matches = [c for c in list_conversations() if c["id"].startswith(prefix)]
+        if len(matches) != 1:
+            sys.exit(f"{len(matches)} conversations match {prefix!r}; need exactly one")
+        delete_conversation(matches[0]["id"])
+        print(f"deleted {matches[0]['title']!r}")
+    elif command == "clear":
+        clear_all()
+        vacuum()
+        print("cleared all chat history")
+    elif command == "vacuum":
+        vacuum()
+        print("vacuumed")
+    else:
+        sys.exit("usage: python store.py [list | delete <id-prefix> | clear | vacuum]")
