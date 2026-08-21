@@ -11,10 +11,17 @@ DEFAULT_REPO_ID = "Qwen/Qwen2.5-7B-Instruct"
 DEFAULT_SYSTEM_PROMPT = "You are an experienced and professional Compilance Engineer AI assistant. So make good and professional decisions."
 
 
+# Ceiling on a single reply. Bounds the cost of any one turn and stops a runaway
+# generation streaming indefinitely into the UI. Cited compliance answers run a few
+# hundred tokens, so this is headroom rather than a constraint.
+MAX_NEW_TOKENS = int(os.getenv("LLM_MAX_NEW_TOKENS", "1024"))
+
+
 def build_model(repo_id = DEFAULT_REPO_ID):
     llm = HuggingFaceEndpoint(
         repo_id = repo_id,
-        task = "text-generation"
+        task = "text-generation",
+        max_new_tokens = MAX_NEW_TOKENS,
     )
     return ChatHuggingFace(llm = llm)
 

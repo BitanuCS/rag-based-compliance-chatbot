@@ -39,20 +39,49 @@ def new_thread():
     st.session_state.active_id = uuid.uuid4().hex
 
 
-def render_citations(sources):
-    """Show the evidence behind an answer, numbered as the model cited it.
+def render_citations(sources, answer):
+    """Show the evidence behind an answer, labelled by what the answer actually used.
+
+    Retrieved is not the same as cited. Calling a passage a "source" claims it
+    backed the answer, so the label follows what the answer actually used and
+    passages it never referenced are marked as such.
+
+    A refusal is treated as using nothing, even when it contains [n] markers — a
+    refusal routinely cites while *describing* what the sources cover ("the sources
+    cover digital lending [1]"), which is the opposite of drawing on them. Counting
+    those would label a refusal "2 sources" and invite the reader to conclude from
+    them exactly what the refusal said could not be concluded.
 
     Collapsed by default: the point is that every claim *can* be checked, not
     that the reader must wade through 6 clauses to read one answer.
     """
     if not sources:
         return
-    label = f"📎 {len(sources)} source{'s' if len(sources) > 1 else ''}"
+
+    cited, _, _ = rag.validate_citations(answer, len(sources))
+    # Only markers pointing at a source we actually supplied may be counted, or a
+    # hallucinated [9] inflates the header above the number of passages listed.
+    cited = [n for n in cited if 1 <= n <= len(sources)]
+    if rag.is_refusal(answer):
+        cited = []
+
+    if not cited:
+        label = f"🔍 {len(sources)} passages searched — none used in this answer"
+    elif len(cited) == len(sources):
+        label = f"📎 {len(sources)} source{'s' if len(sources) != 1 else ''}"
+    else:
+        # Always "N of M", never a bare count: the panel lists all M passages, so a
+        # header saying "2 sources" above six entries reads as a bug.
+        label = f"📎 {len(cited)} of {len(sources)} sources cited"
+
     with st.expander(label):
         for source in sources:
+            used = source["n"] in cited
+            # Explains why the header count can be lower than the list length.
+            tag = "" if used else " · _not cited_"
             st.markdown(
                 f"**[{source['n']}] {source['framework_id']}** · {source['pages']} "
-                f"· distance `{source['distance']}`"
+                f"· distance `{source['distance']}`{tag}"
             )
             st.caption(source["breadcrumb"])
             st.text(source["text"][:1500])
@@ -130,11 +159,23 @@ if not messages:
 for message in messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        render_citations(message.get("sources"))
+        render_citations(message.get("sources"), message["content"])
 
-if user_input := st.chat_input("Ask a compliance question..."):
+if user_input := st.chat_input(
+    "Ask a compliance question...",
+    # First line of defence, enforced by the browser. check_input() repeats it
+    # server-side because this widget is not the only caller of the RAG path.
+    max_chars=rag.MAX_INPUT_CHARS,
+):
     with st.chat_message("user"):
         st.markdown(user_input)
+
+    rejection = rag.check_input(user_input)
+    if rejection:
+        # Nothing is persisted: a rejected input never became a turn.
+        with st.chat_message("assistant"):
+            st.warning(rejection)
+        st.stop()
 
     conv_id = st.session_state.active_id
     history = [rag.to_langchain(m) for m in messages]
@@ -168,7 +209,19 @@ if user_input := st.chat_input("Ask a compliance question..."):
                 reply = st.write_stream(
                     chunk.content for chunk in model.stream(prompt, config=config)
                 )
-                render_citations(sources)
+                # Verify after the fact rather than trusting the prompt: a marker
+                # pointing at a source that was never supplied is unverifiable by
+                # the reader, which defeats the point of citing at all.
+                _, invalid, _ = rag.validate_citations(reply, len(sources))
+                if invalid:
+                    st.warning(
+                        "⚠️ This answer references "
+                        + ", ".join(f"[{n}]" for n in invalid)
+                        + f", which {'was' if len(invalid) == 1 else 'were'} not among "
+                        f"the {len(sources)} sources retrieved. Treat "
+                        f"{'that claim' if len(invalid) == 1 else 'those claims'} as unverified."
+                    )
+                render_citations(sources, reply)
         except Exception as exc:  # network/auth/model errors all surface the same way
             st.error(f"Request failed: {exc}")
         else:
