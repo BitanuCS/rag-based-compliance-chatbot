@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_REPO_ID = "Qwen/Qwen2.5-7B-Instruct"
-DEFAULT_SYSTEM_PROMPT = "You are a helpful AI assistant."
+DEFAULT_SYSTEM_PROMPT = "You are an experienced and professional Compilance Engineer AI assistant. So make good and professional decisions."
 
 
 def build_model(repo_id = DEFAULT_REPO_ID):

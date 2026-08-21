@@ -5,6 +5,7 @@ the CLI or a future API layer. Messages are stored as plain ("user"/"assistant",
 text) rows and mapped to LangChain message objects by the caller.
 """
 
+import json
 import os
 import sqlite3
 import time
@@ -50,9 +51,22 @@ def _session():
         conn.close()
 
 
+def _migrate(conn):
+    """Additive, idempotent schema catch-up for databases created before a column.
+
+    `sources` holds the JSON citation list for an assistant message. Added rather
+    than baked into SCHEMA so existing chat_history.db files keep their history:
+    the column is nullable, so pre-RAG messages simply have no citations.
+    """
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(messages)")}
+    if "sources" not in columns:
+        conn.execute("ALTER TABLE messages ADD COLUMN sources TEXT")
+
+
 def init_db():
     with _session() as conn:
         conn.executescript(SCHEMA)
+        _migrate(conn)
 
 
 def create_conversation(title, conv_id=None):
@@ -89,21 +103,33 @@ def conversation_exists(conv_id):
 
 
 def load_messages(conv_id):
-    """Messages in send order, as {"role", "content"} dicts."""
+    """Messages in send order, as {"role", "content", "sources"} dicts.
+
+    `sources` is the decoded citation list, or [] for user messages and for any
+    assistant message stored before citations existed.
+    """
     with _session() as conn:
         rows = conn.execute(
-            "SELECT role, content FROM messages WHERE conv_id = ? ORDER BY id",
+            "SELECT role, content, sources FROM messages WHERE conv_id = ? ORDER BY id",
             (conv_id,),
         ).fetchall()
-    return [dict(row) for row in rows]
+    return [
+        {
+            "role": row["role"],
+            "content": row["content"],
+            "sources": json.loads(row["sources"]) if row["sources"] else [],
+        }
+        for row in rows
+    ]
 
 
-def append_message(conv_id, role, content):
+def append_message(conv_id, role, content, sources=None):
     now = time.time()
     with _session() as conn:
         conn.execute(
-            "INSERT INTO messages (conv_id, role, content, created_at) VALUES (?, ?, ?, ?)",
-            (conv_id, role, content, now),
+            "INSERT INTO messages (conv_id, role, content, created_at, sources) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (conv_id, role, content, now, json.dumps(sources) if sources else None),
         )
         conn.execute(
             "UPDATE conversations SET updated_at = ? WHERE id = ?", (now, conv_id)

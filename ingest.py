@@ -37,6 +37,7 @@ from vectorstore import (
     get_embeddings,
     get_store,
     get_tokenizer,
+    indexed_frameworks,
     token_length,
 )
 
@@ -180,6 +181,9 @@ def build(frameworks=None, limit=None, reset=False, assume_yes=False):
             if answer.strip().lower() not in {"y", "yes"}:
                 sys.exit("aborted")
         store.delete_collection()
+        # The cached handle now points at a collection that no longer exists.
+        get_store.cache_clear()
+        indexed_frameworks.cache_clear()
         print(f"reset collection {COLLECTION!r}")
 
     splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(

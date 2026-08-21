@@ -90,8 +90,14 @@ def get_embeddings():
     )
 
 
+@lru_cache(maxsize=1)
 def get_store():
     """Handle on the persistent collection.
+
+    Cached because Streamlit re-runs the whole script on every interaction, and a
+    fresh Chroma client per rerun means a new sqlite connection and a reloaded
+    HNSW index each time. Anything that deletes the collection must call
+    get_store.cache_clear(), or it keeps talking to a handle that no longer exists.
 
     hnsw:space is frozen when the collection is first created and cannot be
     changed afterwards — Chroma's default is l2, which would be the wrong metric
@@ -131,6 +137,17 @@ def get_retriever(k=5, framework=None, sector=None):
     if where:
         kwargs["filter"] = where
     return get_store().as_retriever(search_kwargs=kwargs)
+
+
+@lru_cache(maxsize=1)
+def indexed_frameworks():
+    """Framework ids actually present in the index, for scoping a search.
+
+    Read from the collection rather than from the corpus on disk so the UI can
+    only offer filters that will actually match something.
+    """
+    metas = get_store().get(include=["metadatas"])["metadatas"]
+    return sorted({m["framework_id"] for m in metas})
 
 
 def display_text(document):
