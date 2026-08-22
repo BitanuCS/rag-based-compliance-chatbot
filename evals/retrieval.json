@@ -1,0 +1,152 @@
+{
+  "_readme": [
+    "Retrieval evaluation set. Each case names a question and the passage that",
+    "must come back for an answer to be possible at all — identified by a phrase",
+    "the corpus actually contains, verified against data/all_chunks.json rather",
+    "than assumed. A case fails when no retrieved passage carries that phrase,",
+    "which means the model could not have answered correctly however good it is.",
+    "",
+    "expect_text is matched case-insensitively against the retrieved passage.",
+    "expect: refusal means nothing should clear the distance floor.",
+    "Run with: python eval_retrieval.py"
+  ],
+  "cases": [
+    {
+      "question": "What is the maximum monetary penalty under the DPDP Act?",
+      "expect_framework": "DPDP_ACT_2023",
+      "expect_text": "two hundred and fifty crore",
+      "note": "The Schedule. Unretrievable until ingest stopped filing it under Section 44."
+    },
+    {
+      "question": "Can a Data Principal be penalized under the DPDP Act, and what is the maximum penalty?",
+      "expect_framework": "DPDP_ACT_2023",
+      "expect_text": "two hundred and fifty crore",
+      "note": "The question a user actually asked, which the system answered wrongly."
+    },
+    {
+      "question": "What duties does a Data Principal have under the DPDP Act?",
+      "expect_framework": "DPDP_ACT_2023",
+      "expect_text": "shall perform the following duties"
+    },
+    {
+      "question": "What must a Data Fiduciary do after a personal data breach under the DPDP Act?",
+      "expect_framework": "DPDP_ACT_2023",
+      "expect_text": "in the event of a personal data breach"
+    },
+    {
+      "question": "What additional obligations do the DPDP Rules place on a Significant Data Fiduciary?",
+      "expect_framework": "DPDP_RULES_2025",
+      "expect_text": "significant data fiduciary"
+    },
+    {
+      "question": "How is verifiable consent obtained for processing a child's personal data under the DPDP Rules?",
+      "expect_framework": "DPDP_RULES_2025",
+      "expect_text": "verifiable consent"
+    },
+    {
+      "question": "How quickly must a cyber incident be reported to CERT-In?",
+      "expect_framework": "CERT_IN_DIRECTIONS_2022",
+      "expect_text": "6 hours"
+    },
+    {
+      "question": "How long must ICT system logs be retained under the CERT-In directions?",
+      "expect_framework": "CERT_IN_DIRECTIONS_2022",
+      "expect_text": "180 days"
+    },
+    {
+      "question": "What must virtual asset service providers record under the CERT-In directions?",
+      "expect_framework": "CERT_IN_DIRECTIONS_2022",
+      "expect_text": "virtual asset"
+    },
+    {
+      "question": "How often must KYC records be updated for low risk customers?",
+      "expect_framework": "RBI_KYC_MASTER_DIRECTIONS",
+      "expect_text": "ten years"
+    },
+    {
+      "question": "What is V-CIP under the RBI KYC Master Directions?",
+      "expect_framework": "RBI_KYC_MASTER_DIRECTIONS",
+      "expect_text": "v-cip"
+    },
+    {
+      "question": "Which documents count as officially valid documents for KYC?",
+      "expect_framework": "RBI_KYC_MASTER_DIRECTIONS",
+      "expect_text": "officially valid document"
+    },
+    {
+      "question": "Is there a cooling-off period for digital loans?",
+      "expect_framework": "RBI_DIGITAL_LENDING_2025",
+      "expect_text": "cooling-off"
+    },
+    {
+      "question": "What is the cap on a default loss guarantee in digital lending?",
+      "expect_framework": "RBI_DIGITAL_LENDING_2025",
+      "expect_text": "five per cent"
+    },
+    {
+      "question": "Can sensitive authentication data be stored after authorization under PCI DSS?",
+      "expect_framework": "PCI_DSS_V4",
+      "expect_text": "sensitive authentication data"
+    },
+    {
+      "question": "What minimum password length does PCI DSS require?",
+      "expect_framework": "PCI_DSS_V4",
+      "expect_text": "12 characters"
+    },
+    {
+      "question": "How often must internal vulnerability scans be performed under PCI DSS?",
+      "expect_framework": "PCI_DSS_V4",
+      "expect_text": "three months"
+    },
+    {
+      "question": "Within what time must a personal data breach be notified to the supervisory authority under GDPR?",
+      "expect_framework": "GDPR_2018",
+      "expect_text": "72 hours"
+    },
+    {
+      "question": "What is the maximum administrative fine under GDPR?",
+      "expect_framework": "GDPR_2018",
+      "expect_text": "20 000 000"
+    },
+    {
+      "question": "What is a secure electronic record under the IT Act?",
+      "expect_framework": "IT_ACT_2000",
+      "expect_text": "secure electronic record"
+    },
+    {
+      "question": "What does ISO 27001 require for management review?",
+      "expect_framework": "ISO_27001_2022",
+      "expect_text": "management review"
+    },
+    {
+      "question": "What does ISO 27001 require when a nonconformity occurs?",
+      "expect_framework": "ISO_27001_2022",
+      "expect_text": "nonconformity"
+    },
+    {
+      "question": "Which activities count as CSR under the Companies Act?",
+      "expect_framework": "COMPANIES_ACT_2013",
+      "expect_text": "eradicating hunger",
+      "note": "Schedule VII, another schedule the ingest repair relabelled."
+    },
+    {
+      "question": "What are a director's duties under the Companies Act?",
+      "expect_framework": "COMPANIES_ACT_2013",
+      "expect_text": "act in good faith"
+    },
+    {
+      "question": "Who must a SEBI-regulated entity's Security Operations Centre report to?",
+      "expect_framework": "SEBI_CYBERSECURITY_FRAMEWORK_2024",
+      "expect_text": "security operations centre"
+    },
+    {
+      "question": "Does an insurer need a Chief Information Security Officer?",
+      "expect_framework": "IRDAI_CYBER_SECURITY_GUIDELINES_2023",
+      "expect_text": "chief information security officer"
+    },
+    { "question": "How do I bake a chocolate cake?", "expect": "refusal" },
+    { "question": "Who won the Indian general election in 2024?", "expect": "refusal" },
+    { "question": "What is the capital of France?", "expect": "refusal" },
+    { "question": "Write me a poem about the sea.", "expect": "refusal" }
+  ]
+}

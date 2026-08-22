@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 
@@ -98,30 +99,19 @@ def render_citations(sources, answer):
     if not shown:
         return
 
-    # Retrieval returns chunks, not documents, and several chunks of one section
-    # routinely come back together — five of six is normal on a narrow question.
-    # Listed flat that prints the same reference five times, which reads as a bug,
-    # so one line per distinct location carries all the markers pointing at it.
-    groups = {}
-    for source in shown:
-        key = (source["framework_name"], source["breadcrumb"], source["pages"])
-        groups.setdefault(key, []).append(source)
-
+    groups = rag.group_references(shown)
     st.markdown(f"**References** · {len(groups)} source{'s' if len(groups) != 1 else ''}")
-    for (framework_name, breadcrumb, pages), group in groups.items():
-        # The breadcrumb already opens with the framework name; printing both puts
-        # the document title twice in one line.
-        location = breadcrumb.removeprefix(framework_name).lstrip(" >")
-        markers = "".join(f"[{source['n']}]" for source in group)
+    for place, numbers in groups:
+        markers = "".join(f"[{n}]" for n in numbers)
         # Framework name over id: the reference line is for the reader, and
         # "Digital Personal Data Protection Act, 2023" identifies a document in a
         # way "DPDP_ACT_2023" does not.
-        line = f"**{markers}** {framework_name}"
-        if location:
-            line += f" · {location}"
-        line += f" · {pages}"
-        if group[0].get("source_url"):
-            line += f" · [source ↗]({group[0]['source_url']})"
+        line = f"**{markers}** {place['framework_name']}"
+        if place["location"]:
+            line += f" · {place['location']}"
+        line += f" · {place['pages']}"
+        if place["source_url"]:
+            line += f" · [source ↗]({place['source_url']})"
         st.markdown(line)
 
     with st.expander("📎 Show cited passages"):
@@ -233,7 +223,16 @@ if user_input := st.chat_input(
                 # touched. A question the corpus cannot answer is answered by a
                 # constant, and reaching a constant through a model call means
                 # paying a model to say nothing.
-                hits, best = rag.retrieve(user_input, framework=framework)
+                # An explicit sidebar scope wins; otherwise a question that names
+                # a framework is treated as asking about that framework.
+                scope_id = framework or rag.detect_framework(user_input)
+                hits, best = rag.retrieve(user_input, framework=scope_id)
+
+                if not hits and scope_id and not framework:
+                    # Detection is a guess, so it is never allowed to cause a
+                    # refusal: a miss inside the guessed framework falls back to
+                    # the whole corpus rather than reporting nothing found.
+                    hits, best = rag.retrieve(user_input)
 
                 if not hits and history:
                     # The one case where a miss is not yet a refusal: a follow-up
@@ -244,7 +243,10 @@ if user_input := st.chat_input(
                     model = get_model(MODEL_REPO_ID)
                     search_query = rag.condense(model, user_input, history, config)
                     if search_query != user_input:
-                        hits, best = rag.retrieve(search_query, framework=framework)
+                        hits, best = rag.retrieve(
+                            search_query,
+                            framework=framework or rag.detect_framework(search_query),
+                        )
 
             if not hits:
                 # Nothing cleared the distance floor. Answering anyway would mean
@@ -293,7 +295,15 @@ if user_input := st.chat_input(
                     )
                 render_citations(sources, reply)
         except Exception as exc:  # network/auth/model errors all surface the same way
-            st.error(f"Request failed: {exc}")
+            # The detail goes to the server log, not the page: an endpoint error
+            # can carry the request URL and headers, and a compliance officer can
+            # do nothing with a stack trace anyway.
+            logging.exception("answer failed for conversation %s", conv_id)
+            st.error(
+                "Something went wrong reaching the model. Try again — if it keeps "
+                "failing, check the server log."
+            )
+            st.caption(f"`{type(exc).__name__}`")
         else:
             # Persist only a completed turn, creating the conversation on first
             # use under the thread id the trace already used.

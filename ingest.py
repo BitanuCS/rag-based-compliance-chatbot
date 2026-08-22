@@ -28,6 +28,8 @@ from pathlib import Path
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+import corpus_repair
+
 from vectorstore import (
     CHROMA_DIR,
     COLLECTION,
@@ -109,11 +111,15 @@ def header_of(chunk):
     return embed_text[: len(embed_text) - len(text)]
 
 
-def clean_metadata(chunk, header, index, total):
+def clean_metadata(chunk, header, index, total, overrides=None):
     """Corpus fields reduced to what Chroma accepts.
 
     Chroma stores str/int/float/bool only. Two fields in this corpus break that:
     `chapter` is None on most chunks, and `section_path` is a list.
+
+    `overrides` carries corrections from corpus_repair — a lifted schedule keeps
+    its parent's provenance (framework, pages, source URL) but gets its own
+    section identity, which is the whole point of lifting it out.
     """
     meta = {}
     for key in CARRY:
@@ -129,49 +135,80 @@ def clean_metadata(chunk, header, index, total):
     meta["parent_chunk_id"] = chunk["chunk_id"]
     meta["split_index"] = index
     meta["split_total"] = total
+    if overrides:
+        # A schedule sits beside the chapter it was printed after, not inside it.
+        meta.pop("chapter", None)
+        meta.update(overrides)
     return meta
 
 
 def build_documents(chunks, splitter):
     """Chunks in, (documents, ids) out — splitting only what overruns the model.
 
-    Ids are deterministic (`chunk_id`, or `chunk_id#pN` for parts) so a re-run
-    upserts in place rather than duplicating the corpus.
+    Ids are deterministic (`chunk_id`, `chunk_id#schedule`, or `…#pN` for parts)
+    so a re-run upserts in place rather than duplicating the corpus.
     """
     documents, ids = [], []
-    passed = split = 0
+    passed = split = repaired = 0
 
     for chunk in chunks:
         header = header_of(chunk)
-        embed_text = chunk["embed_text"]
 
-        if token_length(embed_text) <= EMBED_LIMIT:
-            documents.append(
-                Document(page_content=embed_text, metadata=clean_metadata(chunk, header, 1, 1))
-            )
-            ids.append(chunk["chunk_id"])
-            passed += 1
-            continue
+        # A chunk normally yields itself. One carrying a schedule yields the body
+        # and the schedule separately, so the schedule stops answering to the
+        # breadcrumb of whichever section it was printed after.
+        for suffix, text, overrides in corpus_repair.repair(chunk):
+            part_header = header
+            if "breadcrumb" in overrides:
+                part_header = header.replace(chunk["breadcrumb"], overrides["breadcrumb"], 1)
+                repaired += 1
+            embed_text = part_header + text
+            record_id = chunk["chunk_id"] + suffix
 
-        # Split the body alone, then re-apply the header to each part so every
-        # part remains self-describing.
-        parts = splitter.split_text(chunk["text"])
-        for i, part in enumerate(parts, start=1):
-            documents.append(
-                Document(
-                    page_content=header + part,
-                    metadata=clean_metadata(chunk, header, i, len(parts)),
+            if token_length(embed_text) <= EMBED_LIMIT:
+                documents.append(
+                    Document(
+                        page_content=embed_text,
+                        metadata=clean_metadata(chunk, part_header, 1, 1, overrides),
+                    )
                 )
-            )
-            ids.append(f"{chunk['chunk_id']}#p{i}")
-        split += 1
+                ids.append(record_id)
+                passed += 1
+                continue
 
-    return documents, ids, passed, split
+            # Split the body alone, then re-apply the header to each part so every
+            # part remains self-describing.
+            parts = splitter.split_text(text)
+            for i, part in enumerate(parts, start=1):
+                documents.append(
+                    Document(
+                        page_content=part_header + part,
+                        metadata=clean_metadata(chunk, part_header, i, len(parts), overrides),
+                    )
+                )
+                ids.append(f"{record_id}#p{i}")
+            split += 1
+
+    return documents, ids, passed, split, repaired
 
 
-def build(frameworks=None, limit=None, reset=False, assume_yes=False):
+def build(frameworks=None, limit=None, reset=False, assume_yes=False, replace=False):
     chunks = load_chunks(frameworks, limit)
     print(f"loaded {len(chunks)} chunks from {CORPUS.name}")
+
+    if replace:
+        if not frameworks:
+            sys.exit("--replace needs --frameworks; use --reset to drop everything")
+        # Ids are deterministic, so re-running upserts — but only over the ids the
+        # new run happens to produce. A chunk that used to be split into #p1/#p2
+        # and now fits in one record would leave those parts behind as orphans
+        # answering to text that no longer exists. Clearing the framework first is
+        # what makes a targeted re-ingest equivalent to a rebuild of that slice.
+        store = get_store()
+        before = store._collection.count()
+        store._collection.delete(where={"framework_id": {"$in": list(frameworks)}})
+        removed = before - store._collection.count()
+        print(f"replace: removed {removed} existing records for {', '.join(frameworks)}")
 
     if reset:
         store = get_store()
@@ -194,11 +231,13 @@ def build(frameworks=None, limit=None, reset=False, assume_yes=False):
         separators=["\n\n", "\n", ". ", "; ", " ", ""],
     )
 
-    documents, ids, passed, split = build_documents(chunks, splitter)
+    documents, ids, passed, split, repaired = build_documents(chunks, splitter)
     print(
         f"split: {passed} chunks fit as-is, {split} were over {EMBED_LIMIT} tokens "
         f"→ {len(documents)} records"
     )
+    if repaired:
+        print(f"repair: {repaired} schedules lifted out of the section they were printed under")
 
     oversized = [d for d in documents if token_length(d.page_content) > EMBED_LIMIT]
     if oversized:
@@ -229,6 +268,10 @@ def stats():
     parts = Counter(m["framework_id"] for m in metas)
     parents = Counter()
     for meta in metas:
+        # Repaired records are lifted out of a parent, not parents themselves, so
+        # counting them would show more chunks than the corpus contains.
+        if meta.get("repair"):
+            continue
         parents[meta["framework_id"]] += meta["split_index"] == 1
 
     # The corpus records its own per-framework chunk counts; anything short of
@@ -243,8 +286,11 @@ def stats():
             missing.append(framework)
         print(f"{framework:<42} {got:>7} {want:>9} {parts.get(framework, 0):>8}{flag}")
 
+    lifted = sum(1 for m in metas if m.get("repair") == "schedule")
+    print(f"\nschedules lifted into their own records: {lifted}")
+
     over = sum(1 for d in docs if token_length(d) > EMBED_LIMIT)
-    print(f"\nrecords over {EMBED_LIMIT} tokens: {over}" + ("  ✗" if over else "  ✓"))
+    print(f"records over {EMBED_LIMIT} tokens: {over}" + ("  ✗" if over else "  ✓"))
     if missing:
         print(f"frameworks not fully indexed: {', '.join(missing)}  ✗")
     elif not over:
@@ -282,6 +328,11 @@ def main():
     build_cmd.add_argument("--reset", action="store_true", help="drop the collection first")
     build_cmd.add_argument("--yes", action="store_true", help="skip the --reset confirmation")
     build_cmd.add_argument("--frameworks", help="comma-separated framework ids to index")
+    build_cmd.add_argument(
+        "--replace",
+        action="store_true",
+        help="delete the selected frameworks' records first (targeted re-ingest)",
+    )
     build_cmd.add_argument("--limit", type=int, help="index only the first N chunks (smoke test)")
 
     sub.add_parser("stats", help="what is indexed, and whether it is complete")
@@ -296,7 +347,7 @@ def main():
 
     if args.command == "build":
         frameworks = args.frameworks.split(",") if args.frameworks else None
-        build(frameworks, args.limit, args.reset, args.yes)
+        build(frameworks, args.limit, args.reset, args.yes, args.replace)
     elif args.command == "stats":
         stats()
     elif args.command == "query":

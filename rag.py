@@ -19,6 +19,8 @@ The policy has three parts, and all three matter:
 
 import os
 import re
+from collections import Counter
+from functools import lru_cache
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
@@ -29,6 +31,17 @@ from vectorstore import display_text, get_store
 # gap. Raise it to be more permissive, lower it to demand tighter matches.
 MAX_DISTANCE = float(os.getenv("RAG_MAX_DISTANCE", "0.45"))
 RETRIEVAL_K = int(os.getenv("RAG_K", "6"))
+
+# Candidates pulled before diversification. Nearest-k alone routinely returns one
+# section five or six times over — long sections are split into several records,
+# and every part of the right section scores well — which spends the whole
+# context budget on one passage and hides everything else the corpus knows.
+FETCH_K = int(os.getenv("RAG_FETCH_K", "24"))
+
+# Parts of one section that may occupy the final k. Two rather than one because
+# an obligation and its proviso are often split across consecutive parts, and
+# dropping the second would cut a rule in half.
+MAX_PER_SECTION = int(os.getenv("RAG_MAX_PER_SECTION", "2"))
 
 # Input cap. A question is a question; anything longer is a pasted document, which
 # inflates cost, and — once history and six sources are added — can push the
@@ -216,23 +229,136 @@ def condense(model, question, history, config=None):
     return rewritten
 
 
-def retrieve(question, k=RETRIEVAL_K, framework=None, max_distance=MAX_DISTANCE):
-    """Nearest chunks that clear the distance floor.
+# What kind of instrument a framework is. On its own this identifies nothing —
+# every Indian regulation is an act, rules or directions — but it is exactly what
+# separates two frameworks that share a name, so it is scored, not discarded.
+TYPE_WORDS = {
+    "act", "acts", "rules", "rule", "regs", "regulations", "regulation",
+    "guidelines", "guideline", "framework", "frameworks", "directions",
+    "direction", "master", "circular", "codes", "code",
+}
+
+# Carried in ids as filler or version noise.
+IGNORED_WORDS = {"the", "of", "and", "in", "for", "on", "v", "v4"}
+
+# Below this length a token has to appear capitalised in the question to count.
+# IT_ACT_2000 contributes "it", which would otherwise match the pronoun in
+# "is it mandatory…" and quietly scope half the corpus away.
+SHORT_TOKEN = 3
+
+
+@lru_cache(maxsize=1)
+def _framework_tokens():
+    """(identifying words, instrument words) per indexed framework, from its id.
+
+    Built from the index rather than hand-maintained, so a framework added to the
+    corpus becomes detectable without anyone remembering to update a list here.
+    """
+    from vectorstore import indexed_frameworks
+
+    tokens = {}
+    for framework_id in indexed_frameworks():
+        words = {w.lower() for w in re.split(r"[^A-Za-z0-9]+", framework_id) if w}
+        words -= IGNORED_WORDS
+        words = {w for w in words if not re.fullmatch(r"(19|20)\d{2}", w)}
+        naming = words - TYPE_WORDS
+        if naming:
+            tokens[framework_id] = (naming, words & TYPE_WORDS)
+    return tokens
+
+
+def detect_framework(question):
+    """The framework a question names, or None.
+
+    A question that says "under the DPDP Act" is not asking what data protection
+    law in general provides, but nearest-neighbour search has no notion of that:
+    on the corpus's own numbers a DPDP penalty question returns five GDPR
+    passages and one DPDP one, because GDPR says more about penalties in more
+    ways. Scoping to the framework the reader named is what makes the answer
+    about the law they asked about.
+
+    A naming word is worth two and the instrument word one, so "the DPDP Act"
+    picks the Act over the Rules of the same name while "DPDP" alone, naming
+    both equally, picks neither. Only an outright winner counts: a question
+    naming two frameworks is usually a comparison and must see both, and a word
+    shared by several — "cybersecurity" belongs to RBI's framework and SEBI's
+    alike — identifies neither.
+    """
+    words = [w for w in re.split(r"[^A-Za-z0-9]+", question) if w]
+    lowered = {w.lower() for w in words}
+    capitalised = {w.lower() for w in words if w.isupper()}
+
+    def named(token):
+        return token in (capitalised if len(token) <= SHORT_TOKEN else lowered)
+
+    matched = {}
+    for framework_id, (naming, instrument) in _framework_tokens().items():
+        hits = frozenset(token for token in naming if named(token))
+        if hits:
+            matched[framework_id] = (hits, len(instrument & lowered))
+    if not matched:
+        return None
+
+    # Two frameworks are only rivals for the same scope if the words that matched
+    # them overlap: "RBI" and "RBI KYC" are the same family, and the narrower one
+    # should win. "DPDP" and "GDPR" share nothing, which means the question named
+    # both — a comparison, and scoping to either would hide half the answer.
+    families = []
+    for hits, _ in matched.values():
+        overlapping = [family for family in families if family & hits]
+        merged = set(hits).union(*overlapping)
+        families = [family for family in families if not family & hits] + [merged]
+    if len(families) > 1:
+        return None
+
+    scores = {fid: 2 * len(hits) + instrument for fid, (hits, instrument) in matched.items()}
+    best = max(scores.values())
+    winners = [fid for fid, score in scores.items() if score == best]
+    return winners[0] if len(winners) == 1 else None
+
+
+def diversify(scored, k=RETRIEVAL_K, max_per_section=MAX_PER_SECTION):
+    """Thin a ranked candidate list down to k, capping repeats of one section.
+
+    Retrieval ranks records, but the reader and the model both think in sections.
+    A section long enough to be split into six records can win all six slots on
+    its own, and an answer built from six views of one paragraph is narrower than
+    the corpus it came from — the exception two sections down never gets seen.
+
+    Order is preserved, so the nearest match is still first and the cap only ever
+    displaces a passage by a nearer one from a section already represented.
+    """
+    kept, seen = [], Counter()
+    for doc, distance in scored:
+        key = (doc.metadata.get("framework_id"), doc.metadata.get("breadcrumb"))
+        if seen[key] >= max_per_section:
+            continue
+        seen[key] += 1
+        kept.append((doc, distance))
+        if len(kept) == k:
+            break
+    return kept
+
+
+def retrieve(question, k=RETRIEVAL_K, framework=None, max_distance=MAX_DISTANCE, fetch_k=FETCH_K):
+    """Nearest chunks that clear the distance floor, thinned for section variety.
 
     Returns (hits, best_distance). best_distance is reported even when everything
     is filtered out, so a near-miss is debuggable rather than an unexplained
-    refusal.
+    refusal — and it is the raw nearest distance, before diversification, because
+    that is what the floor was tuned against.
     """
     from vectorstore import build_filter
 
     scored = get_store().similarity_search_with_score(
-        question, k=k, filter=build_filter(framework)
+        question, k=max(fetch_k, k), filter=build_filter(framework)
     )
     if not scored:
         return [], None
 
     best = scored[0][1]
-    return [(doc, dist) for doc, dist in scored if dist <= max_distance], best
+    near = [(doc, dist) for doc, dist in scored if dist <= max_distance]
+    return diversify(near, k), best
 
 
 def citations(hits):
@@ -254,6 +380,40 @@ def citations(hits):
                 "distance": round(distance, 4),
                 "text": display_text(doc),
             }
+        )
+    return out
+
+
+def group_references(sources):
+    """Collapse a source list into one entry per distinct location.
+
+    Retrieval returns records, and several records of one section routinely come
+    back together. Listed flat that prints the same reference repeatedly, which
+    reads as a bug, so each location appears once carrying every marker that
+    points at it: [1][2][4] rather than three identical lines.
+
+    Returns a list of (location dict, [numbers]), in first-cited order.
+    """
+    grouped = {}
+    for source in sources:
+        key = (source["framework_name"], source["breadcrumb"], source["pages"])
+        grouped.setdefault(key, []).append(source)
+
+    out = []
+    for (framework_name, breadcrumb, pages), group in grouped.items():
+        # The breadcrumb already opens with the framework name; printing both puts
+        # the document title twice in one line.
+        location = breadcrumb.removeprefix(framework_name).lstrip(" >")
+        out.append(
+            (
+                {
+                    "framework_name": framework_name,
+                    "location": location,
+                    "pages": pages,
+                    "source_url": group[0].get("source_url", ""),
+                },
+                [source["n"] for source in group],
+            )
         )
     return out
 

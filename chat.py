@@ -1,14 +1,20 @@
+"""Model construction and LangSmith run configuration.
+
+Deliberately has no chat loop of its own. An ungrounded assistant answering
+compliance questions from the model's memory — no corpus, no citations, no way
+to refuse — is the one thing this project exists to prevent, so the only path to
+the model runs through rag.build_prompt. For a terminal-side look at what the
+corpus holds, `python ingest.py query "..."` searches the index directly.
+"""
+
 import os
-import uuid
 
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
-from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from dotenv import load_dotenv
 
 load_dotenv()
 
 DEFAULT_REPO_ID = "Qwen/Qwen2.5-7B-Instruct"
-DEFAULT_SYSTEM_PROMPT = "You are an experienced and professional Compilance Engineer AI assistant. So make good and professional decisions."
 
 
 # Ceiling on a single reply. Bounds the cost of any one turn and stops a runaway
@@ -55,24 +61,3 @@ def run_config(thread_id, **metadata):
     }
 
 
-def main():
-    model = build_model()
-    thread_id = uuid.uuid4().hex
-    config = run_config(thread_id)
-    chat_history = [
-        SystemMessage(content=DEFAULT_SYSTEM_PROMPT)
-    ]
-    while True:
-        user_input = input("User: ")
-        chat_history.append(HumanMessage(content=user_input))
-        if user_input == 'exit':
-            break
-        results = model.invoke(chat_history, config=config)
-        chat_history.append(AIMessage(results.content))
-        print("AI: ", results.content)
-
-    print(chat_history)
-
-
-if __name__ == "__main__":
-    main()
