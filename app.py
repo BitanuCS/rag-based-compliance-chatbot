@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 import rag
 import store
-from chat import DEFAULT_REPO_ID, build_model, run_config, tracing_enabled, tracing_project
+from chat import DEFAULT_REPO_ID, build_model, run_config, tracing_enabled
 from vectorstore import indexed_frameworks
 
 load_dotenv()
@@ -15,6 +15,29 @@ MODEL_REPO_ID = os.getenv("HF_MODEL", DEFAULT_REPO_ID)
 TITLE_MAX_CHARS = 34
 
 st.set_page_config(page_title="Compliance Chat", page_icon="⚖️")
+
+# History rows are one line each. Streamlit centres and wraps button labels, which
+# turns a list of chats into a stack of two-line blocks you have to read rather
+# than scan. Scoped by the `open-<id>` key so it touches only the history buttons.
+st.markdown(
+    """
+    <style>
+    section[data-testid="stSidebar"] [class*="st-key-open-"] button {
+        justify-content: flex-start;
+        text-align: left;
+    }
+    section[data-testid="stSidebar"] [class*="st-key-open-"] button div,
+    section[data-testid="stSidebar"] [class*="st-key-open-"] button p {
+        min-width: 0;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Cached so the endpoint isn't rebuilt on every Streamlit rerun.
 get_model = st.cache_resource(show_spinner=False)(build_model)
@@ -43,8 +66,9 @@ def render_citations(sources, answer):
     """Show the evidence behind an answer, labelled by what the answer actually used.
 
     Retrieved is not the same as cited. Calling a passage a "source" claims it
-    backed the answer, so the label follows what the answer actually used and
-    passages it never referenced are marked as such.
+    backed the answer, so only the passages the answer actually referenced are
+    listed; the rest were search results, not evidence, and showing them only
+    invites the reader to treat unused text as support.
 
     A refusal is treated as using nothing, even when it contains [n] markers — a
     refusal routinely cites while *describing* what the sources cover ("the sources
@@ -52,8 +76,11 @@ def render_citations(sources, answer):
     those would label a refusal "2 sources" and invite the reader to conclude from
     them exactly what the refusal said could not be concluded.
 
-    Collapsed by default: the point is that every claim *can* be checked, not
-    that the reader must wade through 6 clauses to read one answer.
+    The references themselves sit directly under the answer, always visible: a
+    citation the reader has to go looking for is doing half its job. The full
+    passage text stays collapsed behind them — the point is that every claim *can*
+    be checked, not that the reader must wade through six clauses to read one
+    answer.
     """
     if not sources:
         return
@@ -65,28 +92,46 @@ def render_citations(sources, answer):
     if rag.is_refusal(answer):
         cited = []
 
-    if not cited:
-        label = f"🔍 {len(sources)} passages searched — none used in this answer"
-    elif len(cited) == len(sources):
-        label = f"📎 {len(sources)} source{'s' if len(sources) != 1 else ''}"
-    else:
-        # Always "N of M", never a bare count: the panel lists all M passages, so a
-        # header saying "2 sources" above six entries reads as a bug.
-        label = f"📎 {len(cited)} of {len(sources)} sources cited"
+    # Numbers stay as the model saw them, so [3] in the answer still finds [3] here
+    # even when the gaps are gone.
+    shown = [source for source in sources if source["n"] in cited]
+    if not shown:
+        return
 
-    with st.expander(label):
-        for source in sources:
-            used = source["n"] in cited
-            # Explains why the header count can be lower than the list length.
-            tag = "" if used else " · _not cited_"
+    # Retrieval returns chunks, not documents, and several chunks of one section
+    # routinely come back together — five of six is normal on a narrow question.
+    # Listed flat that prints the same reference five times, which reads as a bug,
+    # so one line per distinct location carries all the markers pointing at it.
+    groups = {}
+    for source in shown:
+        key = (source["framework_name"], source["breadcrumb"], source["pages"])
+        groups.setdefault(key, []).append(source)
+
+    st.markdown(f"**References** · {len(groups)} source{'s' if len(groups) != 1 else ''}")
+    for (framework_name, breadcrumb, pages), group in groups.items():
+        # The breadcrumb already opens with the framework name; printing both puts
+        # the document title twice in one line.
+        location = breadcrumb.removeprefix(framework_name).lstrip(" >")
+        markers = "".join(f"[{source['n']}]" for source in group)
+        # Framework name over id: the reference line is for the reader, and
+        # "Digital Personal Data Protection Act, 2023" identifies a document in a
+        # way "DPDP_ACT_2023" does not.
+        line = f"**{markers}** {framework_name}"
+        if location:
+            line += f" · {location}"
+        line += f" · {pages}"
+        if group[0].get("source_url"):
+            line += f" · [source ↗]({group[0]['source_url']})"
+        st.markdown(line)
+
+    with st.expander("📎 Show cited passages"):
+        for source in shown:
             st.markdown(
                 f"**[{source['n']}] {source['framework_id']}** · {source['pages']} "
-                f"· distance `{source['distance']}`{tag}"
+                f"· distance `{source['distance']}`"
             )
             st.caption(source["breadcrumb"])
             st.text(source["text"][:1500])
-            if source.get("source_url"):
-                st.caption(f"[{source['framework_name']}]({source['source_url']})")
             st.divider()
 
 
@@ -100,7 +145,7 @@ conversations = store.list_conversations()
 messages = store.load_messages(st.session_state.active_id) if saved else []
 
 with st.sidebar:
-    st.title("⚖️ Compliance Chat")
+    st.title("⚖️ Compliance Assistant")
 
     if st.button("➕  New chat", use_container_width=True):
         # Already on an unsaved blank chat? Its thread id is still unused.
@@ -131,6 +176,8 @@ with st.sidebar:
         if row.button(
             conv["title"],
             key=f"open-{conv['id']}",
+            # The row clips to one line, so the full title lives in the tooltip.
+            help=conv["title"],
             use_container_width=True,
             type="primary" if is_active else "secondary",
         ):
@@ -141,13 +188,6 @@ with st.sidebar:
             if is_active:
                 new_thread()
             st.rerun()
-
-    st.divider()
-    if tracing_enabled():
-        st.caption(f"🔎 LangSmith: `{tracing_project()}`")
-        st.caption(f"thread `{st.session_state.active_id[:12]}`")
-    else:
-        st.caption("🔎 LangSmith: off")
 
 if not messages:
     st.markdown("### How can I help with compliance today?")
@@ -186,29 +226,59 @@ if user_input := st.chat_input(
 
     with st.chat_message("assistant"):
         try:
-            model = get_model(MODEL_REPO_ID)
+            model = None
 
             with st.spinner("Searching the corpus..."):
-                # A follow-up like "what about GDPR?" is meaningless to a vector
-                # search on its own, so history is folded in before retrieving.
-                search_query = rag.condense(model, user_input, history, config)
-                hits, best = rag.retrieve(search_query, framework=framework)
+                # Retrieval runs on the raw question first, before any model is
+                # touched. A question the corpus cannot answer is answered by a
+                # constant, and reaching a constant through a model call means
+                # paying a model to say nothing.
+                hits, best = rag.retrieve(user_input, framework=framework)
+
+                if not hits and history:
+                    # The one case where a miss is not yet a refusal: a follow-up
+                    # like "what about GDPR?" is meaningless to a vector search on
+                    # its own because its subject lives in the previous turn. The
+                    # condense call is spent only here, where it can still turn a
+                    # refusal into an answer — never to confirm one.
+                    model = get_model(MODEL_REPO_ID)
+                    search_query = rag.condense(model, user_input, history, config)
+                    if search_query != user_input:
+                        hits, best = rag.retrieve(search_query, framework=framework)
 
             if not hits:
                 # Nothing cleared the distance floor. Answering anyway would mean
-                # writing around irrelevant regulation, so refuse and show how
-                # close the nearest match came.
+                # writing around irrelevant regulation.
                 reply = rag.NO_CONTEXT
-                if best is not None:
+                if best is not None and tracing_enabled():
+                    # Debug detail, and only in dev: how close the nearest match
+                    # came is what tells you whether the floor is set too tight.
                     reply += f"\n\n*(nearest match: distance {best:.3f}, floor {rag.MAX_DISTANCE})*"
                 st.markdown(reply)
                 sources = []
             else:
+                model = model or get_model(MODEL_REPO_ID)
                 sources = rag.citations(hits)
                 prompt = rag.build_prompt(user_input, hits, history)
-                reply = st.write_stream(
-                    chunk.content for chunk in model.stream(prompt, config=config)
-                )
+                # Streamed into a placeholder so the finished text can replace the
+                # streamed one: the reserved refusal sentence can only be spotted
+                # once the answer it contradicts has been written.
+                holder = st.empty()
+                with holder:
+                    reply = st.write_stream(
+                        chunk.content for chunk in model.stream(prompt, config=config)
+                    )
+                reply = rag.strip_stray_refusal(reply)
+
+                if rag.is_refusal(reply):
+                    # The model read the passages and judged them insufficient.
+                    # That is the same outcome as retrieving nothing, so it reads
+                    # identically: one wording for "the corpus does not answer
+                    # this", never a second one the reader has to interpret.
+                    reply = rag.NO_CONTEXT
+                    sources = []
+                holder.markdown(reply)
+
                 # Verify after the fact rather than trusting the prompt: a marker
                 # pointing at a source that was never supplied is unverifiable by
                 # the reader, which defeats the point of citing at all.

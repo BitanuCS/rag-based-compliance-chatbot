@@ -48,9 +48,43 @@ CITATION_RE = re.compile(r"\[(\d+)\]")
 # digital lending [1], cybersecurity [2]" — which is not the same as using them.
 REFUSAL_MARKER = "this is out of my knowledge"
 
+# The sentence carrying the marker, with any bold/quote wrapping. Matched at
+# sentence granularity so removing it cannot leave a dangling clause behind.
+REFUSAL_SENTENCE_RE = re.compile(
+    r"[^.\n]*\bthis is out of my knowledge\b[^.\n]*[.!]?[*_\"'\s]*",
+    re.IGNORECASE,
+)
+
 
 def is_refusal(answer):
-    return REFUSAL_MARKER in answer.lower()
+    """True when the answer *is* the refusal, not when it merely contains it.
+
+    The prompt reserves the sentence for a whole-answer refusal and puts it first,
+    so position is what distinguishes the two cases. A substring test cannot: a
+    model that writes seven cited paragraphs and then tacks the sentence on the end
+    would be classed a refusal, and its citations suppressed — the answer visibly
+    rests on sources while the panel shows none.
+    """
+    opening = answer.strip().lstrip("*_>#\"' \t")
+    return opening.lower().startswith(REFUSAL_MARKER)
+
+
+def strip_stray_refusal(answer):
+    """Drop the reserved refusal sentence when it trails a substantive answer.
+
+    The prompt forbids this pairing, but a prompt is a request, not a constraint.
+    Left in, the sentence contradicts the answer above it: the reader is told the
+    corpus does not cover something they were just given cited paragraphs about.
+    Removing it is the smaller error, and the "the sources do not cover X" wording
+    the prompt asks for is a different sentence that survives untouched.
+    """
+    if is_refusal(answer):
+        return answer
+    cleaned = REFUSAL_SENTENCE_RE.sub("", answer)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+    # Never return nothing: an answer that was only the marker in some unexpected
+    # shape is better shown as-is than blanked.
+    return cleaned or answer
 
 SYSTEM_PROMPT = """You are an experienced and professional Compliance Engineer \
 advising on Indian and international regulatory frameworks. You are precise, \
@@ -67,12 +101,14 @@ Rules:
 it supports. Every factual statement needs a citation.
 - Answer only as far as the sources allow.
 - If the sources answer the question, answer it and cite every claim.
-- If they answer only part of it, answer that part with citations, then say plainly \
-which part of the question the sources do not cover. Do not write "This is out of \
-my knowledge" here — you are answering something.
-- If they do not answer it at all, reply with exactly "This is out of my knowledge." \
-and then briefly say what the sources do cover. Use that sentence only here, and \
-never alongside a substantive answer.
+- If they answer only part of it, answer that part with citations, then name the \
+part the sources do not cover, like "the sources do not specify a maximum penalty". \
+Never write "This is out of my knowledge" here — you are answering something.
+- If they do not answer it at all, open with exactly "This is out of my knowledge." \
+and then briefly say what the sources do cover.
+- The sentence "This is out of my knowledge." is reserved for that last case alone. \
+It may only ever be the FIRST sentence of your reply. If you have cited even one \
+source, it must not appear anywhere in your answer, and never as a closing line.
 - Never label your response or announce which of these situations applies. Do not \
 write headings like "Fully answered" or "Partly answered". Just answer.
 - Do not fill gaps from memory, and do not guess from professional experience.
