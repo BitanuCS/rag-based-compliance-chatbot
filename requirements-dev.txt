@@ -1,0 +1,16 @@
+# Local development, tests and evaluation. NOT installed on the deployed app —
+# keep this out of requirements.txt or the Streamlit container installs ~1GB it
+# never imports.
+-r requirements.txt
+
+pytest==9.1.1
+
+# evaluation + tracing (eval_retrieval.py, evals/)
+ragas==0.2.10
+datasets==3.2.0
+langsmith>=0.3.45
+
+# Alternate LLM providers. Nothing imports these today — chat.py builds a
+# Hugging Face endpoint only — so they are dev-side until that wrapper exists.
+google-genai==2.18.1
+groq==1.2.0

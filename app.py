@@ -2,6 +2,14 @@ import logging
 import os
 import uuid
 
+# First, and before the project imports below: _bootstrap swaps in a newer
+# sqlite for chromadb where the host needs it, and copies Streamlit secrets into
+# os.environ. Both have to happen before `import rag` pulls in vectorstore.py,
+# which reads its configuration and opens Chroma at module scope.
+import _bootstrap
+
+_bootstrap.load_secrets_into_env()
+
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -10,6 +18,7 @@ import store
 from chat import DEFAULT_REPO_ID, build_model, run_config, tracing_enabled
 from vectorstore import indexed_frameworks
 
+# Fills in anything secrets did not provide; does not override real env vars.
 load_dotenv()
 
 MODEL_REPO_ID = os.getenv("HF_MODEL", DEFAULT_REPO_ID)

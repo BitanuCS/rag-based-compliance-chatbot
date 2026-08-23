@@ -34,6 +34,13 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-base-en-v1.5")
 CHROMA_DIR = Path(os.getenv("CHROMA_DIR", Path(__file__).parent / "chroma_db"))
 COLLECTION = os.getenv("CHROMA_COLLECTION", "compliance")
 
+# Hugging Face dataset repo holding a built copy of CHROMA_DIR, e.g.
+# "your-name/compliance-chroma". Set only where the index cannot be built in
+# place — a Streamlit Cloud container, whose disk is empty on every cold start
+# and where a 35-minute ingest is not an option. Unset locally, which is what
+# keeps ingest.py from ever downloading over an index it is about to write.
+INDEX_REPO = os.getenv("CHROMA_INDEX_REPO")
+
 # bge-base truncates silently past this. The splitter in ingest.py sizes itself
 # against the same number.
 EMBED_LIMIT = 512
@@ -90,6 +97,39 @@ def get_embeddings():
     )
 
 
+def _index_present():
+    """Whether CHROMA_DIR holds a real index rather than an empty directory.
+
+    Chroma creates the directory and its sqlite file on first connection, so
+    "the path exists" is not the question — an empty index answers every query
+    with nothing, and the failure looks like a bad corpus rather than a missing
+    download.
+    """
+    sqlite = CHROMA_DIR / "chroma.sqlite3"
+    return sqlite.exists() and sqlite.stat().st_size > 0
+
+
+def ensure_index():
+    """Fetch the prebuilt index from INDEX_REPO when there isn't one on disk.
+
+    A no-op unless CHROMA_INDEX_REPO is set and the local index is missing, so
+    the local workflow (ingest.py writes CHROMA_DIR, everything else reads it)
+    is untouched. Downloads roughly 100MB, once per container.
+    """
+    if not INDEX_REPO or _index_present():
+        return
+
+    from huggingface_hub import snapshot_download
+
+    logging.info("no local index; fetching %s into %s", INDEX_REPO, CHROMA_DIR)
+    snapshot_download(
+        repo_id=INDEX_REPO,
+        repo_type="dataset",
+        local_dir=str(CHROMA_DIR),
+        token=os.getenv("HF_TOKEN"),
+    )
+
+
 @lru_cache(maxsize=1)
 def get_store():
     """Handle on the persistent collection.
@@ -103,6 +143,7 @@ def get_store():
     changed afterwards — Chroma's default is l2, which would be the wrong metric
     for the normalized BGE vectors above. Changing it later means a full rebuild.
     """
+    ensure_index()
     return Chroma(
         collection_name=COLLECTION,
         embedding_function=get_embeddings(),

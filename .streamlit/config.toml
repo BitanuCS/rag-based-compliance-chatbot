@@ -1,0 +1,10 @@
+# Streamlit Community Cloud reads this at startup.
+
+[server]
+# The corpus JSON and the Chroma index are read-only at runtime; watching them
+# on every rerun costs a filesystem scan of ~130MB for no benefit.
+fileWatcherType = "none"
+maxUploadSize = 5
+
+[browser]
+gatherUsageStats = false

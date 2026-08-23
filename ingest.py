@@ -21,6 +21,7 @@ still says which framework and section it came from.
 
 import argparse
 import json
+import os
 import sys
 from collections import Counter
 from pathlib import Path
@@ -32,6 +33,7 @@ import corpus_repair
 
 from vectorstore import (
     CHROMA_DIR,
+    _index_present,
     COLLECTION,
     EMBED_LIMIT,
     EMBED_MODEL,
@@ -320,6 +322,38 @@ def query(text, k=5, framework=None, sector=None):
         print(f"   {body[:220]}...\n")
 
 
+def push_index(repo_id, private=True):
+    """Upload the built index to a Hugging Face dataset repo.
+
+    The deployed app has no way to build an index — a container starts with an
+    empty disk and a full ingest is ~35 minutes — so the built artefact is
+    published here and fetched by vectorstore.ensure_index() at startup. Run
+    this after any rebuild, or the deployment keeps serving the old index.
+
+    A dataset repo rather than a model repo: this is data, and dataset repos are
+    what the Hub's own tooling expects for a blob of files like this.
+    """
+    from huggingface_hub import HfApi
+
+    if not _index_present():
+        sys.exit(f"no index at {CHROMA_DIR} — run `ingest.py build` first")
+
+    token = os.getenv("HF_TOKEN")
+    if not token:
+        sys.exit("HF_TOKEN is not set; needs a token with write permission")
+
+    api = HfApi(token=token)
+    api.create_repo(repo_id, repo_type="dataset", private=private, exist_ok=True)
+    print(f"uploading {CHROMA_DIR} to {repo_id} (dataset)…")
+    api.upload_folder(
+        repo_id=repo_id,
+        repo_type="dataset",
+        folder_path=str(CHROMA_DIR),
+        commit_message="rebuild compliance index",
+    )
+    print(f"done. Set CHROMA_INDEX_REPO={repo_id} in the deployment's secrets.")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -337,6 +371,12 @@ def main():
 
     sub.add_parser("stats", help="what is indexed, and whether it is complete")
 
+    push_cmd = sub.add_parser("push-index", help="upload the built index to a HF dataset repo")
+    push_cmd.add_argument("repo_id", help='e.g. "your-name/compliance-chroma"')
+    push_cmd.add_argument(
+        "--public", action="store_true", help="create the repo public (default: private)"
+    )
+
     query_cmd = sub.add_parser("query", help="search the index")
     query_cmd.add_argument("text")
     query_cmd.add_argument("--k", type=int, default=5)
@@ -350,6 +390,8 @@ def main():
         build(frameworks, args.limit, args.reset, args.yes, args.replace)
     elif args.command == "stats":
         stats()
+    elif args.command == "push-index":
+        push_index(args.repo_id, private=not args.public)
     elif args.command == "query":
         query(args.text, args.k, args.framework, args.sector)
 

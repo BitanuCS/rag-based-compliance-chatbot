@@ -1,40 +1,36 @@
-# Compliance RAG — pinned runtime
-# Python 3.11, Apple Silicon (torch uses MPS)
+# Compliance RAG — runtime deps only (what `streamlit run app.py` imports).
+# Python 3.11, pinned in .python-version. Dev/eval extras: requirements-dev.txt.
+
+# torch ships CUDA wheels from PyPI (~2.5GB unpacked), which does not fit in a
+# Streamlit Community Cloud container. This index serves the CPU-only build.
+--extra-index-url https://download.pytorch.org/whl/cpu
 
 # --- vector store + retrieval ---
 chromadb==0.5.23
 langchain-chroma==0.2.3
+# chromadb needs sqlite >= 3.35; _bootstrap.py swaps this in only when the host
+# sqlite3 is older. Harmless and unused on an up-to-date image.
+pysqlite3-binary==0.5.4; sys_platform == "linux"
+
+# --- embeddings (vectorstore.py) ---
 sentence-transformers==3.3.1
-rank-bm25==0.2.2
+transformers==4.46.3
+# 2.6.0 is the newest cp311 CPU wheel on the index above. Local dev runs
+# 2.13.0 (an MPS build for Apple Silicon); there is no Linux cp311 CPU
+# equivalent, so the deployed app is a version behind on purpose.
+torch==2.6.0
 
-# --- orchestration (retrieval components only; LangGraph owns control flow) ---
-langchain==0.3.27
+# --- LLM endpoint + prompt plumbing (chat.py, rag.py) ---
 langchain-core==0.3.74
-langchain-community==0.3.27
-langgraph==0.6.4
-langgraph-checkpoint-sqlite==2.0.11
-
-# --- LLM providers (all behind the single wrapper in config.py) ---
-# Default is Hugging Face Inference Providers; huggingface_hub also ships as a
-# sentence-transformers dependency, pinned here because config.py imports it.
+langchain-huggingface==0.3.1
 huggingface_hub==0.36.2
-# Optional alternates, same wrapper. google-genai supersedes the end-of-life
-# google-generativeai package.
-google-genai==2.18.1
-groq==1.2.0
 
-# --- tests ---
-pytest==9.1.1
-
-# --- evaluation + tracing ---
-ragas==0.2.10
-datasets==3.2.0
-langsmith>=0.3.45
+# --- ingest only, but pure-python and tiny ---
+langchain-text-splitters==0.3.9
 
 # --- UI ---
 streamlit==1.48.0
 
 # --- misc ---
-pydantic==2.13.4
 python-dotenv==1.0.1
 numpy==1.26.4
