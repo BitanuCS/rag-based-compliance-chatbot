@@ -14,11 +14,26 @@ From a working local checkout with a built `chroma_db/`:
 
 ```bash
 export HF_TOKEN=hf_...          # needs *write* permission
-python ingest.py push-index your-name/compliance-chroma
+python ingest.py push-index --public your-name/compliance-chroma
 ```
 
-This creates a private dataset repo and uploads the index. Re-run it after any
-rebuild — the deployment keeps serving the old index until you do.
+Re-run it after any rebuild — the deployment keeps serving the old index until
+you do.
+
+`--public` matters. The index is embeddings and text of published regulation, so
+there is nothing to protect, and a public repo is readable with no credentials at
+all. A private one means the deployed app needs a token that can see it, and the
+Hub reports "no access" and "does not exist" as the same 404 — a token mismatch
+there is genuinely hard to tell apart from a missing repo.
+
+To open up a repo that was already pushed as private:
+
+```python
+from huggingface_hub import HfApi
+HfApi(token="hf_<write-token>").update_repo_settings(
+    repo_id="your-name/compliance-chroma", repo_type="dataset", private=False
+)
+```
 
 ### 2. Deploy the app
 
@@ -36,6 +51,11 @@ rebuild — the deployment keeps serving the old index until you do.
    HF_MODEL = "meta-llama/Llama-3.3-70B-Instruct"
    CHROMA_INDEX_REPO = "your-name/compliance-chroma"
    ```
+
+   With a public index repo the token is not needed to fetch the index, but it is
+   still required for the chat itself — `chat.py` calls a Hugging Face inference
+   endpoint. Rotating the token means updating it here too, or the index loads
+   and every question fails.
 
    `_bootstrap.load_secrets_into_env()` copies these into `os.environ` before any
    module reads its configuration, so the existing `os.getenv` calls keep working
