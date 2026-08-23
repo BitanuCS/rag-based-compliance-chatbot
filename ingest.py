@@ -34,6 +34,7 @@ import corpus_repair
 from vectorstore import (
     CHROMA_DIR,
     _index_present,
+    hf_token,
     COLLECTION,
     EMBED_LIMIT,
     EMBED_MODEL,
@@ -338,9 +339,12 @@ def push_index(repo_id, private=True):
     if not _index_present():
         sys.exit(f"no index at {CHROMA_DIR} — run `ingest.py build` first")
 
-    token = os.getenv("HF_TOKEN")
+    token = hf_token()
     if not token:
-        sys.exit("HF_TOKEN is not set; needs a token with write permission")
+        sys.exit(
+            "No HF_TOKEN or HUGGINGFACEHUB_API_TOKEN set; needs *write* permission. "
+            "A read token is enough for the deployed app but not for this upload."
+        )
 
     api = HfApi(token=token)
     api.create_repo(repo_id, repo_type="dataset", private=private, exist_ok=True)

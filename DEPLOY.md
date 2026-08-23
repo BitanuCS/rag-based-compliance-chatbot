@@ -25,7 +25,10 @@ rebuild — the deployment keeps serving the old index until you do.
 1. Push this repo to GitHub.
 2. On [share.streamlit.io](https://share.streamlit.io), create an app pointing at
    `app.py` on the `main` branch.
-3. Under **Advanced settings → Secrets**, paste the contents of
+3. **Under Advanced settings, set the Python version to 3.11.** This is the one
+   setting that cannot be committed to the repo, and getting it wrong is a hard
+   failure — see below.
+4. Under **Advanced settings → Secrets**, paste the contents of
    `.streamlit/secrets.toml.example` with real values filled in. At minimum:
 
    ```toml
@@ -44,8 +47,8 @@ starts reuse the container's disk and are much faster.
 
 ## What was changed for deployment
 
-- **`.python-version`** pins 3.11. `chromadb==0.5.23` and `numpy==1.26.4` do not
-  build on 3.13, which is what the platform would otherwise pick.
+- **`.python-version`** records 3.11 for local tooling (pyenv, uv). It does
+  **not** control Streamlit Community Cloud — see the warning below.
 - **`requirements.txt`** is now runtime-only. `langchain-huggingface` was missing
   and is imported by both `chat.py` and `vectorstore.py`, so the app could not
   have started without it. `langgraph`, `langchain-community`, `langchain`,
@@ -58,6 +61,34 @@ starts reuse the container's disk and are much faster.
   is chromadb's floor.
 - **`_bootstrap.py`** also bridges `st.secrets` into `os.environ`, keeping
   Streamlit out of `vectorstore.py`, `store.py` and `chat.py`.
+
+## The Python version must be set in the dashboard
+
+Streamlit Community Cloud **ignores `.python-version`**. It picks the interpreter
+from the app's own Advanced settings and defaults to a current release, which at
+time of writing is 3.14. This stack cannot run there:
+
+- `langchain-chroma` requires `<3.13`
+- `numpy==1.26.4` publishes no wheels for 3.13+
+- `pysqlite3-binary` has no cp314 ABI wheel
+
+The failure surfaces as a dependency resolution error, not a version error, so it
+reads as a bad pin:
+
+```
+Using Python 3.14.7 environment at /home/adminuser/venv
+ERROR: Could not find a version that satisfies the requirement
+       pysqlite3-binary==0.5.4 (from versions: 0.5.4.post2)
+```
+
+That message is misleading — `0.5.4` exists and ships a cp311 wheel. pip is
+reporting what is installable *on 3.14*, where the answer is nothing.
+
+**Fix:** set Python to 3.11 in Advanced settings. 3.12 also resolves, but 3.11 is
+what the pins are tested against. Streamlit only offers this choice when an app is
+first created — if the field is greyed out on the existing app, delete it and
+deploy again from the same repo, choosing 3.11 this time. Deleting the app does
+not touch the GitHub repo or the published index.
 
 ## Known limitations
 

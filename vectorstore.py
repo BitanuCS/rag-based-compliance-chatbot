@@ -41,6 +41,18 @@ COLLECTION = os.getenv("CHROMA_COLLECTION", "compliance")
 # keeps ingest.py from ever downloading over an index it is about to write.
 INDEX_REPO = os.getenv("CHROMA_INDEX_REPO")
 
+
+def hf_token():
+    """The Hugging Face token, under either name this project uses.
+
+    langchain's HuggingFaceEndpoint reads HUGGINGFACEHUB_API_TOKEN and
+    huggingface_hub reads HF_TOKEN, so a working .env may define either one.
+    Accepting both keeps the index download authenticated regardless of which
+    name the deployment was configured with — an unauthenticated read of a
+    private repo fails as a bare 404.
+    """
+    return os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN")
+
 # bge-base truncates silently past this. The splitter in ingest.py sizes itself
 # against the same number.
 EMBED_LIMIT = 512
@@ -120,14 +132,36 @@ def ensure_index():
         return
 
     from huggingface_hub import snapshot_download
+    from huggingface_hub.errors import RepositoryNotFoundError
 
+    token = hf_token()
     logging.info("no local index; fetching %s into %s", INDEX_REPO, CHROMA_DIR)
-    snapshot_download(
-        repo_id=INDEX_REPO,
-        repo_type="dataset",
-        local_dir=str(CHROMA_DIR),
-        token=os.getenv("HF_TOKEN"),
-    )
+    try:
+        snapshot_download(
+            repo_id=INDEX_REPO,
+            repo_type="dataset",
+            local_dir=str(CHROMA_DIR),
+            token=token,
+        )
+    except RepositoryNotFoundError as exc:
+        # The Hub returns 404 rather than 403 for a private repo the caller
+        # cannot see, so "missing" and "no access" are the same response here and
+        # the raw error sends you looking for a repo that may exist. Spell out
+        # the three real causes instead.
+        raise RuntimeError(
+            f"Cannot read the index repo {INDEX_REPO!r} (CHROMA_INDEX_REPO).\n"
+            f"HF_TOKEN / HUGGINGFACEHUB_API_TOKEN is {'set' if token else 'NOT set'}. "
+            "A private repo the token "
+            "cannot see returns the same 404 as one that does not exist, so this is "
+            "one of:\n"
+            "  1. The index was never published. Run, from a local checkout with a "
+            "built chroma_db/:\n"
+            f"       HF_TOKEN=<write-token> python ingest.py push-index {INDEX_REPO}\n"
+            "  2. CHROMA_INDEX_REPO still holds the placeholder from "
+            "secrets.toml.example. Set it to a real <user>/<repo>.\n"
+            "  3. HF_TOKEN belongs to an account without read access to it.\n"
+            "Unset CHROMA_INDEX_REPO to use a local chroma_db/ instead."
+        ) from exc
 
 
 @lru_cache(maxsize=1)
