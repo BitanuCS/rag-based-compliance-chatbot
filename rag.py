@@ -6,8 +6,8 @@ from a future API layer, matching how store.py and vectorstore.py are split.
 The policy has four parts, and all four matter:
 
 1. **A distance floor.** Vector search always returns k results, however bad the
-   match — a chocolate-cake question returns Labour Codes at distance 0.59, while
-   a real KYC question hits 0.23. Without a floor the model gets handed irrelevant
+   match — a chocolate-cake question still gets six regulations back, just at
+   distance 0.72 or more, where a real answer sits at 0.60 or less. Without a floor the model gets handed irrelevant
    regulation and writes a confident answer around it, which is worse than no
    answer at all.
 2. **A grounded prompt.** The model answers from the retrieved context or says it
@@ -74,6 +74,10 @@ MAX_INPUT_CHARS = int(os.getenv("RAG_MAX_INPUT_CHARS", "2000"))
 MAX_QUERY_CHARS = 300
 
 CITATION_RE = re.compile(r"\[(\d+)\]")
+
+# A marker with the space before it, so "duties [1][2]." becomes "duties."
+# rather than "duties ." once the markers are gone.
+CITATION_STRIP_RE = re.compile(r"\s*\[\d+\]")
 
 # The exact sentence the system prompt reserves for "the sources do not answer
 # this". Detected rather than inferred from citation count, because a refusal
@@ -550,20 +554,36 @@ def format_context(hits):
     return "\n\n---\n\n".join(blocks)
 
 
+def strip_citations(text):
+    """Remove [n] markers, for an earlier answer replayed as history.
+
+    Each turn numbers its own sources from [1], and only the current turn's
+    sources are in the prompt. A stored answer's [2] meant a passage from its
+    own turn; left in, it reads as this turn's [2], and the model can cite a
+    source on the strength of a claim that came from somewhere else.
+    """
+    return CITATION_STRIP_RE.sub("", text)
+
+
 def build_prompt(question, hits, history=None):
     """Grounded prompt: system rules, prior turns, then evidence plus the question.
 
     The evidence rides with the current question rather than as a separate system
     message so that on a later turn it is clear which question each context block
-    was retrieved for.
+    was retrieved for. Prior answers lose their [n] markers, so the only source
+    numbers in the prompt are the ones this turn supplies.
     """
     grounded = (
         f"Sources:\n\n{format_context(hits)}\n\n"
         f"---\n\nQuestion: {question}"
     )
+    past = [
+        AIMessage(content=strip_citations(m.content)) if isinstance(m, AIMessage) else m
+        for m in history or []
+    ]
     return [
         SystemMessage(content=SYSTEM_PROMPT),
-        *(history or []),
+        *past,
         HumanMessage(content=grounded),
     ]
 

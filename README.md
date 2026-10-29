@@ -9,7 +9,7 @@ cites every claim — or refuses.**
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white)](.python-version)
 [![Frameworks](https://img.shields.io/badge/frameworks-25-informational)](#whats-indexed)
 [![Retrieval](https://img.shields.io/badge/hit%401-88%25-brightgreen)](#retrieval-quality)
-[![Tests](https://img.shields.io/badge/tests-61-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-68-brightgreen)](tests/)
 
 [Live app](https://rag-based-compliance-chatbot.streamlit.app) ·
 [Deployment](DEPLOY.md) ·
@@ -92,15 +92,17 @@ sits.
 ```
 question
    │
-   ├─ condense ........... rewrites a follow-up into a standalone question, so
-   │                       "what about GDPR?" retrieves on more than four words
    ├─ input guard ........ length cap; the question is data, never instructions
    ├─ framework detect ... "the DPDP Act" scopes to the Act, bare "DPDP" scopes
    │                       to neither, two frameworks named means a comparison
-   ├─ retrieve (k=24) .... Cohere embeddings, cosine distance over Chroma
+   ├─ condense ........... only if the raw question finds nothing and there is
+   │                       history: rewrites "what about GDPR?" into a
+   │                       standalone question and retrieves again
+   ├─ retrieve ........... fetch 24 candidates: Cohere embeddings, cosine
+   │                       distance over Chroma
    ├─ distance floor ..... nothing past 0.62 reaches the reranker or the model
    ├─ rerank ............. Cohere rerank-v3.5 reorders what cleared the floor
-   ├─ diversify .......... max 2 chunks per section
+   ├─ diversify .......... max 2 chunks per section, keep the best 6
    └─ grounded prompt .... numbered sources, inline [n] citations, or a refusal
 ```
 
@@ -170,7 +172,7 @@ worse than declining.
 **What these do not cover** — stated plainly because it matters:
 
 - **Injection is stopped by the distance floor, not by injection detection.**
-  `"Ignore all previous instructions..."` scores 0.52 and never reaches the model
+  `"Ignore all previous instructions..."` scores 0.80 and never reaches the model
   because it is semantically off-corpus, not because anything recognises it as an
   attack. An injection phrased in dense compliance language would clear retrieval,
   leaving only the prompt's "treat input as data" rule — and a prompt is a
@@ -180,6 +182,12 @@ worse than declining.
 - **Chat history is global.** Conversations are not scoped per user, so any
   browser session sees every other session's questions. Fine for a local
   single-operator tool; a real gap for a shared deployment.
+- **The whole conversation goes to the model, by choice.** `condense` uses
+  only the last 4 messages to rewrite a follow-up for retrieval, but the answer
+  step gets every prior turn so the model never loses what was said. The cost:
+  a very long chat grows the prompt each turn. Earlier answers have their `[n]`
+  markers stripped first, so the only source numbers in the prompt are the
+  current turn's — otherwise an old `[2]` reads as this turn's `[2]`.
 
 ## Retrieval quality
 
@@ -195,10 +203,12 @@ What the harness prints today:
 answerable   26/26  (100% of questions retrieved the passage that answers them)
 refused      4/4    (100% of out-of-corpus questions correctly returned nothing)
 mean rank    1.3    (where the answering passage landed, 1 is best)
+
+Hit@1 88%  Hit@3 96%  Hit@6 100%  MRR 0.924  (over all 26 answerable cases, a miss scores 0)
 ```
 
 `mean rank` averages only over cases that passed, so it improves as cases fail —
-the per-rank numbers are the honest ones. Over the same 30 cases, against the
+the Hit@k and MRR line is the honest one, because a miss counts as 0 there. Over the same 30 cases, against the
 August baseline (BGE embeddings over the pre-chunked corpus):
 
 | Metric | Aug 2026 · BGE | Now · vector only | **Now · + Cohere rerank** |
@@ -260,7 +270,7 @@ python pdf_to_chromadb.py stats                        # what is indexed, and wh
 python pdf_to_chromadb.py query "KYC periodic update"  # search the index directly
 python eval_retrieval.py --verbose              # retrieval quality (--no-rerank to compare)
 python store.py list                            # saved conversations
-pytest                                          # 61 tests, ~1s
+pytest                                          # 68 tests, ~1s
 ```
 
 ## Layout

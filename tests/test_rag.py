@@ -88,6 +88,41 @@ def test_answer_without_markers_cites_nothing():
     assert (cited, invalid, uncited) == ([], [], [1, 2])
 
 
+# --- citations across turns --------------------------------------------------
+#
+# Every turn numbers its sources from [1]. A previous answer's markers point at
+# that turn's sources, which are not in the new prompt — left in, they read as
+# the new turn's numbers.
+
+
+def test_markers_are_stripped_with_their_leading_space():
+    assert rag.strip_citations("Directors act in good faith [1][2].") == (
+        "Directors act in good faith."
+    )
+
+
+def test_prior_answers_lose_their_markers_in_the_prompt():
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    history = [
+        HumanMessage(content="What is the DPDP penalty [cap]?"),
+        AIMessage(content="Up to ₹250 crore [2]."),
+    ]
+    prompt = rag.build_prompt("And under GDPR?", [], history)
+    assert prompt[1].content == "What is the DPDP penalty [cap]?"
+    assert prompt[2].content == "Up to ₹250 crore."
+    assert isinstance(prompt[2], AIMessage)
+
+
+def test_every_prior_turn_is_kept():
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    history = [HumanMessage(content=f"q{i}") if i % 2 == 0 else AIMessage(content=f"a{i}")
+               for i in range(10)]
+    prompt = rag.build_prompt("next", [], history)
+    assert len(prompt) == 1 + 10 + 1
+
+
 # --- input checks ------------------------------------------------------------
 
 

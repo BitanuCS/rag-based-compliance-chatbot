@@ -5,6 +5,13 @@ before changing it. [`README.md`](README.md) covers *how* to run the project;
 this file covers *why* the dependency choices look like they do.
 
 Environment bootstrapped 18 Aug 2026. Dependency pins re-verified 23 Aug 2026.
+Reference sections updated 29 Oct 2026 for the Cohere stack.
+
+**How to read this file.** Everything above the first dated *Session log*
+describes the system as it is now. The dated sections below it are an
+engineering log: they record what was true *then*, including BGE embeddings,
+the 0.45 floor and `ingest.py`, and are kept for the reasoning, not as current
+reference. The 29 October section is the latest.
 
 ---
 
@@ -14,14 +21,13 @@ Environment bootstrapped 18 Aug 2026. Dependency pins re-verified 23 Aug 2026.
 | --- | --- |
 | Python | 3.11 (pinned in `.python-version`) |
 | Virtualenv | `.venv/` at the project root |
-| Local device | Apple Silicon — `torch` uses MPS |
-| Deployed device | Streamlit Community Cloud — CPU-only `torch` |
+| Models | None run locally — embeddings and rerank are Cohere API calls, generation is the Hugging Face Inference API |
+| Deployed on | Streamlit Community Cloud (see [`DEPLOY.md`](DEPLOY.md)) |
+| Local-only tools | PyMuPDF and the Tesseract binary, for building the corpus (`requirements-dev.txt`) |
 
-The local and deployed `torch` builds differ on purpose: `requirements.txt`
-pulls `torch==2.6.0` from the PyTorch CPU index because the default PyPI wheel
-ships CUDA and does not fit in a Streamlit container. Local dev runs 2.13.0
-(MPS). There is no Linux cp311 CPU wheel at that version, so the deployed app
-is deliberately one version behind.
+There is no torch anywhere in the stack since 29 October 2026. Until then BGE
+ran locally on MPS and the deployed app needed a CPU-only torch wheel; that
+whole problem left with the move to Cohere.
 
 ---
 
@@ -68,7 +74,7 @@ and a system Python left with conflicting LangChain versions.
 source .venv/bin/activate     # then plain python / pip are correct
 # or address it explicitly:
 .venv/bin/python -m pip install ...
-.venv/bin/python ingest.py stats
+.venv/bin/python pdf_to_chromadb.py stats
 ```
 
 After any install, confirm the environment is still coherent:
@@ -87,7 +93,8 @@ python3 -m pip install "langchain-core>=0.3.72,<1.0.0"
 
 ## Secrets
 
-`.env` is gitignored and holds the Hugging Face token. Both names work —
+`.env` is gitignored and holds the Hugging Face token, the Cohere key, and the
+optional Langfuse and LangSmith keys. For the Hugging Face token both names work —
 `HUGGINGFACEHUB_API_TOKEN` is what LangChain's `HuggingFaceEndpoint` looks for,
 `HF_TOKEN` is the `huggingface_hub` convention:
 
@@ -117,28 +124,33 @@ the same reason `.env` is.
 name and reached through the link. Git stores the symlink itself, so a clone on
 macOS or Linux resolves it correctly and nothing is duplicated in the repo.
 
-The corpus is treated as read-only input. Fixes to source chunks are applied at
-ingest time in [`corpus_repair.py`](corpus_repair.py), never by editing the
-JSON in place, so re-running ingest is always reproducible from pristine data.
+The corpus is generated output: [`pdf_to_chromadb.py`](pdf_to_chromadb.py)
+writes it from the PDFs in `source_pdfs/`, and fixes go into that script, never
+into the JSON, so every build is reproducible from the PDFs. The only
+hand-written files in it are the per-framework `metadata.json`.
 
 ---
 
 ## Model choice
 
 The LLM is served over the **Hugging Face Inference API**, not run locally —
-`chat.py` builds a `ChatHuggingFace` around a `HuggingFaceEndpoint`
-(`Qwen/Qwen2.5-7B-Instruct` by default).
+`chat.py` builds a `ChatHuggingFace` around a `HuggingFaceEndpoint`. The model
+is `HF_MODEL` (`.env.example` sets `meta-llama/Llama-3.3-70B-Instruct`), falling
+back to `Qwen/Qwen2.5-7B-Instruct` when unset.
 
-Embeddings are the opposite: BGE runs **locally** in
-[`vectorstore.py`](vectorstore.py). Routing 2,602 chunks plus every query
-embedding through a rate-limited API would make ingest slow and retrieval
-scores non-reproducible between runs.
+Embeddings are also an API now: Cohere `embed-v4.0` at 1536 dimensions, in
+[`vectorstore.py`](vectorstore.py), with `rerank-v3.5` from the same key. Until
+29 October BGE ran locally; it moved so the deployed app installs no torch.
+The cost of that is a call budget: the free trial key allows 1,000 calls a
+month, a full build is ~45 of them, and each question costs two (embed +
+rerank). The index records the model and dimension it was built with, and the
+app refuses to open an index built with others.
 
 `chat.py` has no chat loop of its own, deliberately. An ungrounded assistant
 answering compliance questions from model memory is the failure mode this
 project exists to prevent, so the only path to the model runs through
 `rag.build_prompt`. To inspect the corpus directly, use
-`python ingest.py query "..."` instead.
+`python pdf_to_chromadb.py query "..."` instead.
 
 ---
 
@@ -227,6 +239,12 @@ before concluding tracing is misconfigured.
 
 ## The corpus is already chunked — split only what overruns
 
+> **Historical (August, `ingest.py`).** This describes the pre-chunked
+> 2,602-chunk corpus and BGE's 512-token limit. Since 29 October the corpus is
+> chunked from the PDFs by `pdf_to_chromadb.py` with every chunk ≤ 512
+> `cl100k_base` tokens — see the 29 October section. The `embed_text` /
+> `text` split below still holds.
+
 `data/all_chunks.json` ships 2,602 retrieval-ready chunks, each carrying two text
 fields that are **not** interchangeable:
 
@@ -278,23 +296,25 @@ better**:
 distance = 1 − cosine_similarity
 ```
 
-Verified against a hand-computed dot product: Chroma's `0.244050` versus
-`1 − 0.755950`, matching to six decimals. So `0.45` is not "45% similar" — it is a
-similarity of `0.55`.
+Verified against a hand-computed dot product (on the BGE index): Chroma's
+`0.244050` versus `1 − 0.755950`, matching to six decimals. So the current
+`0.62` floor is not "62% similar" — it is a similarity of `0.38`.
 
-Measured bands on this corpus:
+The bands are specific to the embedding model. Measured on this corpus with
+Cohere `embed-v4.0`:
 
 | Band | Distance | Meaning |
 | --- | --- | --- |
-| Genuine hit | 0.17 – 0.31 | The passage answers the question |
-| Adjacent but unanswerable | 0.31 – 0.39 | Right topic, wrong document |
-| Off-topic | 0.50 – 0.61 | Nothing relevant in the corpus |
+| Answering passage | 0.25 – 0.60 | The passage that answers an eval question |
+| Adjacent but unanswerable | 0.65 | Basel III — banking, but not in the corpus |
+| Off-topic | 0.72 – 0.86 | Cake recipes, football, prompt injection |
 
-The gap between the second and third band is narrow, and that is the whole
-problem: **a distance threshold cannot separate "the corpus covers this" from
-"the corpus covers something that looks like this."** Basel III, FEMA and GST
-questions all retrieve six passages comfortably under the floor. Only the prompt
-rule refuses them.
+The floor sits at 0.62, in a gap ~0.05 wide on each side, and that is the
+whole problem: **a distance threshold cannot separate "the corpus covers this"
+from "the corpus covers something that looks like this."** The hardest
+answerable case (DPDP maximum penalty, 0.600) and Basel III (0.654) are closer
+to each other than either is to its own band. The prompt rule is the second
+refusal gate for that reason.
 
 ---
 
@@ -302,7 +322,7 @@ rule refuses them.
 
 Retrieval alone returns `k` results however bad the match, so refusing is layered:
 
-1. **Nothing clears the distance floor** (`RAG_MAX_DISTANCE`, default `0.45`) —
+1. **Nothing clears the distance floor** (`RAG_MAX_DISTANCE`, default `0.62`) —
    `rag.NO_CONTEXT` is returned directly and **no model call is made**.
 2. **Passages clear the floor but do not answer** — the system prompt reserves the
    exact sentence `"This is out of my knowledge."` for this case.
@@ -349,7 +369,7 @@ Three limits to be honest about:
   check. The warning is redundant there, not wrong. Flagging conservatively is the
   safer default.
 - **Injection is stopped by the distance floor, not by injection detection.**
-  `"Ignore all previous instructions..."` scores 0.52 and never reaches the model —
+  `"Ignore all previous instructions..."` scores 0.80 and never reaches the model —
   because it is semantically off-corpus, not because anything recognises it as an
   attack. An injection phrased in dense compliance language would clear retrieval,
   leaving only the prompt's "treat input as data" rule. That rule held under
@@ -359,25 +379,27 @@ Three limits to be honest about:
 
 ---
 
-## Rebuilding the index costs ~35 minutes
+## Rebuilding the index costs ~45 Cohere calls
 
-A full `ingest.py build --reset` re-embeds every record on MPS and took roughly 35
-minutes wall clock. It is not CPU-bound, so the machine looks idle throughout —
-that is expected, not a hang.
+A full `pdf_to_chromadb.py build --reset` embeds 4,299 chunks in ~45 calls of 96
+texts, paced at 80k of the trial key's 100k tokens a minute — roughly 15–20
+minutes. That is ~5% of the month's 1,000 calls, shared with reranking and every
+question asked in the app. `pdf_to_chromadb.py chunk` on its own is a few
+minutes, local and free.
 
 Consequences worth internalising:
 
-- Changing `EMBED_MODEL` silently invalidates every stored vector and costs a full
-  rebuild. It is not a configuration tweak.
-- Prefer targeted work: `ingest.py build --frameworks X` upserts in place because
-  ids are deterministic, and `--limit N` gives a fast smoke test.
-- Run full rebuilds in the background from the start, not in a foreground call
-  that will time out.
+- Changing `EMBED_MODEL` or `EMBED_DIM` invalidates every stored vector and costs
+  a full rebuild. It is not a configuration tweak — the app refuses to start
+  against a mismatched index.
+- Prefer targeted work: `embed --frameworks X --replace` re-does one framework,
+  and `embed --resume` continues an interrupted build.
+- Run full rebuilds in the background, not in a foreground call that will time
+  out.
 
-`ingest.py stats` is the check that matters after any build. It compares distinct
-`parent_chunk_id`s per framework against `data/validation.json` and asserts that
-**no stored record exceeds 512 tokens** — the truncation the split step exists to
-prevent, verified rather than assumed.
+`pdf_to_chromadb.py stats` is the check that matters after any build. It
+compares indexed records per framework against the chunk count in `data/` and
+reports *all frameworks fully indexed ✓* only when every one matches.
 
 ---
 
@@ -391,14 +413,17 @@ misread:
 You have depleted your monthly included credits.
 ```
 
-Only *generation* is affected. Embeddings run locally, so retrieval, the distance
-floor, refusals and `ingest.py query` all keep working — which makes it look like
-a model bug rather than a billing one. Rule out the 402 before debugging the
-prompt.
+Only *generation* is affected. Embeddings and rerank are on the separate Cohere
+key, so retrieval, the distance floor, refusals and `pdf_to_chromadb.py query`
+all keep working — which makes it look like a model bug rather than a billing
+one. Rule out the 402 before debugging the prompt.
 
-`requirements.txt` already carries `google-genai` and `groq`, and `.env.example`
-documents `LLM_PROVIDER`, `GOOGLE_API_KEY` and `GROQ_API_KEY` as alternates behind
-the same wrapper.
+The mirror image is a spent Cohere key: then retrieval fails while the model is
+fine. If only the rerank call fails, retrieval falls back to vector order.
+
+There is no alternate provider wired up. `groq` sits in `requirements-dev.txt`,
+but `chat.py` builds a Hugging Face endpoint only; switching providers means
+writing that switch.
 
 ---
 
@@ -833,6 +858,35 @@ and ~15 minutes, paced at 80k tokens/min; each question costs two calls (embed
 + rerank), leaving roughly 450 questions a month. Rejected calls may count
 against the 1,000, which is why the embedder paces itself instead of leaning
 on retries.
+
+### Docs and harness check — 29 October 2026 (later)
+
+A read-and-verify pass before interviews: every number in the README, DEPLOY.md
+and this file's reference sections was checked against the code and the built
+index.
+
+- `eval_retrieval.py` now prints Hit@1/3/k and MRR over all answerable cases
+  (a miss scores 0), so the README's metrics table comes from the harness rather
+  than a separate calculation. `tests/test_eval_metrics.py` covers the
+  arithmetic.
+- Prompt injection re-measured on the Cohere index: 0.80, not the BGE-era 0.52.
+- The README diagram now shows `condense` where the app runs it, as a
+  fallback after a miss, and spells out fetch 24 → floor → rerank → keep 6.
+- `.env.example` and `secrets.toml.example` dropped `LLM_PROVIDER` and
+  `HF_PROVIDER`, which nothing reads, and use `LANGFUSE_BASE_URL`, since
+  langfuse 5 deprecates `LANGFUSE_HOST`.
+- Of the three chat-path issues from the 23 August review:
+  - **Citation collisions — fixed.** `rag.build_prompt` now runs earlier
+    assistant answers through `rag.strip_citations()`, so a stored `[2]` from
+    turn 1 can no longer be read as turn 2's `[2]`. User messages are left
+    untouched. Three tests cover it; 68 in all.
+  - **Full history in `build_prompt` — kept by decision.** The model sees the
+    whole conversation; only `condense` windows to 4 messages, because it only
+    feeds retrieval. Documented in the README as a trade-off, not a bug.
+  - **`uncited` from `validate_citations` — still unused** by `app.py`.
+
+Not re-run: the full retrieval eval (~56 Cohere calls). The README's metrics
+are the 29 October measurement.
 
 ---
 

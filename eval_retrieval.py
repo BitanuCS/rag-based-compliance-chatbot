@@ -7,9 +7,9 @@ that answers it came back at all — and whether the questions the corpus does n
 cover are correctly refused.
 
 It deliberately stops there. It does not ask the chat model anything, so it
-costs a few cents of embedding and rerank calls, runs in under a minute, and
-reports one number you can compare before and after a change to the floor, the
-chunking or the reranker.
+costs ~56 Cohere calls (one embed and one rerank per case) from the trial key's
+1,000 a month, runs in about a minute, and reports Hit@k and MRR you can compare
+before and after a change to the floor, the chunking or the reranker.
 
     python eval_retrieval.py [--k 6] [--verbose] [--strict] [--no-rerank]
 
@@ -56,6 +56,24 @@ def run_case(case, k, use_rerank):
     return False, {"scope": scope, "best": best, "hits": len(hits), "rank": None}
 
 
+def ranking_metrics(ranks, k):
+    """Hit@1/3/k and MRR over every answerable case, a miss counting as 0.
+
+    `ranks` holds one entry per case: the 1-based rank of the answering passage,
+    or None when it never came back. Unlike mean rank, neither number can be
+    improved by a hard case failing.
+    """
+    if not ranks:
+        return "no answerable cases"
+    n = len(ranks)
+    cutoffs = sorted({1, 3, k})
+    hits = "  ".join(
+        f"Hit@{c} {sum(1 for r in ranks if r and r <= c) / n:.0%}" for c in cutoffs
+    )
+    mrr = sum(1 / r for r in ranks if r) / n
+    return f"{hits}  MRR {mrr:.3f}  (over all {n} answerable cases, a miss scores 0)"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--k", type=int, default=rag.RETRIEVAL_K)
@@ -79,12 +97,17 @@ def main():
 
     failures = []
     found_at = []
+    # One entry per answerable case, None for a miss — the honest denominator
+    # for Hit@k and MRR. found_at alone excludes misses and so flatters itself.
+    lookup_ranks = []
     for case in cases:
         passed, detail = run_case(case, args.k, use_rerank)
         if not passed:
             failures.append((case, detail))
         elif detail["rank"]:
             found_at.append(detail["rank"])
+        if case.get("expect") != "refusal":
+            lookup_ranks.append(detail["rank"])
 
         if args.verbose or not passed:
             mark = "pass" if passed else "FAIL"
@@ -103,6 +126,8 @@ def main():
     print(f"\nanswerable   {len(lookups) - len(lookup_failures)}/{len(lookups)}  ({hit_rate:.0%} of questions retrieved the passage that answers them)")
     print(f"refused      {len(refusals) - len(refusal_failures)}/{len(refusals)}  ({refusal_rate:.0%} of out-of-corpus questions correctly returned nothing)")
     print(f"mean rank    {mean_rank:.1f}  (where the answering passage landed, 1 is best)")
+
+    print(f"\n{ranking_metrics(lookup_ranks, args.k)}")
 
     # os._exit skips interpreter teardown, which once aborted on the way out
     # (chromadb racing torch) and turned every run into a failure for a caller

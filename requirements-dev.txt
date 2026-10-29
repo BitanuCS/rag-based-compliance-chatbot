@@ -5,15 +5,16 @@
 
 pytest==9.1.1
 
-# evaluation (eval_retrieval.py, evals/)
+# Answer-quality evaluation, not wired up yet: eval_retrieval.py measures
+# retrieval only and imports neither. Kept for the planned faithfulness eval.
 ragas==0.2.10
 datasets==3.2.0
 
-# Alternate LLM providers. Nothing imports these today — chat.py builds a
-# Hugging Face endpoint only — so they are dev-side until that wrapper exists.
+# Alternate LLM provider. Nothing imports it today — chat.py builds a Hugging
+# Face endpoint only — so it is dev-side until a provider switch exists.
 groq==1.2.0
 
-# Corpus pipeline (pipeline.py chunk/ocr): PDF text, tables and layout. Local
+# Corpus pipeline (pdf_to_chromadb.py chunk/ocr): PDF text, tables and layout. Local
 # only — the deployed app reads the built index and never opens a PDF. AGPL-3.0,
 # fine for a build tool that is not shipped. Scanned PDFs also need the
 # Tesseract binary on PATH: `brew install tesseract` (macOS).

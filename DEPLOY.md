@@ -84,7 +84,8 @@ calls. Later starts reuse the container's disk and are faster.
   and is imported by both `chat.py` and `vectorstore.py`, so the app could not
   have started without it. `langgraph`, `langchain-community`, `langchain`,
   `rank-bm25`, `ragas`, `datasets`, `google-genai` and `groq` are not imported by
-  any source file and moved to `requirements-dev.txt`.
+  any source file; `ragas`, `datasets` and `groq` moved to
+  `requirements-dev.txt` and the rest were dropped.
 - **No torch.** Embeddings moved from local BGE to the Cohere API, as did
   reranking, so torch, transformers and sentence-transformers left
   `requirements.txt` — roughly 1GB less to install and hold in memory.
