@@ -94,12 +94,18 @@ python3 -m pip install "langchain-core>=0.3.72,<1.0.0"
 ## Secrets
 
 `.env` is gitignored and holds the Hugging Face token, the Cohere key, and the
-optional Langfuse and LangSmith keys. For the Hugging Face token both names work —
-`HUGGINGFACEHUB_API_TOKEN` is what LangChain's `HuggingFaceEndpoint` looks for,
-`HF_TOKEN` is the `huggingface_hub` convention:
+optional Langfuse and LangSmith keys. **Set the Hugging Face token as
+`HF_TOKEN`.** `HUGGINGFACEHUB_API_TOKEN` is what LangChain's
+`HuggingFaceEndpoint` reads, but it is not enough on its own: before each chat
+call `huggingface_hub` looks up which provider serves the model, and that lookup
+reads only `HF_TOKEN` — or, failing that, a token cached by `hf auth login` in
+`~/.cache/huggingface/token`. With only the LangChain name set, that cached token
+is used, and once it expires every answer fails with a 401 *"OAuth token has
+expired"* even though the token in `.env` is valid. Setting both names is safe:
 
 ```
-HUGGINGFACEHUB_API_TOKEN=hf_...
+HF_TOKEN=hf_...
+HUGGINGFACEHUB_API_TOKEN=hf_...   # optional, same value
 ```
 
 The token needs the **"Make calls to Inference Providers"** permission. A
@@ -887,6 +893,37 @@ index.
 
 Not re-run: the full retrieval eval (~56 Cohere calls). The README's metrics
 are the 29 October measurement.
+
+### Deployment debugging — 29 October 2026 (evening)
+
+The deployed app had been pushed with the Cohere code but nothing else, and
+failed in four layers, each hidden behind the one before it:
+
+1. **`RuntimeError: No COHERE_API_KEY`** at page load — the Streamlit Cloud
+   secrets still had the Gemini-era keys.
+2. **`EmbeddingModelMismatch`** — the published index in
+   `fakeresearcher/compliance-chroma` was still the 23 August BGE build.
+   Code and index ship separately, and only the code had been pushed.
+   `push-index` was re-run; it now passes `delete_patterns="*"`, because
+   Chroma's segment folders get new uuids on a rebuild and a plain upload left
+   the old BGE folders in the repo for every cold start to download.
+3. **`UnauthorizedError`** (Cohere's 401) on the first question — the key pasted
+   into the secrets was not the working one. The page loads without a valid
+   key, since listing frameworks reads metadata only; the first embed call is
+   what fails.
+4. **`HfHubHTTPError` 402** — the Hugging Face Inference credits are used up.
+   Retrieval, rerank and refusals all work; only generation fails. Unresolved:
+   moving generation to a free provider is pending a decision.
+
+Locally the same model call first failed with a 401 *"OAuth token has
+expired"*: see *Secrets* above for why `HF_TOKEN` must be set.
+
+**A near-miss on the floor.** *"What is DPDP act?"* scored **0.625** against the
+0.62 floor and was refused with no model call; *"What is the purpose of the
+Digital Personal Data Protection Act?"* scored 0.406 and retrieved §1. A
+three-word question with an abbreviation carries little for the embedding to
+match, while every chunk header spells the full name. Candidate fix, not yet
+made: append the detected framework's full name to the search query.
 
 ---
 

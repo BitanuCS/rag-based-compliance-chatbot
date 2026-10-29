@@ -19,7 +19,9 @@ python pdf_to_chromadb.py push-index --public your-name/compliance-chroma
 ```
 
 Re-run it after any rebuild — the deployment keeps serving the old index until
-you do.
+you do. Pushing code to GitHub does **not** publish the index; they ship
+separately. The upload mirrors `chroma_db/`, deleting files the rebuild no
+longer has, so stale segment folders do not ride along.
 
 `--public` matters. The index is embeddings and text of published regulation, so
 there is nothing to protect, and a public repo is readable with no credentials at
@@ -125,6 +127,24 @@ what the pins are tested against. Streamlit only offers this choice when an app 
 first created — if the field is greyed out on the existing app, delete it and
 deploy again from the same repo, choosing 3.11 this time. Deleting the app does
 not touch the GitHub repo or the published index.
+
+## When it fails
+
+Each of these hides the next, so they tend to arrive in this order:
+
+| Error in the app | Cause | Fix |
+| --- | --- | --- |
+| `RuntimeError: No COHERE_API_KEY` at page load | Secret missing | Add `COHERE_API_KEY` to Secrets |
+| `EmbeddingModelMismatch` at page load | Published index is from another embedding model | `push-index` from a current local build, then **Reboot** |
+| `UnauthorizedError` on the first question | Cohere rejected the key (the page loads without one) | Paste the working key again, no spaces inside the quotes |
+| `HfHubHTTPError` on a question that retrieved passages | Hugging Face 402 (credits used up) or 401 (token) | Check the logs: 402 needs credits or another provider |
+| Every question refused | An old `RAG_MAX_DISTANCE = "0.45"` in Secrets | Delete it; the default is 0.62 |
+
+Only two secrets are real credentials: `HF_TOKEN` and `COHERE_API_KEY`.
+`CHROMA_INDEX_REPO` is a repo name; the Langfuse/LangSmith keys are optional;
+every other setting has the right default in code. Delete a line rather than
+leaving it empty — `EMBED_DIM = ""` crashes, a missing line uses the default.
+After any secrets change, **Reboot** the app.
 
 ## Known limitations
 

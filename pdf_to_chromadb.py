@@ -1232,8 +1232,12 @@ def push_index(repo_id, private=True):
     api = HfApi(token=token)
     api.create_repo(repo_id, repo_type="dataset", private=private, exist_ok=True)
     print(f"uploading {CHROMA_DIR} to {repo_id} (dataset)…")
+    # A mirror, not a merge: Chroma keeps vectors in uuid-named segment folders,
+    # and a rebuild gets new uuids. Without the delete, the old segments stay in
+    # the repo beside the new ones and every cold start downloads both.
+    # .gitattributes is always kept by the Hub.
     api.upload_folder(repo_id=repo_id, repo_type="dataset", folder_path=str(CHROMA_DIR),
-                      commit_message="rebuild compliance index")
+                      delete_patterns="*", commit_message="rebuild compliance index")
     print(f"done. Set CHROMA_INDEX_REPO={repo_id} in the deployment's secrets.")
 
 

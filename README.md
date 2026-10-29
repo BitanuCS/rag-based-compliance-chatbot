@@ -51,6 +51,44 @@ prompt. So the project now owns the whole path from the PDFs:
 gazette tables that have no ruling lines from the `(1) (2) (3)` column-number
 row they print — so each breach is read next to its penalty, one row at a time.
 
+## Features
+
+- **Cited answers.** Every claim carries an inline `[n]`; a **References**
+  list under the answer gives framework, section, pages and a link to the
+  source document, one line per location.
+- **Checkable evidence.** *Show cited passages* opens the exact text the model
+  read, with its cosine distance and rerank relevance score. Only passages the
+  answer actually cites are listed.
+- **Refuses instead of guessing.** Out-of-corpus questions get a fixed refusal,
+  usually with no model call at all.
+- **Invalid-citation warning.** A `[n]` pointing at a source that was never
+  supplied is flagged under the answer as unverified.
+- **Search scope.** Restrict retrieval to one framework from the sidebar, or let
+  the app detect the framework a question names.
+- **Follow-up questions.** "What about GDPR?" is rewritten into a standalone
+  question when it finds nothing on its own.
+- **Saved chat history.** Conversations persist in SQLite; reopen or delete
+  them from the sidebar.
+- **Feedback.** 👍/👎 under each answer when tracing is on, saved with the chat
+  and scored onto the turn's Langfuse trace.
+- **Tracing.** Every turn traced in Langfuse and LangSmith (see
+  [Observability](#observability)).
+
+## Tech stack
+
+| Layer | Choice |
+| --- | --- |
+| UI | Streamlit 1.48 |
+| LLM | Hugging Face Inference API via `langchain-huggingface` — `HF_MODEL`, default `Qwen/Qwen2.5-7B-Instruct` (`.env.example` sets `meta-llama/Llama-3.3-70B-Instruct`) |
+| Embeddings | Cohere `embed-v4.0`, 1536 dimensions |
+| Reranker | Cohere `rerank-v3.5` |
+| Vector store | Chroma 0.5 (cosine), published to a Hugging Face dataset for deployment |
+| PDF extraction | PyMuPDF; Tesseract OCR for scanned pages |
+| Token counting | `tiktoken` (`cl100k_base`) |
+| Chat history | SQLite |
+| Observability | Langfuse 5 and LangSmith |
+| Tests | pytest |
+
 ## What's indexed
 
 **27 documents · 25 frameworks · 2,816 sections → 4,299 chunks**
@@ -243,7 +281,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 brew install tesseract           # OCR for the scanned PDFs (macOS)
 
-cp .env.example .env             # HF token + Cohere key (free trial); Langfuse optional
+cp .env.example .env             # set HF_TOKEN + COHERE_API_KEY; Langfuse optional
 python pdf_to_chromadb.py build --reset # PDFs in source_pdfs/ → data/ JSON → chroma_db/
 streamlit run app.py
 ```
@@ -251,6 +289,11 @@ streamlit run app.py
 Neither the PDFs nor the index are in the repo. Put the PDFs in
 `source_pdfs/<FRAMEWORK_ID>/`, or set `CHROMA_INDEX_REPO` to a published index
 and it is fetched on first use.
+
+Or open the repo in **GitHub Codespaces / a VS Code dev container**:
+[`.devcontainer/`](.devcontainer/devcontainer.json) installs
+`requirements-dev.txt` and starts the app on port 8501. It still needs `.env`
+and an index.
 
 > **A full build is ~45 Cohere calls** (96 chunks each) and fits a free trial
 > key, which allows 1,000 calls a month across embedding and reranking. Each
@@ -261,16 +304,48 @@ and it is fetched on first use.
 > `EMBED_MODEL` or `EMBED_DIM` invalidates every stored vector, and the app
 > refuses to start against a mismatched index rather than answer from noise.
 
+### Configuration
+
+Everything is read from `.env` locally, or from Streamlit secrets when
+deployed. [`.env.example`](.env.example) documents every variable; the ones
+that matter:
+
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `HF_TOKEN` | yes | — | Hugging Face token for the LLM. Use this name: `HUGGINGFACEHUB_API_TOKEN` alone is not enough |
+| `COHERE_API_KEY` | yes | — | Embeddings and reranking (`CO_API_KEY` also accepted) |
+| `HF_MODEL` | no | `Qwen/Qwen2.5-7B-Instruct` | Generation model |
+| `CHROMA_INDEX_REPO` | deployed only | — | HF dataset holding a prebuilt index |
+| `EMBED_MODEL` / `EMBED_DIM` | no | `embed-v4.0` / `1536` | Must match the index |
+| `RERANK_MODEL` / `RAG_RERANK` | no | `rerank-v3.5` / `true` | Reranker, and an off switch for A/B runs |
+| `RAG_MAX_DISTANCE` | no | `0.62` | Distance floor (the refusal gate) |
+| `RAG_K` / `RAG_FETCH_K` / `RAG_MAX_PER_SECTION` | no | `6` / `24` / `2` | Sources kept, candidates fetched, per-section cap |
+| `RAG_MAX_INPUT_CHARS` / `LLM_MAX_NEW_TOKENS` | no | `2000` / `1024` | Input and output caps |
+| `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_BASE_URL` | no | off | Langfuse tracing |
+| `LANGCHAIN_TRACING_V2` / `LANGCHAIN_API_KEY` / `LANGCHAIN_PROJECT` | no | off | LangSmith tracing |
+| `RAG_DEBUG` | no | `false` | Show the nearest distance under a refusal |
+
 ### CLI
 
 ```bash
+# corpus and index
+python pdf_to_chromadb.py build --reset                # chunk + embed everything (asks to confirm the reset)
 python pdf_to_chromadb.py chunk                        # PDFs → data/ JSON (no API calls)
-python pdf_to_chromadb.py embed --resume               # data/ JSON → chroma_db/
+python pdf_to_chromadb.py ocr                          # OCR the scanned PDFs into the cache only
+python pdf_to_chromadb.py embed --resume               # data/ JSON → chroma_db/, continuing a stopped build
+python pdf_to_chromadb.py embed --frameworks X --replace  # re-do one framework
 python pdf_to_chromadb.py stats                        # what is indexed, and whether it is complete
-python pdf_to_chromadb.py query "KYC periodic update"  # search the index directly
-python eval_retrieval.py --verbose              # retrieval quality (--no-rerank to compare)
+python pdf_to_chromadb.py query "KYC periodic update" --framework RBI_KYC_MASTER_DIRECTIONS --k 5
+python pdf_to_chromadb.py push-index --public <user>/<repo>  # publish the index for deployment
+
+# evaluation and tests
+python eval_retrieval.py --verbose              # retrieval quality (--no-rerank to compare, --strict for CI)
+pytest                                          # 68 tests, ~1s, no network
+
+# chat history
 python store.py list                            # saved conversations
-pytest                                          # 68 tests, ~1s
+python store.py delete <id-prefix>              # delete one
+python store.py clear                           # delete all, then vacuum
 ```
 
 ## Layout
@@ -285,6 +360,13 @@ pytest                                          # 68 tests, ~1s
 | [`chat.py`](chat.py) | Model construction and per-turn run configuration |
 | [`store.py`](store.py) | SQLite chat history |
 | [`eval_retrieval.py`](eval_retrieval.py) | Retrieval evaluation harness |
+| [`_bootstrap.py`](_bootstrap.py) | Copies Streamlit secrets into the environment; swaps in a newer sqlite for Chroma when the host's is too old |
+| [`evals/retrieval.json`](evals/retrieval.json) | The 30 evaluation cases |
+| [`tests/`](tests/) | Unit tests: grounding rules, chunking, embeddings, eval metrics |
+| [`compliance-corpus-json/`](compliance-corpus-json/) | The generated corpus (reached as `data/`); per-framework `metadata.json` is the only hand-written input |
+| [`.streamlit/`](.streamlit/) | Server config, and the secrets template for deployment |
+| [`.devcontainer/`](.devcontainer/) | Codespaces / VS Code dev container |
+| `requirements.txt` / `requirements-dev.txt` | Runtime only (what the deployed app installs) / plus PDF tooling, tests and eval extras |
 
 `rag.py`, `vectorstore.py` and `store.py` deliberately import no Streamlit, so the
 retrieval policy stays testable from the CLI and reusable behind an API. The
@@ -318,6 +400,7 @@ filterable.
 | --- | --- |
 | [`DEPLOY.md`](DEPLOY.md) | Deploying to Streamlit Community Cloud, and the traps in it |
 | [`PHASES.md`](PHASES.md) | Why the environment is pinned as it is, plus the full engineering log |
+| [`compliance-corpus-json/README.md`](compliance-corpus-json/README.md) | Corpus file layout and chunk fields |
 
 ## Limitations
 
