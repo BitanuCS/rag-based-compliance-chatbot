@@ -15,7 +15,8 @@ from dotenv import load_dotenv
 
 import rag
 import store
-from chat import DEFAULT_REPO_ID, build_model, run_config, tracing_enabled
+from chat import DEFAULT_REPO_ID, build_model, run_config
+from observability import record_feedback, trace_turn, tracing_enabled
 from vectorstore import indexed_frameworks
 
 # Fills in anything secrets did not provide; does not override real env vars.
@@ -23,6 +24,10 @@ load_dotenv()
 
 MODEL_REPO_ID = os.getenv("HF_MODEL", DEFAULT_REPO_ID)
 TITLE_MAX_CHARS = 34
+
+# Shows the nearest distance under a "nothing found" reply. A tuning aid for
+# whoever is setting RAG_MAX_DISTANCE, not something a reader should see.
+DEBUG = os.getenv("RAG_DEBUG", "false").strip().lower() in {"1", "true", "yes"}
 
 st.set_page_config(page_title="Compliance Chat", page_icon="⚖️")
 
@@ -66,8 +71,8 @@ def new_thread():
     """Mint a thread id for a chat that has not been saved yet.
 
     Minting up front (rather than at save time) means the very first turn is
-    already traced under the thread it belongs to, and the id later becomes the
-    conversation's primary key so LangSmith and SQLite agree on one identifier.
+    already traced under the session it belongs to, and the id later becomes the
+    conversation's primary key so Langfuse and SQLite agree on one identifier.
     """
     st.session_state.active_id = uuid.uuid4().hex
 
@@ -125,13 +130,37 @@ def render_citations(sources, answer):
 
     with st.expander("📎 Show cited passages"):
         for source in shown:
+            score = source.get("rerank_score")
             st.markdown(
                 f"**[{source['n']}] {source['framework_id']}** · {source['pages']} "
                 f"· distance `{source['distance']}`"
+                + (f" · relevance `{score}`" if score is not None else "")
             )
             st.caption(source["breadcrumb"])
             st.text(source["text"][:1500])
             st.divider()
+
+
+def save_feedback(message, key):
+    """st.feedback callback: persist the verdict and send it to the turn's trace."""
+    value = st.session_state.get(key)
+    if value is None:
+        return
+    store.set_feedback(message["id"], value)
+    record_feedback(message["trace_id"], positive=value == 1)
+
+
+def render_feedback(message):
+    """👍/👎 under an answer, scored onto the Langfuse trace that produced it.
+
+    One verdict per answer: once given it is shown, not offered again, so a
+    double click cannot score one trace twice.
+    """
+    if message.get("feedback") is not None:
+        st.caption("👍 Marked helpful" if message["feedback"] else "👎 Marked not helpful")
+        return
+    key = f"fb-{message['id']}"
+    st.feedback("thumbs", key=key, on_change=save_feedback, args=(message, key))
 
 
 if "active_id" not in st.session_state:
@@ -199,6 +228,8 @@ for message in messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
         render_citations(message.get("sources"), message["content"])
+        if message["role"] == "assistant" and message.get("trace_id") and tracing_enabled():
+            render_feedback(message)
 
 if user_input := st.chat_input(
     "Ask a compliance question...",
@@ -219,11 +250,21 @@ if user_input := st.chat_input(
     conv_id = st.session_state.active_id
     history = [rag.to_langchain(m) for m in messages]
 
-    # Every turn of this chat carries the same thread id, so LangSmith stacks
-    # them into one conversation rather than a pile of unrelated runs.
-    config = run_config(conv_id, model=MODEL_REPO_ID, turn=len(messages) // 2 + 1)
+    turn = len(messages) // 2 + 1
+    # Every turn of this chat carries the same session id, so Langfuse stacks
+    # them into one conversation rather than a pile of unrelated traces.
+    config = run_config(conv_id, model=MODEL_REPO_ID, turn=turn)
 
-    with st.chat_message("assistant"):
+    completed = False
+    trace_id = None
+    # The trace closes before the turn is persisted and the page reruns:
+    # st.rerun() works by raising, and inside the span it would be recorded as
+    # an error on every successful turn.
+    with trace_turn(
+        conv_id, user_input, model=MODEL_REPO_ID, turn=turn, scope=framework or "all"
+    ) as span, st.chat_message("assistant"):
+        trace_id = span.trace_id if span else None
+        outcome, invalid, sources = "error", [], []
         try:
             model = None
 
@@ -261,7 +302,8 @@ if user_input := st.chat_input(
                 # Nothing cleared the distance floor. Answering anyway would mean
                 # writing around irrelevant regulation.
                 reply = rag.NO_CONTEXT
-                if best is not None and tracing_enabled():
+                outcome = "no_context"
+                if best is not None and DEBUG:
                     # Debug detail, and only in dev: how close the nearest match
                     # came is what tells you whether the floor is set too tight.
                     reply += f"\n\n*(nearest match: distance {best:.3f}, floor {rag.MAX_DISTANCE})*"
@@ -288,6 +330,9 @@ if user_input := st.chat_input(
                     # this", never a second one the reader has to interpret.
                     reply = rag.NO_CONTEXT
                     sources = []
+                    outcome = "refused"
+                else:
+                    outcome = "answered"
                 holder.markdown(reply)
 
                 # Verify after the fact rather than trusting the prompt: a marker
@@ -313,12 +358,32 @@ if user_input := st.chat_input(
                 "failing, check the server log."
             )
             st.caption(f"`{type(exc).__name__}`")
+            if span:
+                span.update(level="ERROR", status_message=type(exc).__name__)
         else:
-            # Persist only a completed turn, creating the conversation on first
-            # use under the thread id the trace already used.
-            if not saved:
-                store.create_conversation(title_from(user_input), conv_id=conv_id)
-            store.append_message(conv_id, "user", user_input)
-            store.append_message(conv_id, "assistant", reply, sources=sources)
-            # Refresh so the sidebar picks up the new/reordered conversation.
-            st.rerun()
+            completed = True
+            if span:
+                # The numbers worth filtering traces on: how often the corpus
+                # had nothing, how often the model refused what it was handed,
+                # and how often it cited a source it was never given.
+                cited, _, _ = rag.validate_citations(reply, len(sources))
+                span.update(
+                    output=reply,
+                    metadata={
+                        "outcome": outcome,
+                        "best_distance": None if best is None else round(best, 4),
+                        "sources": len(sources),
+                        "cited": len([n for n in cited if 1 <= n <= len(sources)]),
+                        "invalid_citations": invalid,
+                    },
+                )
+
+    if completed:
+        # Persist only a completed turn, creating the conversation on first use
+        # under the session id the trace already used.
+        if not saved:
+            store.create_conversation(title_from(user_input), conv_id=conv_id)
+        store.append_message(conv_id, "user", user_input)
+        store.append_message(conv_id, "assistant", reply, sources=sources, trace_id=trace_id)
+        # Refresh so the sidebar picks up the new/reordered conversation.
+        st.rerun()

@@ -11,3 +11,4 @@ chat_history.db
 
 # real secrets; only .streamlit/secrets.toml.example is committed
 .streamlit/secrets.toml
+chroma_db.*backup/

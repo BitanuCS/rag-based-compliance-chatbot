@@ -3,7 +3,7 @@
 Kept out of app.py so the retrieval policy is testable from the CLI and reusable
 from a future API layer, matching how store.py and vectorstore.py are split.
 
-The policy has three parts, and all three matter:
+The policy has four parts, and all four matter:
 
 1. **A distance floor.** Vector search always returns k results, however bad the
    match — a chocolate-cake question returns Labour Codes at distance 0.59, while
@@ -15,8 +15,14 @@ The policy has three parts, and all three matter:
 3. **Numbered sources.** Every context block is labelled [1], [2]… and the model
    cites those markers inline, so each claim traces to a framework, section and
    page the reader can check against the source PDF.
+4. **A reranker.** Vector search finds the right neighbourhood but orders it
+   poorly: on the eval set the answering passage is in the top 24 far more often
+   than in the top 6. A cross-encoder reads question and passage together and
+   reorders the candidates that cleared the floor, so the six the model sees are
+   the six that answer, not the six that sound most alike.
 """
 
+import logging
 import os
 import re
 from collections import Counter
@@ -24,6 +30,7 @@ from functools import lru_cache
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
+from observability import annotate, observe
 from vectorstore import display_text, get_store
 
 # Cosine distance, so lower is closer. Measured on this corpus: genuine hits land
@@ -37,6 +44,16 @@ RETRIEVAL_K = int(os.getenv("RAG_K", "6"))
 # and every part of the right section scores well — which spends the whole
 # context budget on one passage and hides everything else the corpus knows.
 FETCH_K = int(os.getenv("RAG_FETCH_K", "24"))
+
+# Cohere reranker. On by default whenever a key is set; RAG_RERANK=false turns it
+# off for an A/B against plain vector order. Without a key retrieval still works,
+# it just ranks by distance alone.
+RERANK_MODEL = os.getenv("RERANK_MODEL", "rerank-v3.5")
+RERANK = os.getenv("RAG_RERANK", "true").strip().lower() != "false"
+
+# A rerank call sits between the user and the answer. If Cohere is slow or down
+# the vector order is a fine fallback, so wait briefly rather than hang the turn.
+RERANK_TIMEOUT = float(os.getenv("RERANK_TIMEOUT", "10"))
 
 # Parts of one section that may occupy the final k. Two rather than one because
 # an obligation and its proviso are often split across consecutive parts, and
@@ -340,13 +357,95 @@ def diversify(scored, k=RETRIEVAL_K, max_per_section=MAX_PER_SECTION):
     return kept
 
 
-def retrieve(question, k=RETRIEVAL_K, framework=None, max_distance=MAX_DISTANCE, fetch_k=FETCH_K):
-    """Nearest chunks that clear the distance floor, thinned for section variety.
+def cohere_api_key():
+    """Cohere key under either name: COHERE_API_KEY, or the SDK's own CO_API_KEY."""
+    return os.getenv("COHERE_API_KEY") or os.getenv("CO_API_KEY")
+
+
+def rerank_enabled():
+    return RERANK and bool(cohere_api_key())
+
+
+@lru_cache(maxsize=1)
+def get_reranker():
+    import cohere
+
+    return cohere.ClientV2(api_key=cohere_api_key(), timeout=RERANK_TIMEOUT, max_retries=2)
+
+
+def _trace_hits(hits):
+    """Compact per-passage summary for a trace: enough to see why it ranked."""
+    return [
+        {
+            "framework_id": doc.metadata.get("framework_id"),
+            "breadcrumb": doc.metadata.get("breadcrumb"),
+            "distance": round(distance, 4),
+            "rerank_score": doc.metadata.get("rerank_score"),
+        }
+        for doc, distance in hits
+    ]
+
+
+@observe(name="rerank", summarize=_trace_hits)
+def rerank(question, scored):
+    """Reorder (doc, distance) pairs by Cohere relevance, best first.
+
+    Every candidate is scored and returned — diversify() still needs the tail to
+    fill slots the section cap frees up. The score is written into each
+    document's metadata, where citations() and the trace pick it up; the
+    distance is kept, because the floor and the debug line both speak in it.
+
+    The passage sent is page_content, header included: the framework and
+    breadcrumb are exactly what lets the reranker tell DPDP's breach notice from
+    GDPR's. Any failure falls back to vector order — a worse-ranked answer is
+    better than no answer.
+    """
+    if not scored:
+        return scored
+    try:
+        response = get_reranker().rerank(
+            model=RERANK_MODEL,
+            query=question,
+            documents=[doc.page_content for doc, _ in scored],
+            top_n=len(scored),
+        )
+    except Exception as exc:
+        logging.warning("rerank failed, keeping vector order: %s", exc)
+        annotate(level="WARNING", status_message=f"rerank failed: {type(exc).__name__}")
+        return scored
+
+    reranked = []
+    for result in response.results:
+        doc, distance = scored[result.index]
+        doc.metadata["rerank_score"] = round(result.relevance_score, 4)
+        reranked.append((doc, distance))
+    annotate(output=_trace_hits(reranked), metadata={"model": RERANK_MODEL})
+    return reranked
+
+
+@observe(
+    name="retrieve",
+    as_type="retriever",
+    summarize=lambda result: {"hits": _trace_hits(result[0]), "best_distance": result[1]},
+)
+def retrieve(
+    question,
+    k=RETRIEVAL_K,
+    framework=None,
+    max_distance=MAX_DISTANCE,
+    fetch_k=FETCH_K,
+    use_rerank=None,
+):
+    """Nearest chunks that clear the distance floor, reranked, thinned for variety.
 
     Returns (hits, best_distance). best_distance is reported even when everything
     is filtered out, so a near-miss is debuggable rather than an unexplained
-    refusal — and it is the raw nearest distance, before diversification, because
-    that is what the floor was tuned against.
+    refusal — and it is the raw nearest distance, before reranking and
+    diversification, because that is what the floor was tuned against.
+
+    The floor runs before the reranker, not after: it is the refusal gate, and a
+    cross-encoder score is not calibrated to say "nothing here answers this".
+    use_rerank=None means "whatever RAG_RERANK and the key say".
     """
     from vectorstore import build_filter
 
@@ -354,11 +453,28 @@ def retrieve(question, k=RETRIEVAL_K, framework=None, max_distance=MAX_DISTANCE,
         question, k=max(fetch_k, k), filter=build_filter(framework)
     )
     if not scored:
+        annotate(output=[], metadata={"candidates": 0})
         return [], None
 
     best = scored[0][1]
     near = [(doc, dist) for doc, dist in scored if dist <= max_distance]
-    return diversify(near, k), best
+    reranked = use_rerank if use_rerank is not None else rerank_enabled()
+    if reranked and near:
+        near = rerank(question, near)
+    hits = diversify(near, k)
+
+    annotate(
+        output=_trace_hits(hits),
+        metadata={
+            "candidates": len(scored),
+            "cleared_floor": len(near),
+            "best_distance": round(best, 4),
+            "floor": max_distance,
+            "reranked": bool(reranked and near),
+            "framework": framework,
+        },
+    )
+    return hits, best
 
 
 def citations(hits):
@@ -378,6 +494,7 @@ def citations(hits):
                 "pages": pages,
                 "source_url": meta.get("source_url", ""),
                 "distance": round(distance, 4),
+                "rerank_score": meta.get("rerank_score"),
                 "text": display_text(doc),
             }
         )

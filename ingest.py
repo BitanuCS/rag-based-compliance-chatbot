@@ -7,14 +7,15 @@ sits, not only what it says — so this pipeline preserves it rather than
 re-cutting the corpus from scratch.
 
 What it does not preserve is oversized chunks: measured with the embedder's own
-tokenizer, 1,271 of the 2,602 (48.8%) run past bge-base's 512-token input limit,
-the largest at 2,724 tokens. Embedded as-is, everything past token 512 is
-silently dropped and becomes unretrievable. So the split step is a guarded
-repair, not a re-chunk: chunks that fit pass through untouched, and only the
-oversized ones are split — with the header re-applied to every part so each part
-still says which framework and section it came from.
+tokenizer, 1,253 of the 2,602 (48%) run past the 512-token record cap, the
+largest past 2,700 tokens. The cap was bge-base's hard input limit and is now a
+chosen granularity (see EMBED_LIMIT): a 2,700-token record would rank and be
+cited as one blob. So the split step is a guarded repair, not a re-chunk: chunks
+that fit pass through untouched, and only the oversized ones are split — with
+the header re-applied to every part so each part still says which framework and
+section it came from.
 
-    python ingest.py build [--reset] [--frameworks ID,ID] [--limit N]
+    python ingest.py build [--reset | --resume] [--frameworks ID,ID] [--limit N]
     python ingest.py stats
     python ingest.py query "..." [--framework ID] [--sector S] [--k 5]
 """
@@ -37,9 +38,8 @@ from vectorstore import (
     hf_token,
     COLLECTION,
     EMBED_LIMIT,
-    EMBED_MODEL,
+    EMBED_ID,
     display_text,
-    get_embeddings,
     get_store,
     get_tokenizer,
     indexed_frameworks,
@@ -49,14 +49,15 @@ from vectorstore import (
 CORPUS = Path(__file__).parent / "data" / "all_chunks.json"
 VALIDATION = Path(__file__).parent / "data" / "validation.json"
 
-# Body budget per part. The largest header in the corpus is 88 tokens; 2 more go
-# to the [CLS]/[SEP] pair. A single fixed budget keeps one splitter instance for
-# the whole run, and costs at most ~30 tokens against a per-chunk budget.
-MAX_HEADER_TOKENS = 88
-BODY_BUDGET = EMBED_LIMIT - MAX_HEADER_TOKENS - 2
+# Body budget per part. The largest header in the corpus is 93 cl100k tokens. A
+# single fixed budget keeps one splitter instance for the whole run, and costs at
+# most ~30 tokens against a per-chunk budget.
+MAX_HEADER_TOKENS = 93
+BODY_BUDGET = EMBED_LIMIT - MAX_HEADER_TOKENS
 OVERLAP = 64
 
-# Progress granularity and MPS memory headroom, not a Chroma limit.
+# Records per embeddings request and per Chroma write: progress granularity, and
+# small enough that one failed batch costs seconds to retry rather than minutes.
 BATCH_SIZE = 256
 
 # Copied onto every record. framework_id and sector are the filter keys; the
@@ -195,7 +196,7 @@ def build_documents(chunks, splitter):
     return documents, ids, passed, split, repaired
 
 
-def build(frameworks=None, limit=None, reset=False, assume_yes=False, replace=False):
+def build(frameworks=None, limit=None, reset=False, assume_yes=False, replace=False, resume=False):
     chunks = load_chunks(frameworks, limit)
     print(f"loaded {len(chunks)} chunks from {CORPUS.name}")
 
@@ -214,7 +215,9 @@ def build(frameworks=None, limit=None, reset=False, assume_yes=False, replace=Fa
         print(f"replace: removed {removed} existing records for {', '.join(frameworks)}")
 
     if reset:
-        store = get_store()
+        # The one place a collection built with another embedding model may be
+        # opened — to delete it.
+        store = get_store(check_model=False)
         existing = store._collection.count()
         if existing and not assume_yes:
             answer = input(f"delete collection {COLLECTION!r} ({existing} records)? [y/N] ")
@@ -226,8 +229,8 @@ def build(frameworks=None, limit=None, reset=False, assume_yes=False, replace=Fa
         indexed_frameworks.cache_clear()
         print(f"reset collection {COLLECTION!r}")
 
-    splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
-        get_tokenizer(),
+    splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+        encoding_name=get_tokenizer().name,
         chunk_size=BODY_BUDGET,
         chunk_overlap=OVERLAP,
         # Legal prose degrades gracefully: paragraph, line, sentence, clause.
@@ -246,8 +249,18 @@ def build(frameworks=None, limit=None, reset=False, assume_yes=False, replace=Fa
     if oversized:
         sys.exit(f"{len(oversized)} records still exceed {EMBED_LIMIT} tokens; not indexing")
 
-    print(f"embedding with {EMBED_MODEL} on {get_embeddings().model_kwargs['device']}...")
     store = get_store()
+    if resume:
+        # The free embedding tier has a daily quota a full build can run into.
+        # Ids are deterministic, so whatever an interrupted run already wrote is
+        # exactly the set to skip — the rest picks up where it stopped.
+        done = set(store.get(ids=ids, include=[])["ids"])
+        keep = [i for i, record_id in enumerate(ids) if record_id not in done]
+        documents = [documents[i] for i in keep]
+        ids = [ids[i] for i in keep]
+        print(f"resume: {len(done)} records already indexed, {len(documents)} to go")
+
+    print(f"embedding with {EMBED_ID}...")
     for start in range(0, len(documents), BATCH_SIZE):
         window = slice(start, start + BATCH_SIZE)
         store.add_documents(documents[window], ids=ids[window])
@@ -263,7 +276,7 @@ def stats():
     data = store.get(include=["metadatas", "documents"])
     metas, docs = data["metadatas"], data["documents"]
 
-    print(f"{CHROMA_DIR}  collection={COLLECTION!r}  model={EMBED_MODEL}")
+    print(f"{CHROMA_DIR}  collection={COLLECTION!r}  model={EMBED_ID}")
     print(f"\n{len(metas)} records from {len({m['parent_chunk_id'] for m in metas})} source chunks")
     if not metas:
         return
@@ -372,6 +385,11 @@ def main():
         help="delete the selected frameworks' records first (targeted re-ingest)",
     )
     build_cmd.add_argument("--limit", type=int, help="index only the first N chunks (smoke test)")
+    build_cmd.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip records already in the index (continue a build stopped by a quota)",
+    )
 
     sub.add_parser("stats", help="what is indexed, and whether it is complete")
 
@@ -391,7 +409,9 @@ def main():
 
     if args.command == "build":
         frameworks = args.frameworks.split(",") if args.frameworks else None
-        build(frameworks, args.limit, args.reset, args.yes, args.replace)
+        if args.resume and (args.reset or args.replace):
+            sys.exit("--resume continues an existing index; it cannot be combined with --reset or --replace")
+        build(frameworks, args.limit, args.reset, args.yes, args.replace, args.resume)
     elif args.command == "stats":
         stats()
     elif args.command == "push-index":

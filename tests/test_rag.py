@@ -136,6 +136,82 @@ def test_diversify_stops_at_k():
     assert len(rag.diversify(scored, k=3)) == 3
 
 
+# --- reranking ---------------------------------------------------------------
+#
+# The reranker is an outside service. What is tested here is the contract around
+# it: its order wins, nothing is dropped, and a failure costs ranking, never the
+# answer.
+
+
+class _Result:
+    def __init__(self, index, relevance_score):
+        self.index, self.relevance_score = index, relevance_score
+
+
+class _Reranker:
+    def __init__(self, order=None, error=None):
+        self.order, self.error, self.calls = order, error, []
+
+    def rerank(self, model, query, documents, top_n):
+        self.calls.append((query, documents, top_n))
+        if self.error:
+            raise self.error
+        return type("Response", (), {"results": [_Result(i, 1 - n / 10) for n, i in enumerate(self.order)]})
+
+
+def _scored():
+    return [(_doc("F", f"section {i}"), 0.2 + i / 100) for i in range(3)]
+
+
+def test_rerank_order_replaces_vector_order(monkeypatch):
+    monkeypatch.setattr(rag, "get_reranker", lambda: _Reranker(order=[2, 0, 1]))
+    scored = _scored()
+    reranked = rag.rerank("q", scored)
+    assert [doc.metadata["breadcrumb"] for doc, _ in reranked] == ["section 2", "section 0", "section 1"]
+
+
+def test_rerank_keeps_distance_and_records_score(monkeypatch):
+    monkeypatch.setattr(rag, "get_reranker", lambda: _Reranker(order=[1, 0, 2]))
+    (doc, distance), *_ = rag.rerank("q", _scored())
+    # The floor and the debug line speak in distance; the score rides alongside.
+    assert distance == pytest.approx(0.21)
+    assert doc.metadata["rerank_score"] == 1.0
+
+
+def test_rerank_scores_every_candidate(monkeypatch):
+    # diversify() fills from the tail when the section cap frees a slot, so the
+    # reranker must return all of them, not just the top k.
+    reranker = _Reranker(order=[0, 1, 2])
+    monkeypatch.setattr(rag, "get_reranker", lambda: reranker)
+    assert len(rag.rerank("q", _scored())) == 3
+    assert reranker.calls[0][2] == 3
+
+
+def test_rerank_failure_falls_back_to_vector_order(monkeypatch):
+    monkeypatch.setattr(rag, "get_reranker", lambda: _Reranker(error=TimeoutError("slow")))
+    scored = _scored()
+    assert rag.rerank("q", scored) == scored
+
+
+def test_nothing_to_rerank_makes_no_call(monkeypatch):
+    reranker = _Reranker(order=[])
+    monkeypatch.setattr(rag, "get_reranker", lambda: reranker)
+    assert rag.rerank("q", []) == []
+    assert reranker.calls == []
+
+
+def test_rerank_score_reaches_the_citation():
+    doc = Document(
+        page_content="clause",
+        metadata={
+            "framework_id": "F", "framework_name": "F", "breadcrumb": "F > 1",
+            "page_start": 1, "page_end": 1, "rerank_score": 0.91,
+        },
+    )
+    (source,) = rag.citations([(doc, 0.2)])
+    assert source["rerank_score"] == 0.91
+
+
 # --- reference grouping ------------------------------------------------------
 
 

@@ -1,9 +1,8 @@
 # Compliance RAG — runtime deps only (what `streamlit run app.py` imports).
 # Python 3.11, pinned in .python-version. Dev/eval extras: requirements-dev.txt.
 
-# torch ships CUDA wheels from PyPI (~2.5GB unpacked), which does not fit in a
-# Streamlit Community Cloud container. This index serves the CPU-only build.
---extra-index-url https://download.pytorch.org/whl/cpu
+# No torch: embeddings (Gemini) and reranking (Cohere) are both API calls, so
+# nothing here runs a model locally.
 
 # --- vector store + retrieval ---
 chromadb==0.5.23
@@ -13,12 +12,23 @@ langchain-chroma==0.2.3
 pysqlite3-binary==0.5.4; sys_platform == "linux"
 
 # --- embeddings (vectorstore.py) ---
-sentence-transformers==3.3.1
-transformers==4.46.3
-# 2.6.0 is the newest cp311 CPU wheel on the index above. Local dev runs
-# 2.13.0 (an MPS build for Apple Silicon); there is no Linux cp311 CPU
-# equivalent, so the deployed app is a version behind on purpose.
-torch==2.6.0
+google-genai==2.18.1
+# Token counts for the 512-token record cap and free-tier pacing (ingest.py,
+# vectorstore.py) — a stand-in for Gemini's tokenizer, which is not offline.
+tiktoken==0.14.0
+
+# --- reranking (rag.py) ---
+cohere==7.3.0
+
+# --- observability (observability.py) ---
+# langfuse moves the OpenTelemetry exporters forward; chromadb 0.5.23 pins its
+# gRPC exporter by minor version and breaks at import if the two drift apart.
+# These two pins keep them on the same release — move them together.
+langfuse==5.0.4
+# Also arrives via langchain-core; pinned because observability.py imports it.
+langsmith==0.11.0
+opentelemetry-exporter-otlp-proto-grpc==1.45.1
+opentelemetry-instrumentation-fastapi==0.66b1
 
 # --- LLM endpoint + prompt plumbing (chat.py, rag.py) ---
 langchain-core==0.3.74

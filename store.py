@@ -57,10 +57,15 @@ def _migrate(conn):
     `sources` holds the JSON citation list for an assistant message. Added rather
     than baked into SCHEMA so existing chat_history.db files keep their history:
     the column is nullable, so pre-RAG messages simply have no citations.
+
+    `trace_id` is the Langfuse trace that produced an assistant message, and
+    `feedback` the reader's verdict on it (1 up, 0 down). The trace id is kept so
+    feedback given on a reloaded chat still lands on the right trace.
     """
     columns = {row["name"] for row in conn.execute("PRAGMA table_info(messages)")}
-    if "sources" not in columns:
-        conn.execute("ALTER TABLE messages ADD COLUMN sources TEXT")
+    for name, kind in (("sources", "TEXT"), ("trace_id", "TEXT"), ("feedback", "INTEGER")):
+        if name not in columns:
+            conn.execute(f"ALTER TABLE messages ADD COLUMN {name} {kind}")
 
 
 def init_db():
@@ -73,7 +78,7 @@ def create_conversation(title, conv_id=None):
     """Persist a new conversation.
 
     The caller may supply the id so a thread id minted before the first message
-    (for LangSmith grouping) becomes this conversation's primary key.
+    (for Langfuse session grouping) becomes this conversation's primary key.
     """
     conv_id = conv_id or uuid.uuid4().hex
     now = time.time()
@@ -103,37 +108,48 @@ def conversation_exists(conv_id):
 
 
 def load_messages(conv_id):
-    """Messages in send order, as {"role", "content", "sources"} dicts.
+    """Messages in send order, as dicts.
 
     `sources` is the decoded citation list, or [] for user messages and for any
-    assistant message stored before citations existed.
+    assistant message stored before citations existed. `trace_id` and
+    `feedback` are None where there is none.
     """
     with _session() as conn:
         rows = conn.execute(
-            "SELECT role, content, sources FROM messages WHERE conv_id = ? ORDER BY id",
+            "SELECT id, role, content, sources, trace_id, feedback FROM messages "
+            "WHERE conv_id = ? ORDER BY id",
             (conv_id,),
         ).fetchall()
     return [
         {
+            "id": row["id"],
             "role": row["role"],
             "content": row["content"],
             "sources": json.loads(row["sources"]) if row["sources"] else [],
+            "trace_id": row["trace_id"],
+            "feedback": row["feedback"],
         }
         for row in rows
     ]
 
 
-def append_message(conv_id, role, content, sources=None):
+def append_message(conv_id, role, content, sources=None, trace_id=None):
     now = time.time()
     with _session() as conn:
         conn.execute(
-            "INSERT INTO messages (conv_id, role, content, created_at, sources) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (conv_id, role, content, now, json.dumps(sources) if sources else None),
+            "INSERT INTO messages (conv_id, role, content, created_at, sources, trace_id) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (conv_id, role, content, now, json.dumps(sources) if sources else None, trace_id),
         )
         conn.execute(
             "UPDATE conversations SET updated_at = ? WHERE id = ?", (now, conv_id)
         )
+
+
+def set_feedback(message_id, value):
+    """Record a reader's verdict on an assistant message: 1 up, 0 down."""
+    with _session() as conn:
+        conn.execute("UPDATE messages SET feedback = ? WHERE id = ?", (value, message_id))
 
 
 def delete_conversation(conv_id):

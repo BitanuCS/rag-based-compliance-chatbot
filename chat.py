@@ -1,4 +1,4 @@
-"""Model construction and LangSmith run configuration.
+"""Model construction and per-turn run configuration.
 
 Deliberately has no chat loop of its own. An ungrounded assistant answering
 compliance questions from the model's memory — no corpus, no citations, no way
@@ -11,6 +11,8 @@ import os
 
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from dotenv import load_dotenv
+
+from observability import langchain_callbacks
 
 load_dotenv()
 
@@ -32,32 +34,29 @@ def build_model(repo_id = DEFAULT_REPO_ID):
     return ChatHuggingFace(llm = llm)
 
 
-def tracing_enabled():
-    """True when LangSmith tracing is switched on via the environment."""
-    flag = os.getenv("LANGSMITH_TRACING") or os.getenv("LANGCHAIN_TRACING_V2") or ""
-    return flag.strip().lower() in {"1", "true", "yes"}
-
-
-def tracing_project():
-    return os.getenv("LANGSMITH_PROJECT") or os.getenv("LANGCHAIN_PROJECT") or "default"
-
-
 def run_config(thread_id, **metadata):
-    """LangChain run config that files this turn under a LangSmith thread.
+    """LangChain run config for one LLM call inside a chat turn.
 
-    LangSmith groups runs into a conversation thread by the `session_id`
-    metadata key; `thread_id` and `conversation_id` are accepted aliases, so all
-    three are set to the same value to stay robust across UI versions.
+    The Langfuse callback records the call — prompt, completion, token usage,
+    latency — as a generation nested under the turn's trace (see
+    observability.trace_turn). LangSmith needs no callback: LangChain traces to
+    it from the environment on its own.
+
+    The conversation id goes in under every key either tool groups by.
+    `langfuse_session_id` is what the Langfuse callback reads; LangSmith threads
+    group on `session_id`, with `thread_id` and `conversation_id` as accepted
+    aliases. They repeat what trace_turn already sets, so a call made outside a
+    turn still lands in the right session and thread.
     """
     return {
         "run_name": "compliance-chat-turn",
         "tags": ["compliance-chat"],
+        "callbacks": langchain_callbacks(),
         "metadata": {
+            "langfuse_session_id": thread_id,
             "session_id": thread_id,
             "thread_id": thread_id,
             "conversation_id": thread_id,
             **metadata,
         },
     }
-
-
