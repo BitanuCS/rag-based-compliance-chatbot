@@ -4,7 +4,7 @@ Deliberately has no chat loop of its own. An ungrounded assistant answering
 compliance questions from the model's memory — no corpus, no citations, no way
 to refuse — is the one thing this project exists to prevent, so the only path to
 the model runs through rag.build_prompt. For a terminal-side look at what the
-corpus holds, `python ingest.py query "..."` searches the index directly.
+corpus holds, `python pdf_to_chromadb.py query "..."` searches the index directly.
 """
 
 import os

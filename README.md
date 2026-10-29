@@ -8,8 +8,8 @@ cites every claim — or refuses.**
 [![Live app](https://img.shields.io/badge/demo-live-success?logo=streamlit&logoColor=white)](https://rag-based-compliance-chatbot.streamlit.app)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white)](.python-version)
 [![Frameworks](https://img.shields.io/badge/frameworks-25-informational)](#whats-indexed)
-[![Retrieval](https://img.shields.io/badge/hit%406-92%25-brightgreen)](#retrieval-quality)
-[![Tests](https://img.shields.io/badge/tests-39-brightgreen)](tests/)
+[![Retrieval](https://img.shields.io/badge/hit%401-88%25-brightgreen)](#retrieval-quality)
+[![Tests](https://img.shields.io/badge/tests-61-brightgreen)](tests/)
 
 [Live app](https://rag-based-compliance-chatbot.streamlit.app) ·
 [Deployment](DEPLOY.md) ·
@@ -46,13 +46,14 @@ The answer looked fine. It cited its sources. It was wrong.
 
 That is the failure mode this repo is built around: **retrieval quality is the
 ceiling on the whole system**, and the interesting bugs are upstream of the
-prompt. [`corpus_repair.py`](corpus_repair.py) now repairs both problems at
-ingest time — structurally, never keyed to a specific document — and fires on 27
-chunks across 3 frameworks. The reflowed penalty table now comes back at rank 3.
+prompt. So the project now owns the whole path from the PDFs:
+[`pdf_to_chromadb.py`](pdf_to_chromadb.py) gives the Schedule its own section, and rebuilds
+gazette tables that have no ruling lines from the `(1) (2) (3)` column-number
+row they print — so each breach is read next to its penalty, one row at a time.
 
 ## What's indexed
 
-**27 documents · 25 frameworks · 2,602 source chunks → 4,060 indexed records**
+**27 documents · 25 frameworks · 2,816 sections → 4,299 chunks**
 
 | Sector | Frameworks |
 | --- | --- |
@@ -61,12 +62,30 @@ chunks across 3 frameworks. The reflowed penalty table now comes back at rank 3.
 | **Corporate** | Companies Act 2013 · Labour Codes 2020 · Consumer Protection (E-Commerce) Rules 2020 · Telemedicine Guidelines 2020 |
 | **Global** | GDPR · ISO 27001:2022 |
 
-> **Half the corpus was nearly unsearchable.** Measured with the embedder's own
-> tokenizer, **1,271 of 2,602 chunks (48.8%) exceed bge-base's 512-token limit**,
-> the largest at 2,724. Indexed as-is, everything past token 512 is *silently*
-> dropped — no error, no warning, just unretrievable text. Oversized chunks are
-> split on the body only, with the locating header re-applied to each part and a
-> `parent_chunk_id` back to one citable section.
+## From PDF to index
+
+```
+source_pdfs/*.pdf
+   │
+   ├─ extract ............ PyMuPDF text; Tesseract OCR for the 6 scanned PDFs
+   │                       drops running headers, footnotes, contents pages;
+   │                       tables read row by row; margin notes → section titles
+   ├─ structure .......... detects the document's heading style — gazette
+   │                       "12. Title.—", "Article 12" or decimal "7.5.2 Title"
+   ├─ chunk .............. one chunk per section, split past 512 tokens on
+   │                       paragraph → sentence → clause, 64-token overlap
+   ├─ data/*.json ........ the corpus, regenerated — never edited by hand
+   └─ embed + store ...... Cohere embed-v4.0 → Chroma (cosine)
+```
+
+**Why structure-aware chunking.** A regulation is already chunked by its author:
+one section is one obligation, and it is cited by its number. Cutting anywhere
+else either splits a rule from its proviso or glues two unrelated rules
+together, and the reader loses the "Section 8(5)" they need to check the
+answer. Every chunk also carries a `[framework | regulator | date]` header and
+its `Framework > Chapter > Section` breadcrumb into the embedding, because a
+clause is only findable by what it is about if the embedding knows where it
+sits.
 
 ## How it works
 
@@ -78,8 +97,9 @@ question
    ├─ input guard ........ length cap; the question is data, never instructions
    ├─ framework detect ... "the DPDP Act" scopes to the Act, bare "DPDP" scopes
    │                       to neither, two frameworks named means a comparison
-   ├─ retrieve (k=24) .... BGE embeddings, cosine distance over Chroma
-   ├─ distance floor ..... nothing past 0.45 reaches the model
+   ├─ retrieve (k=24) .... Cohere embeddings, cosine distance over Chroma
+   ├─ distance floor ..... nothing past 0.62 reaches the reranker or the model
+   ├─ rerank ............. Cohere rerank-v3.5 reorders what cleared the floor
    ├─ diversify .......... max 2 chunks per section
    └─ grounded prompt .... numbered sources, inline [n] citations, or a refusal
 ```
@@ -90,20 +110,22 @@ question
 <br>
 
 Vector search always returns *k* results, however bad the match. Scores are
-**cosine distances, so lower is better** — `0.45` is not "45% similar", it is a
-similarity of `0.55`. Measured bands on this corpus:
+**cosine distances, so lower is better** — `0.62` is not "62% similar", it is a
+similarity of `0.38`. The bands are specific to the embedding model; measured
+on this corpus with Cohere `embed-v4.0`:
 
 | Band | Distance | Meaning |
 | --- | --- | --- |
-| Genuine hit | 0.17 – 0.31 | The passage answers the question |
-| Adjacent but unanswerable | 0.31 – 0.39 | Right topic, wrong document |
-| Off-topic | 0.50 – 0.61 | Nothing relevant in the corpus |
+| Answering passage | 0.25 – 0.60 | The passage that answers an eval question |
+| Adjacent but unanswerable | 0.65 | Basel III — banking, but not in the corpus |
+| Off-topic | 0.72 – 0.86 | Cake recipes, football, prompt injection |
 
-The gap between the second and third band is narrow, and that is the whole
-problem: **a threshold cannot separate "the corpus covers this" from "the corpus
-covers something that looks like this."** Basel III, FEMA and GST questions all
-retrieve six passages comfortably under the floor. Only the prompt rule refuses
-them.
+The floor sits at 0.62, in a gap only ~0.05 wide on each side — and that is the
+whole problem: **a threshold cannot separate "the corpus covers this" from "the
+corpus covers something that looks like this."** The hardest answerable case
+(the DPDP Act's maximum penalty, 0.600) and the nearest unanswerable one (Basel
+III, 0.654) are closer to each other than either is to its own band's centre.
+The prompt rule is the second refusal gate for exactly that reason.
 
 </details>
 
@@ -161,50 +183,46 @@ worse than declining.
 
 ## Retrieval quality
 
-`python eval_retrieval.py` — 30 cases, **no model calls**, no cost, under a
-minute. Each case names a phrase the corpus really contains, verified against the
-corpus when written rather than inferred from what retrieval happened to return.
+`python eval_retrieval.py` — 30 cases, no LLM calls, about a minute, ~56 Cohere
+calls (embed + rerank). Each case names a phrase the corpus really contains,
+verified against the corpus when written rather than inferred from what
+retrieval happened to return. `--no-rerank` runs the same cases on vector order
+alone.
 
 What the harness prints today:
 
 ```
-answerable   24/26  (92% of questions retrieved the passage that answers them)
+answerable   26/26  (100% of questions retrieved the passage that answers them)
 refused      4/4    (100% of out-of-corpus questions correctly returned nothing)
-mean rank    1.4    (where the answering passage landed, 1 is best)
+mean rank    1.3    (where the answering passage landed, 1 is best)
 ```
 
-**That `mean rank` flatters itself**, and it is worth knowing why. It averages
-only over cases that *passed*, so the two failures are excluded from the number
-meant to describe ranking quality — it improves as more cases fail. Measured
-separately over the same 30 cases:
+`mean rank` averages only over cases that passed, so it improves as cases fail —
+the per-rank numbers are the honest ones. Over the same 30 cases, against the
+August baseline (BGE embeddings over the pre-chunked corpus):
 
-| Metric | Value | |
-| --- | --- | --- |
-| Hit@1 | 77% | |
-| Hit@3 | 85% | |
-| Hit@6 | 92% | what the harness reports today |
-| MRR (all cases) | **0.819** | misses count as 0 |
-| MRR (found only) | 0.887 | biased — ignores the 2 misses |
-
-MRR over all cases is the honest headline: it carries hit rate and rank in one
-number and cannot be improved by dropping hard cases. The Hit@1 → Hit@6 spread
-(77% → 92%) is precisely the headroom a reranker would attack.
-
-> One run in several reports 23/26 where three consecutive runs report 24/26 —
-> MPS float variance flipping a borderline case. Treat a one-case difference as
-> noise.
-
-**Both known failures are ranking, not recall.** Neither passage is missing;
-both clear the floor and sit inside the candidate list, then get discarded during
-selection:
-
-| Question | Gold passage | Rank | Distance |
+| Metric | Aug 2026 · BGE | Now · vector only | **Now · + Cohere rerank** |
 | --- | --- | --- | --- |
-| Maximum administrative fine under GDPR | `20 000 000` | 8 | 0.308 |
-| A director's duties under the Companies Act | §166 `act in good faith` | 16 | 0.287 |
+| Hit@1 | 77% | 77% | **88%** |
+| Hit@3 | 85% | 92% | **96%** |
+| Hit@6 | 92% | 100% | **100%** |
+| MRR (all cases) | 0.819 | 0.854 | **0.924** |
+| Refused correctly | 4/4 | 4/4 | 4/4 |
 
-That reframes the fix — a cross-encoder rerank over the 24 candidates attacks it
-more directly than more recall would.
+Read the middle column with care: the embedding model (BGE → Cohere) and the
+chunking (pre-chunked JSON → `pdf_to_chromadb.py`) changed together, so the vector-only
+gain cannot be credited to either one alone. What it does show is that both
+August failures — passages that were in the candidate list but discarded in
+selection (the GDPR fine at candidate rank 8, the Companies Act's §166 at 16,
+its title lost to body text) — now reach the top 6 on vector order alone, and
+rank 1 with the reranker. **The reranker's effect is clean**, since it is the
+only difference between the last two columns: same index, same cases, and 3
+more answers moved to rank 1 (Hit@1 77% → 88%, MRR 0.854 → 0.924). The case it
+leaves furthest down is the SEBI Security Operations Centre question (rank 5),
+from a scanned document read by OCR.
+
+> 30 cases is a small set; one case is ~4 points of Hit@1. Treat single-case
+> differences as noise, and add cases before trusting a smaller change.
 
 ## Quickstart
 
@@ -213,29 +231,36 @@ Requires **Python 3.11**.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
+brew install tesseract           # OCR for the scanned PDFs (macOS)
 
-cp .env.example .env          # add your Hugging Face token
-python ingest.py build        # ~35 minutes, builds chroma_db/
+cp .env.example .env             # HF token + Cohere key (free trial); Langfuse optional
+python pdf_to_chromadb.py build --reset # PDFs in source_pdfs/ → data/ JSON → chroma_db/
 streamlit run app.py
 ```
 
-The index is **not** in the repo — it is ~99MB of generated artefact. Build it
-locally, or set `CHROMA_INDEX_REPO` to a published copy and it is fetched on
-first use (~9s).
+Neither the PDFs nor the index are in the repo. Put the PDFs in
+`source_pdfs/<FRAMEWORK_ID>/`, or set `CHROMA_INDEX_REPO` to a published index
+and it is fetched on first use.
 
-> **A full rebuild costs ~35 minutes** and is not CPU-bound, so the machine looks
-> idle throughout. Prefer `--frameworks X --replace` for targeted work (~4 min).
-> Changing `EMBED_MODEL` silently invalidates every stored vector — it is not a
-> configuration tweak.
+> **A full build is ~45 Cohere calls** (96 chunks each) and fits a free trial
+> key, which allows 1,000 calls a month across embedding and reranking. Each
+> question in the app costs two more, so a trial key serves roughly 450
+> questions a month. `pdf_to_chromadb.py chunk` alone takes a few minutes and costs
+> nothing; `pdf_to_chromadb.py embed --resume` continues an interrupted build;
+> `--frameworks X --replace` re-does one framework. Changing
+> `EMBED_MODEL` or `EMBED_DIM` invalidates every stored vector, and the app
+> refuses to start against a mismatched index rather than answer from noise.
 
 ### CLI
 
 ```bash
-python ingest.py stats                        # what is indexed, and whether it is complete
-python ingest.py query "KYC periodic update"  # search the index directly
-python eval_retrieval.py --verbose            # retrieval quality
-python store.py list                          # saved conversations
-pytest                                        # 39 tests, ~0.7s
+python pdf_to_chromadb.py chunk                        # PDFs → data/ JSON (no API calls)
+python pdf_to_chromadb.py embed --resume               # data/ JSON → chroma_db/
+python pdf_to_chromadb.py stats                        # what is indexed, and whether it is complete
+python pdf_to_chromadb.py query "KYC periodic update"  # search the index directly
+python eval_retrieval.py --verbose              # retrieval quality (--no-rerank to compare)
+python store.py list                            # saved conversations
+pytest                                          # 61 tests, ~1s
 ```
 
 ## Layout
@@ -244,22 +269,38 @@ pytest                                        # 39 tests, ~0.7s
 | --- | --- |
 | [`app.py`](app.py) | Streamlit UI — chat, history sidebar, framework scoping, citations |
 | [`rag.py`](rag.py) | Retrieval policy, guardrails, prompt construction |
-| [`vectorstore.py`](vectorstore.py) | Chroma + BGE; the single source of truth for how documents are embedded |
-| [`chat.py`](chat.py) | Model construction and LangSmith run configuration |
+| [`pdf_to_chromadb.py`](pdf_to_chromadb.py) | PDFs → chunks → JSON → embeddings → Chroma, plus `stats` / `query` / `push-index` |
+| [`vectorstore.py`](vectorstore.py) | Chroma + Cohere embeddings; the single source of truth for how text is embedded |
+| [`observability.py`](observability.py) | Langfuse + LangSmith tracing, and 👍/👎 feedback |
+| [`chat.py`](chat.py) | Model construction and per-turn run configuration |
 | [`store.py`](store.py) | SQLite chat history |
-| [`ingest.py`](ingest.py) | Corpus → index, plus `stats` / `query` / `push-index` |
-| [`corpus_repair.py`](corpus_repair.py) | Structural fixes applied to source chunks at ingest time |
 | [`eval_retrieval.py`](eval_retrieval.py) | Retrieval evaluation harness |
 
 `rag.py`, `vectorstore.py` and `store.py` deliberately import no Streamlit, so the
 retrieval policy stays testable from the CLI and reusable behind an API. The
-corpus is treated as read-only input — repairs happen at ingest time, never by
-editing the JSON, so every build is reproducible from pristine data.
+JSON corpus is generated output — fixes go into `pdf_to_chromadb.py`, never into the
+JSON — so every build is reproducible from the PDFs.
 
-**Embeddings run locally, generation does not.** BGE embeds 2,602 chunks and every
-query in-process; routing that through a rate-limited API would make ingest slow
-and retrieval scores non-reproducible between runs. The LLM is served over the
-Hugging Face Inference API.
+**Nothing runs a model locally.** Embeddings and reranking (Cohere) and
+generation (Hugging Face Inference API) are all API calls, so the deployed app
+installs no torch. The cost is a monthly call budget on the free Cohere key.
+
+## Observability
+
+Every chat turn is one trace, in **Langfuse** and in **LangSmith** at once —
+each switches on independently when its keys are set:
+
+```
+compliance-chat-turn     question → reply; session/thread = conversation id
+  retrieve               candidates, cleared floor, best distance, hits
+    rerank               model, relevance score per passage
+  ChatHuggingFace        prompt, completion, tokens, latency
+score: user-feedback     👍/👎 under each answer (Langfuse)
+```
+
+The turn records its outcome — answered, refused, or nothing found — and any
+citation that pointed at a source that was never supplied, so both are
+filterable.
 
 ## Documentation
 
@@ -274,9 +315,12 @@ Hugging Face Inference API.
   the corpus is a snapshot.
 - **The corpus is the boundary.** Anything outside those 25 frameworks is refused
   by design, including questions a general-purpose model could answer.
-- **30% of chunks carry a garbled `section_title`** — 781 of 2,602, body text
-  spilled into the title field by the extraction pipeline. It lands in the
-  embedding and in the reference line the reader sees. This is the direct cause of
-  the Companies Act eval failure above.
+- **Six documents are OCR'd scans** (every SEBI document, the Consumer
+  Protection Rules). Tesseract is good on clean print but not perfect, and OCR
+  text has no font sizes, so footnotes and margin notes are not separated
+  there the way they are in born-digital PDFs.
+- **Heading detection is heuristic.** It is tuned on these 27 documents; a new
+  framework with an unusual layout may chunk by page instead of by section
+  (`qa_report.json` shows which style each document got).
 - **Chat history is not durable when deployed.** Streamlit Cloud containers are
   ephemeral, so conversations are lost on restart. Local runs persist normally.

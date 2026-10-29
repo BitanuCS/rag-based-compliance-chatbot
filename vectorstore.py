@@ -29,22 +29,27 @@ load_dotenv()
 # Nothing is sent either way; this just keeps the noise out of the CLI output.
 logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
 
-# Gemini embedding model and output size. Both are stamped onto the collection
+# Cohere embedding model and output size. Both are stamped onto the collection
 # when it is created and checked on every open: vectors from two models (or two
 # sizes of one) live in different spaces, and querying one with the other
-# returns noise rather than an error. gemini-embedding-001 is trained so that
-# 768 and 1536 are usable truncations of its native 3072.
-EMBED_MODEL = os.getenv("EMBED_MODEL", "gemini-embedding-001")
-EMBED_DIM = int(os.getenv("EMBED_DIM", "3072"))
+# returns noise rather than an error. embed-v4.0 offers 256/512/1024/1536.
+EMBED_MODEL = os.getenv("EMBED_MODEL", "embed-v4.0")
+EMBED_DIM = int(os.getenv("EMBED_DIM", "1536"))
 EMBED_ID = f"{EMBED_MODEL}@{EMBED_DIM}"
 
-# Gemini free tier, per Google project: roughly 100 requests/min, 30k tokens/min
-# and 1,000 requests/day. Tokens per minute is the one ingest runs into — the
-# corpus is ~1.4M tokens, so a full build takes ~45 minutes however it is
-# batched. Raise EMBED_TPM on a paid tier.
-EMBED_TPM = int(os.getenv("EMBED_TPM", "30000"))
-# Texts per request: ~32 records is ~11k tokens, a third of a minute's budget.
-EMBED_BATCH = int(os.getenv("EMBED_BATCH", "32"))
+# Texts per embed call: Cohere's maximum. The trial key's budget is 1,000 calls
+# a month across every endpoint, counted per call rather than per text — so a
+# full ~4,300-chunk build is ~45 calls, and batching as wide as allowed is what
+# makes the free tier enough. (Gemini's free tier, tried first, counts every
+# text as a request and caps at 1,000 a day: five days for one build.)
+EMBED_BATCH = int(os.getenv("EMBED_BATCH", "96"))
+
+# Tokens per minute sent to the embedder. A trial key is limited to 100,000
+# (the 429 body says so), and a 96-chunk batch is ~32k, so a build runs ~3
+# batches a minute — ~15 minutes for the corpus. Paced 20% under the limit
+# because the count here is cl100k, not Cohere's own tokenizer, and a rejected
+# call may still count against the monthly 1,000. Raise on a production key.
+EMBED_TPM = int(os.getenv("EMBED_TPM", "80000"))
 CHROMA_DIR = Path(os.getenv("CHROMA_DIR", Path(__file__).parent / "chroma_db"))
 COLLECTION = os.getenv("CHROMA_COLLECTION", "compliance")
 
@@ -52,7 +57,7 @@ COLLECTION = os.getenv("CHROMA_COLLECTION", "compliance")
 # "your-name/compliance-chroma". Set only where the index cannot be built in
 # place — a Streamlit Cloud container, whose disk is empty on every cold start
 # and where a 35-minute ingest is not an option. Unset locally, which is what
-# keeps ingest.py from ever downloading over an index it is about to write.
+# keeps pdf_to_chromadb.py from ever downloading over an index it is about to write.
 INDEX_REPO = os.getenv("CHROMA_INDEX_REPO")
 
 
@@ -67,23 +72,23 @@ def hf_token():
     """
     return os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Records are capped at this many tokens. gemini-embedding-001 accepts 2,048, so this
+# Records are capped at this many tokens. embed-v4.0 accepts far more, so this
 # is no longer the model's limit but a chosen granularity: one record is one
 # citable passage, short enough that the reranker scores the clause rather than
 # the section around it, and that six of them fit the prompt with room for
-# history. The splitter in ingest.py sizes itself against the same number.
+# history. The chunker in pdf_to_chromadb.py sizes itself against the same number.
 EMBED_LIMIT = 512
 
 
 @lru_cache(maxsize=1)
 def get_tokenizer():
-    """Token counter for the record cap and the free-tier pacing.
+    """Token counter for the 512-token record cap.
 
-    Gemini's tokenizer is not available offline, so cl100k_base stands in. It
-    tracks Gemini's counts closely on English prose, and nothing here needs an
-    exact number: the cap is a chosen granularity well under Gemini's 2,048-token
-    input limit, and pacing overshoot is caught by the 429 retry below. Still
-    far better than the corpus's own token_estimate, which is char_count/4.
+    cl100k_base stands in for Cohere's tokenizer, which is not available
+    offline. Nothing here needs Cohere's exact count: embed-v4.0 accepts far
+    longer inputs than 512 tokens, so the cap is a chosen granularity, not a
+    truncation cliff. Still far better than the corpus's own token_estimate,
+    which was char_count/4.
     """
     import tiktoken
 
@@ -94,36 +99,37 @@ def token_length(text):
     return len(get_tokenizer().encode(text, disallowed_special=()))
 
 
-def gemini_api_key():
-    """Gemini key under either name the google-genai SDK reads."""
-    return os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+def cohere_api_key():
+    """Cohere key under either name: COHERE_API_KEY, or the SDK's own CO_API_KEY."""
+    return os.getenv("COHERE_API_KEY") or os.getenv("CO_API_KEY")
 
 
-class GeminiEmbeddings(Embeddings):
-    """gemini-embedding-001 as a LangChain embedder, paced for the free tier.
+# Rate-limit and transient-failure retries for one embed call.
+EMBED_RETRIES = 6
 
-    Asymmetric, like BGE was: passages are embedded as RETRIEVAL_DOCUMENT and
-    questions as RETRIEVAL_QUERY, which places a question near the passages
-    that answer it rather than near other questions.
 
-    Vectors are L2-normalised here. Only the native 3072 come back unit-length;
-    a truncated 768 or 1536 does not, and cosine distance on unnormalised
-    vectors is not cosine similarity.
+class CohereEmbeddings(Embeddings):
+    """Cohere embed-v4.0 as a LangChain embedder.
+
+    Asymmetric, as BGE was: passages are embedded as search_document and
+    questions as search_query, which places a question near the passages that
+    answer it rather than near other questions. Vectors are L2-normalised here
+    so cosine distance in Chroma is cosine similarity, whatever the model sends.
     """
 
     def __init__(self, model=EMBED_MODEL, dim=EMBED_DIM, tokens_per_minute=EMBED_TPM):
-        from google import genai
+        import cohere
 
-        key = gemini_api_key()
+        key = cohere_api_key()
         if not key:
             raise RuntimeError(
-                "No GOOGLE_API_KEY (or GEMINI_API_KEY) set. Create one at "
-                "https://aistudio.google.com/apikey and add it to .env."
+                "No COHERE_API_KEY (or CO_API_KEY) set. Create one at "
+                "https://dashboard.cohere.com/api-keys and add it to .env."
             )
         self.model, self.dim, self.tpm = model, dim, tokens_per_minute
-        self._client = genai.Client(api_key=key)
-        # (timestamp, tokens) of requests sent in the last minute. Locked
-        # because Streamlit serves sessions from several threads.
+        self._client = cohere.ClientV2(api_key=key, timeout=60, max_retries=0)
+        # (timestamp, tokens) of calls in the last minute. Locked because
+        # Streamlit serves sessions from several threads.
         self._sent = deque()
         self._lock = threading.Lock()
 
@@ -134,59 +140,59 @@ class GeminiEmbeddings(Embeddings):
                 now = time.monotonic()
                 while self._sent and now - self._sent[0][0] >= 60:
                     self._sent.popleft()
-                used = sum(n for _, n in self._sent)
-                if not self._sent or used + tokens <= self.tpm:
+                if not self._sent or sum(n for _, n in self._sent) + tokens <= self.tpm:
                     self._sent.append((now, tokens))
                     return
                 time.sleep(60 - (now - self._sent[0][0]) + 0.1)
 
-    def _embed(self, texts, task_type):
+    def _embed(self, texts, input_type):
+        import cohere
         import numpy as np
-        from google.genai import errors, types
 
         self._pace(sum(token_length(text) for text in texts))
-        config = types.EmbedContentConfig(task_type=task_type, output_dimensionality=self.dim)
-        for attempt in range(6):
+        for attempt in range(EMBED_RETRIES):
             try:
-                response = self._client.models.embed_content(
-                    model=self.model, contents=texts, config=config
+                response = self._client.embed(
+                    model=self.model,
+                    input_type=input_type,
+                    texts=texts,
+                    embedding_types=["float"],
+                    output_dimension=self.dim,
                 )
                 break
-            except errors.APIError as exc:
-                # 429 is the free tier saying "slow down"; 5xx is transient.
-                # Anything else — a bad key, a bad model name — will not get
-                # better by waiting.
-                retryable = exc.code == 429 or (exc.code or 0) >= 500
-                if not retryable or attempt == 5:
-                    if exc.code == 429:
-                        raise RuntimeError(
-                            "Gemini rate limit still exceeded after retries. If this "
-                            "is the daily quota, resume tomorrow with "
-                            "`python ingest.py build --resume`."
-                        ) from exc
+            except (
+                cohere.TooManyRequestsError,
+                cohere.ServiceUnavailableError,
+                cohere.InternalServerError,
+                cohere.GatewayTimeoutError,
+            ) as exc:
+                # A trial key's per-minute limit, or a transient outage: wait
+                # and retry. Anything else — a bad key, a bad model name — will
+                # not get better by waiting, and raises at once.
+                if attempt == EMBED_RETRIES - 1:
                     raise
                 wait = min(90, 10 * 2**attempt)
-                logging.warning("gemini embed %s, retrying in %ss", exc.code, wait)
+                logging.warning("cohere embed %s, retrying in %ss", type(exc).__name__, wait)
                 time.sleep(wait)
 
-        vectors = np.array([e.values for e in response.embeddings], dtype=np.float32)
+        vectors = np.array(response.embeddings.float_, dtype=np.float32)
         vectors /= np.linalg.norm(vectors, axis=1, keepdims=True)
         return vectors.tolist()
 
     def embed_documents(self, texts):
         out = []
         for start in range(0, len(texts), EMBED_BATCH):
-            out.extend(self._embed(texts[start : start + EMBED_BATCH], "RETRIEVAL_DOCUMENT"))
+            out.extend(self._embed(texts[start : start + EMBED_BATCH], "search_document"))
         return out
 
     def embed_query(self, text):
-        return self._embed([text], "RETRIEVAL_QUERY")[0]
+        return self._embed([text], "search_query")[0]
 
 
 @lru_cache(maxsize=1)
 def get_embeddings():
-    """The one embedder both ingest and retrieval use. Needs GOOGLE_API_KEY."""
-    return GeminiEmbeddings()
+    """The one embedder both the pipeline and retrieval use. Needs COHERE_API_KEY."""
+    return CohereEmbeddings()
 
 
 def _index_present():
@@ -205,7 +211,7 @@ def ensure_index():
     """Fetch the prebuilt index from INDEX_REPO when there isn't one on disk.
 
     A no-op unless CHROMA_INDEX_REPO is set and the local index is missing, so
-    the local workflow (ingest.py writes CHROMA_DIR, everything else reads it)
+    the local workflow (pdf_to_chromadb.py writes CHROMA_DIR, everything else reads it)
     is untouched. Downloads roughly 100MB, once per container.
     """
     if not INDEX_REPO or _index_present():
@@ -236,7 +242,7 @@ def ensure_index():
             "one of:\n"
             "  1. The index was never published. Run, from a local checkout with a "
             "built chroma_db/:\n"
-            f"       HF_TOKEN=<write-token> python ingest.py push-index {INDEX_REPO}\n"
+            f"       HF_TOKEN=<write-token> python pdf_to_chromadb.py push-index {INDEX_REPO}\n"
             "  2. CHROMA_INDEX_REPO still holds the placeholder from "
             "secrets.toml.example. Set it to a real <user>/<repo>.\n"
             "  3. HF_TOKEN belongs to an account without read access to it.\n"
@@ -264,7 +270,7 @@ def get_store(check_model=True):
     The embedding model is frozen the same way and recorded beside it, so an
     index built with another model fails here, by name, instead of answering
     every question with unrelated passages. check_model=False is for the one
-    caller that must open a stale collection: ingest.py, to delete it.
+    caller that must open a stale collection: pdf_to_chromadb.py, to delete it.
     """
     ensure_index()
     store = Chroma(
@@ -284,7 +290,7 @@ def get_store(check_model=True):
             f"Collection {COLLECTION!r} in {CHROMA_DIR} was embedded with "
             f"{built_with or 'an unrecorded model (BAAI/bge-base-en-v1.5)'}, "
             f"but EMBED_MODEL/EMBED_DIM say {EMBED_ID!r}. Rebuild it:\n"
-            "    python ingest.py build --reset"
+            "    python pdf_to_chromadb.py build --reset"
         )
     return store
 

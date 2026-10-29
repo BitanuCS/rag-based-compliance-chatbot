@@ -9,7 +9,7 @@ cover are correctly refused.
 It deliberately stops there. It does not ask the chat model anything, so it
 costs a few cents of embedding and rerank calls, runs in under a minute, and
 reports one number you can compare before and after a change to the floor, the
-chunking, the reranker or the ingest repairs.
+chunking or the reranker.
 
     python eval_retrieval.py [--k 6] [--verbose] [--strict] [--no-rerank]
 
@@ -43,12 +43,14 @@ def run_case(case, k, use_rerank):
         # than merely rejecting everything.
         return not hits, {"scope": scope, "best": best, "hits": len(hits), "rank": None}
 
-    wanted_text = (case.get("expect_text") or "").lower()
+    # Whitespace-normalised on both sides: where a PDF wraps a line is not part
+    # of what a passage says, and a rebuilt corpus wraps differently.
+    wanted_text = " ".join((case.get("expect_text") or "").lower().split())
     wanted_framework = case.get("expect_framework")
     for rank, (doc, _) in enumerate(hits, start=1):
         if wanted_framework and doc.metadata.get("framework_id") != wanted_framework:
             continue
-        if wanted_text and wanted_text not in display_text(doc).lower():
+        if wanted_text and wanted_text not in " ".join(display_text(doc).lower().split()):
             continue
         return True, {"scope": scope, "best": best, "hits": len(hits), "rank": rank}
     return False, {"scope": scope, "best": best, "hits": len(hits), "rank": None}

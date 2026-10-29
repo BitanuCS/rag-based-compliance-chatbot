@@ -1,7 +1,7 @@
 # Compliance RAG — runtime deps only (what `streamlit run app.py` imports).
 # Python 3.11, pinned in .python-version. Dev/eval extras: requirements-dev.txt.
 
-# No torch: embeddings (Gemini) and reranking (Cohere) are both API calls, so
+# No torch: embeddings and reranking are both Cohere API calls, so
 # nothing here runs a model locally.
 
 # --- vector store + retrieval ---
@@ -11,13 +11,11 @@ langchain-chroma==0.2.3
 # sqlite3 is older. Harmless and unused on an up-to-date image.
 pysqlite3-binary==0.5.4; sys_platform == "linux"
 
-# --- embeddings (vectorstore.py) ---
-google-genai==2.18.1
+# --- embeddings + reranking: cohere, below (vectorstore.py, rag.py) ---
 # Token counts for the 512-token record cap and free-tier pacing (ingest.py,
-# vectorstore.py) — a stand-in for Gemini's tokenizer, which is not offline.
+# vectorstore.py) — a stand-in for Cohere's tokenizer, which is not offline.
 tiktoken==0.14.0
 
-# --- reranking (rag.py) ---
 cohere==7.3.0
 
 # --- observability (observability.py) ---

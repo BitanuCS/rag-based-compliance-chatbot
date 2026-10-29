@@ -1,9 +1,10 @@
 # Deploying to Streamlit Community Cloud
 
-The app is a RAG chat over a ~99MB Chroma index that takes about 35 minutes to
-build. A Community Cloud container starts with an empty disk on every cold start,
-so the index cannot be built there — it is built locally, published to a Hugging
-Face dataset repo, and downloaded once per container by
+The app is a RAG chat over a Chroma index built from the source PDFs by
+`pdf_to_chromadb.py` — OCR of the scanned documents, then Cohere embeddings (about 45
+API calls on a free trial key). A Community Cloud container starts with an empty disk on
+every cold start, so the index cannot be built there — it is built locally,
+published to a Hugging Face dataset repo, and downloaded once per container by
 `vectorstore.ensure_index()`.
 
 ## One-time setup
@@ -14,7 +15,7 @@ From a working local checkout with a built `chroma_db/`:
 
 ```bash
 export HF_TOKEN=hf_...          # needs *write* permission
-python ingest.py push-index --public your-name/compliance-chroma
+python pdf_to_chromadb.py push-index --public your-name/compliance-chroma
 ```
 
 Re-run it after any rebuild — the deployment keeps serving the old index until
@@ -50,6 +51,11 @@ HfApi(token="hf_<write-token>").update_repo_settings(
    HF_TOKEN = "hf_..."                                  # read permission is enough here
    HF_MODEL = "meta-llama/Llama-3.3-70B-Instruct"
    CHROMA_INDEX_REPO = "your-name/compliance-chroma"
+   COHERE_API_KEY = "..."                               # embeds each question, reranks
+   EMBED_MODEL = "embed-v4.0"                           # must match the index
+   EMBED_DIM = "1536"
+   LANGFUSE_PUBLIC_KEY = "pk-lf-..."                    # tracing; optional
+   LANGFUSE_SECRET_KEY = "sk-lf-..."
    ```
 
    With a public index repo the token is not needed to fetch the index, but it is
@@ -57,13 +63,18 @@ HfApi(token="hf_<write-token>").update_repo_settings(
    endpoint. Rotating the token means updating it here too, or the index loads
    and every question fails.
 
+   `EMBED_MODEL` and `EMBED_DIM` must be the ones the index was built with. The
+   index records them, and the app refuses to start against a mismatch rather
+   than returning unrelated passages. Without the Langfuse keys tracing is off,
+   which does not stop the app.
+
    `_bootstrap.load_secrets_into_env()` copies these into `os.environ` before any
    module reads its configuration, so the existing `os.getenv` calls keep working
    unchanged.
 
-The first cold start installs dependencies, downloads the ~99MB index, and pulls
-the `bge-base-en-v1.5` embedding weights (~440MB). Expect several minutes. Later
-starts reuse the container's disk and are much faster.
+The first cold start installs dependencies and downloads the index. There are
+no model weights to pull: embeddings and reranking are Cohere API
+calls. Later starts reuse the container's disk and are faster.
 
 ## What was changed for deployment
 
@@ -74,8 +85,12 @@ starts reuse the container's disk and are much faster.
   have started without it. `langgraph`, `langchain-community`, `langchain`,
   `rank-bm25`, `ragas`, `datasets`, `google-genai` and `groq` are not imported by
   any source file and moved to `requirements-dev.txt`.
-- **torch comes from the CPU wheel index.** The default PyPI wheel bundles CUDA
-  and unpacks to ~2.5GB, which does not fit the container.
+- **No torch.** Embeddings moved from local BGE to the Cohere API, as did
+  reranking, so torch, transformers and sentence-transformers left
+  `requirements.txt` — roughly 1GB less to install and hold in memory.
+- **OpenTelemetry is pinned.** langfuse moves the OTel exporters forward and
+  chromadb 0.5.23 breaks at import if its gRPC exporter drifts from them; the two
+  pins in `requirements.txt` keep them on one release.
 - **`pysqlite3-binary`** is installed on Linux, and `_bootstrap.py` shadows the
   stdlib `sqlite3` with it *only* when the host sqlite is older than 3.35, which
   is chromadb's floor.
@@ -117,12 +132,8 @@ to local disk, and the Community Cloud container is ephemeral — the database i
 recreated empty whenever the app restarts or wakes from sleep. Conversations are
 lost. Fixing this means pointing `store.py` at a hosted Postgres or Turso.
 
-**Memory is tight.** torch, transformers and the loaded embedding model sit in
-RAM alongside the Chroma HNSW index, against roughly 2.7GB on the free tier. If
-the app is killed on startup, the next thing to cut is local embeddings — call
-the Hugging Face inference API for query embeddings instead, which drops torch
-and transformers entirely.
-
-**`_device()` returns CPU.** The MPS branch in `vectorstore.py` is for Apple
-Silicon dev machines and never fires on the deployed Linux container, so query
-embedding is slower there.
+**Every question costs two Cohere calls before the LLM:** embedding the question
+and reranking. A trial key allows 1,000 calls a month across both, so a free
+deployment answers roughly 450 questions a month. A public deployment needs a
+production key; if only the rerank call fails, retrieval falls back to vector
+order rather than failing.

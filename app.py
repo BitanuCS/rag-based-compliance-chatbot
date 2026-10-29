@@ -220,7 +220,7 @@ with st.sidebar:
 if not messages:
     st.markdown("### How can I help with compliance today?")
     st.caption(
-        "Answers come only from the indexed corpus — 25 frameworks, 2,602 sections — "
+        f"Answers come only from the indexed corpus — {len(indexed_frameworks())} frameworks — "
         "and every claim is cited back to a section and page."
     )
 

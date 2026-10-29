@@ -31,12 +31,15 @@ from functools import lru_cache
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from observability import annotate, observe
-from vectorstore import display_text, get_store
+from vectorstore import cohere_api_key, display_text, get_store
 
-# Cosine distance, so lower is closer. Measured on this corpus: genuine hits land
-# around 0.23-0.30 and off-topic questions bottom out near 0.59. 0.45 sits in the
-# gap. Raise it to be more permissive, lower it to demand tighter matches.
-MAX_DISTANCE = float(os.getenv("RAG_MAX_DISTANCE", "0.45"))
+# Cosine distance, so lower is closer — and specific to the embedding model.
+# Measured on this corpus with embed-v4.0 (29 Oct 2026): the answering passage
+# for every eval question sits at 0.25-0.60, the nearest out-of-corpus question
+# (Basel III) at 0.654, plainly off-topic ones at 0.72-0.86. 0.62 sits in that
+# gap. Raise it to be more permissive, lower it to demand tighter matches, and
+# re-measure after any change of EMBED_MODEL.
+MAX_DISTANCE = float(os.getenv("RAG_MAX_DISTANCE", "0.62"))
 RETRIEVAL_K = int(os.getenv("RAG_K", "6"))
 
 # Candidates pulled before diversification. Nearest-k alone routinely returns one
@@ -355,11 +358,6 @@ def diversify(scored, k=RETRIEVAL_K, max_per_section=MAX_PER_SECTION):
         if len(kept) == k:
             break
     return kept
-
-
-def cohere_api_key():
-    """Cohere key under either name: COHERE_API_KEY, or the SDK's own CO_API_KEY."""
-    return os.getenv("COHERE_API_KEY") or os.getenv("CO_API_KEY")
 
 
 def rerank_enabled():

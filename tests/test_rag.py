@@ -2,7 +2,7 @@
 
 Everything here is pure: no index, no model, no network. The retrieval policy
 that needs the corpus is measured by eval_retrieval.py instead, because a test
-that depends on 2,602 embedded chunks tells you the corpus changed, not that the
+that depends on thousands of embedded chunks tells you the corpus changed, not that the
 code broke.
 """
 
