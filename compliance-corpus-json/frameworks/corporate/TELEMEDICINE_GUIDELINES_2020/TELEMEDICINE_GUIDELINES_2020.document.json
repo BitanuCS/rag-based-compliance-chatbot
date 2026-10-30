@@ -8,8 +8,8 @@
   "source_url": "https://www.nmc.org.in/",
   "source_pdf": "TELEMEDICINE_GUIDELINES_2020.pdf",
   "sha256": "7dde12875bc8c62c3d50060ab019b9a3f351ed164908840dfbd6bf462429b124",
-  "parsed_at": "2026-10-29T07:48:17.334872+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:50:47.533324+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 14,

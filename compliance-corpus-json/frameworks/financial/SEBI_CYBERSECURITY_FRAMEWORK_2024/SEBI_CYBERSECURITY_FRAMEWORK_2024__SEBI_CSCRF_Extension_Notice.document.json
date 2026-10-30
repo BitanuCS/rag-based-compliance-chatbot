@@ -8,8 +8,8 @@
   "source_url": "https://www.sebi.gov.in/legal/circulars.html",
   "source_pdf": "SEBI_CSCRF_Extension_Notice.pdf",
   "sha256": "4556f08a3d2200ef3ef41494fc1b84f0e3623518b352fa41c2d602898a7f94d5",
-  "parsed_at": "2026-10-29T07:49:48.829169+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:22.629122+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 7,

@@ -8,8 +8,8 @@
   "source_url": "https://www.sebi.gov.in/legal/master-circulars.html",
   "source_pdf": "SEBI_AML_CFT_GUIDELINES.pdf",
   "sha256": "51a0f2b833a0bec7d8da2a0e237eb389f7f4cd68ef337da5e6610399f7883252",
-  "parsed_at": "2026-10-29T07:49:29.764665+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:03.756509+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 83,

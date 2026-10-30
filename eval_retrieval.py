@@ -26,7 +26,7 @@ from pathlib import Path
 
 import observability
 import rag
-from vectorstore import display_text
+from vectorstore import display_text, token_length
 
 CASES = Path(__file__).parent / "evals" / "retrieval.json"
 
@@ -41,8 +41,23 @@ def run_case(case, k, use_rerank):
         # Nothing should clear the floor. `best` says how close the nearest
         # candidate came, which is what tells you the floor is set sanely rather
         # than merely rejecting everything.
-        return not hits, {"scope": scope, "best": best, "hits": len(hits), "rank": None}
+        return not hits, {"scope": scope, "best": best, "hits": len(hits), "rank": None,
+                          "match_rank": None, "tokens": 0}
 
+    # Two questions, one retrieval. `rank` asks whether the answer is in what
+    # the model reads — the expanded block; `match_rank` whether the search
+    # itself landed on the clause that says it. Without expansion they agree.
+    detail = {
+        "scope": scope, "best": best, "hits": len(hits),
+        "rank": _rank(case, hits, display_text),
+        "match_rank": _rank(case, hits, lambda d: d.metadata.get("matched_text") or display_text(d)),
+        "tokens": sum(token_length(display_text(d)) for d, _ in hits),
+    }
+    return detail["rank"] is not None, detail
+
+
+def _rank(case, hits, text_of):
+    """1-based rank of the first hit carrying the expected text, or None."""
     # Whitespace-normalised on both sides: where a PDF wraps a line is not part
     # of what a passage says, and a rebuilt corpus wraps differently.
     wanted_text = " ".join((case.get("expect_text") or "").lower().split())
@@ -50,10 +65,10 @@ def run_case(case, k, use_rerank):
     for rank, (doc, _) in enumerate(hits, start=1):
         if wanted_framework and doc.metadata.get("framework_id") != wanted_framework:
             continue
-        if wanted_text and wanted_text not in " ".join(display_text(doc).lower().split()):
+        if wanted_text and wanted_text not in " ".join(text_of(doc).lower().split()):
             continue
-        return True, {"scope": scope, "best": best, "hits": len(hits), "rank": rank}
-    return False, {"scope": scope, "best": best, "hits": len(hits), "rank": None}
+        return rank
+    return None
 
 
 def ranking_metrics(ranks, k):
@@ -99,7 +114,7 @@ def main():
     found_at = []
     # One entry per answerable case, None for a miss — the honest denominator
     # for Hit@k and MRR. found_at alone excludes misses and so flatters itself.
-    lookup_ranks = []
+    lookup_ranks, match_ranks, tokens, blocks = [], [], [], []
     for case in cases:
         passed, detail = run_case(case, args.k, use_rerank)
         if not passed:
@@ -108,6 +123,9 @@ def main():
             found_at.append(detail["rank"])
         if case.get("expect") != "refusal":
             lookup_ranks.append(detail["rank"])
+            match_ranks.append(detail["match_rank"])
+            tokens.append(detail["tokens"])
+            blocks.append(detail["hits"])
 
         if args.verbose or not passed:
             mark = "pass" if passed else "FAIL"
@@ -127,7 +145,12 @@ def main():
     print(f"refused      {len(refusals) - len(refusal_failures)}/{len(refusals)}  ({refusal_rate:.0%} of out-of-corpus questions correctly returned nothing)")
     print(f"mean rank    {mean_rank:.1f}  (where the answering passage landed, 1 is best)")
 
-    print(f"\n{ranking_metrics(lookup_ranks, args.k)}")
+    print(f"\nmodel reads   {ranking_metrics(lookup_ranks, args.k)}")
+    if rag.EXPAND:
+        print(f"search match  {ranking_metrics(match_ranks, args.k)}")
+    if tokens:
+        print(f"evidence      {sum(blocks) / len(blocks):.1f} sources, "
+              f"{sum(tokens) / len(tokens):,.0f} tokens per answerable question (max {max(tokens):,})")
 
     # os._exit skips interpreter teardown, which once aborted on the way out
     # (chromadb racing torch) and turned every run into a failure for a caller

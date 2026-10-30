@@ -8,8 +8,8 @@
   "source_url": "https://legislative.gov.in/sites/default/files/A2003-15.pdf",
   "source_pdf": "PMLA_AML_CFT.pdf",
   "sha256": "a9eef862341b2ced34095a70b97631d46875edb15432509a159c1075bb608eb7",
-  "parsed_at": "2026-10-29T07:49:14.133197+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:47.157939+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 23,

@@ -8,8 +8,8 @@
   "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
   "source_pdf": "RBI_ACCOUNT_AGGREGATOR_FRAMEWORK.pdf",
   "sha256": "6cfa6b0832d208e6d91de07267da0d19c7269bcd5662237109b8891c6c739354",
-  "parsed_at": "2026-10-29T07:49:14.930683+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:48.051002+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 64,

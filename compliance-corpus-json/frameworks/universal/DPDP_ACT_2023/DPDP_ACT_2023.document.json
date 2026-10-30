@@ -8,8 +8,8 @@
   "source_url": "https://www.meity.gov.in/writereaddata/files/Digital%20Personal%20Data%20Protection%20Act%202023.pdf",
   "source_pdf": "DPDP_ACT_2023.pdf",
   "sha256": "4deb23981d3010c8225a2ff6149e7243dc2268455b299e283afebdd7b72a7d15",
-  "parsed_at": "2026-10-29T08:38:30.327860+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:40.336224+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 44,

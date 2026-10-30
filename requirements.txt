@@ -12,7 +12,7 @@ langchain-chroma==0.2.3
 pysqlite3-binary==0.5.4; sys_platform == "linux"
 
 # --- embeddings + reranking: cohere, below (vectorstore.py, rag.py) ---
-# Token counts for the 512-token record cap and free-tier pacing
+# Token counts for the chunker's size guards and free-tier pacing
 # (pdf_to_chromadb.py, vectorstore.py) — a stand-in for Cohere's tokenizer, which is not offline.
 tiktoken==0.14.0
 

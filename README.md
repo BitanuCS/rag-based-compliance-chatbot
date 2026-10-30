@@ -8,8 +8,8 @@ cites every claim — or refuses.**
 [![Live app](https://img.shields.io/badge/demo-live-success?logo=streamlit&logoColor=white)](https://rag-based-compliance-chatbot.streamlit.app)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white)](.python-version)
 [![Frameworks](https://img.shields.io/badge/frameworks-25-informational)](#whats-indexed)
-[![Retrieval](https://img.shields.io/badge/hit%401-88%25-brightgreen)](#retrieval-quality)
-[![Tests](https://img.shields.io/badge/tests-68-brightgreen)](tests/)
+[![Retrieval](https://img.shields.io/badge/hit%401-96%25-brightgreen)](#retrieval-quality)
+[![Tests](https://img.shields.io/badge/tests-81-brightgreen)](tests/)
 
 [Live app](https://rag-based-compliance-chatbot.streamlit.app) ·
 [Deployment](DEPLOY.md) ·
@@ -91,7 +91,7 @@ row they print — so each breach is read next to its penalty, one row at a time
 
 ## What's indexed
 
-**27 documents · 25 frameworks · 2,816 sections → 4,299 chunks**
+**27 documents · 25 frameworks · 2,816 sections → 6,533 clauses**
 
 | Sector | Frameworks |
 | --- | --- |
@@ -110,18 +110,24 @@ source_pdfs/*.pdf
    │                       tables read row by row; margin notes → section titles
    ├─ structure .......... detects the document's heading style — gazette
    │                       "12. Title.—", "Article 12" or decimal "7.5.2 Title"
-   ├─ chunk .............. one chunk per section, split past 512 tokens on
-   │                       paragraph → sentence → clause, 64-token overlap
+   ├─ chunk .............. each section split at its own numbering, (1) or 1.;
+   │                       a piece over 800 tokens splits again at (a) or a.
+   │                       (tables at line breaks); pieces under 40 tokens merge
    ├─ data/*.json ........ the corpus, regenerated — never edited by hand
    └─ embed + store ...... Cohere embed-v4.0 → Chroma (cosine)
 ```
 
 **Why structure-aware chunking.** A regulation is already chunked by its author:
-one section is one obligation, and it is cited by its number. Cutting anywhere
-else either splits a rule from its proviso or glues two unrelated rules
+one numbered clause is one obligation, and it is cited by that number. Cutting
+anywhere else either splits a rule from its proviso or glues two unrelated rules
 together, and the reader loses the "Section 8(5)" they need to check the
-answer. Every chunk also carries a `[framework | regulator | date]` header and
-its `Framework > Chapter > Section` breadcrumb into the embedding, because a
+answer. So the document's numbering decides where a chunk ends; the token
+limits only stop a piece from being too large for the reranker or too small to
+mean anything. Provisos carry no number, so they stay with their rule.
+
+Every chunk also carries a `[framework | regulator | date]` header and its
+`Framework > Chapter > Section` breadcrumb into the embedding — plus, for a
+sub-clause, the lead-in it completes ("A notice shall contain—") — because a
 clause is only findable by what it is about if the embedding knows where it
 sits.
 
@@ -140,7 +146,10 @@ question
    │                       distance over Chroma
    ├─ distance floor ..... nothing past 0.62 reaches the reranker or the model
    ├─ rerank ............. Cohere rerank-v3.5 reorders what cleared the floor
-   ├─ diversify .......... max 2 chunks per section, keep the best 6
+   ├─ diversify .......... best clause per section, up to 6 sections
+   ├─ expand ............. each clause widened with its neighbouring clauses
+   │                       (up to 1,500 tokens), so the model reads the rule
+   │                       with its provisos; 6,000 tokens of evidence at most
    └─ grounded prompt .... numbered sources, inline [n] citations, or a refusal
 ```
 
@@ -235,39 +244,28 @@ verified against the corpus when written rather than inferred from what
 retrieval happened to return. `--no-rerank` runs the same cases on vector order
 alone.
 
-What the harness prints today:
+What the harness prints for the current build:
 
 ```
-answerable   26/26  (100% of questions retrieved the passage that answers them)
+answerable   25/26  (96% of questions retrieved the passage that answers them)
 refused      4/4    (100% of out-of-corpus questions correctly returned nothing)
-mean rank    1.3    (where the answering passage landed, 1 is best)
 
-Hit@1 88%  Hit@3 96%  Hit@6 100%  MRR 0.924  (over all 26 answerable cases, a miss scores 0)
+model reads   Hit@1 96%  Hit@3 96%  Hit@6 96%  MRR 0.962
+search match  Hit@1 92%  Hit@3 92%  Hit@6 92%  MRR 0.923
+evidence      5.9 sources, 3,194 tokens per answerable question (max 5,903)
 ```
 
-`mean rank` averages only over cases that passed, so it improves as cases fail —
-the Hit@k and MRR line is the honest one, because a miss counts as 0 there. Over the same 30 cases, against the
-August baseline (BGE embeddings over the pre-chunked corpus):
+Two views of the same retrieval. **Search match** asks whether the clause the
+search landed on contains the answer; **model reads** asks whether the answer
+is anywhere in what the model is given, after each clause is widened with its
+neighbours. The gap between them is what that widening buys: answers that sit
+one clause away from the best match. Hit@k and MRR count a miss as 0, so they
+cannot improve by a hard case failing.
 
-| Metric | Aug 2026 · BGE | Now · vector only | **Now · + Cohere rerank** |
-| --- | --- | --- | --- |
-| Hit@1 | 77% | 77% | **88%** |
-| Hit@3 | 85% | 92% | **96%** |
-| Hit@6 | 92% | 100% | **100%** |
-| MRR (all cases) | 0.819 | 0.854 | **0.924** |
-| Refused correctly | 4/4 | 4/4 | 4/4 |
-
-Read the middle column with care: the embedding model (BGE → Cohere) and the
-chunking (pre-chunked JSON → `pdf_to_chromadb.py`) changed together, so the vector-only
-gain cannot be credited to either one alone. What it does show is that both
-August failures — passages that were in the candidate list but discarded in
-selection (the GDPR fine at candidate rank 8, the Companies Act's §166 at 16,
-its title lost to body text) — now reach the top 6 on vector order alone, and
-rank 1 with the reranker. **The reranker's effect is clean**, since it is the
-only difference between the last two columns: same index, same cases, and 3
-more answers moved to rank 1 (Hit@1 77% → 88%, MRR 0.854 → 0.924). The case it
-leaves furthest down is the SEBI Security Operations Centre question (rank 5),
-from a scanned document read by OCR.
+The one miss is *"Who must a SEBI-regulated entity's Security Operations Centre
+report to?"*. The search reads "report to" as incident reporting and returns
+SEBI's incident-reporting rules; the passages on the SOC's own reporting line
+write "SOC", not the full name, and do not reach the top results.
 
 > 30 cases is a small set; one case is ~4 points of Hit@1. Treat single-case
 > differences as noise, and add cases before trusting a smaller change.
@@ -295,7 +293,7 @@ Or open the repo in **GitHub Codespaces / a VS Code dev container**:
 `requirements-dev.txt` and starts the app on port 8501. It still needs `.env`
 and an index.
 
-> **A full build is ~45 Cohere calls** (96 chunks each) and fits a free trial
+> **A full build is ~69 Cohere calls** (96 chunks each) and fits a free trial
 > key, which allows 1,000 calls a month across embedding and reranking. Each
 > question in the app costs two more, so a trial key serves roughly 450
 > questions a month. `pdf_to_chromadb.py chunk` alone takes a few minutes and costs
@@ -319,7 +317,8 @@ that matter:
 | `EMBED_MODEL` / `EMBED_DIM` | no | `embed-v4.0` / `1536` | Must match the index |
 | `RERANK_MODEL` / `RAG_RERANK` | no | `rerank-v3.5` / `true` | Reranker, and an off switch for A/B runs |
 | `RAG_MAX_DISTANCE` | no | `0.62` | Distance floor (the refusal gate) |
-| `RAG_K` / `RAG_FETCH_K` / `RAG_MAX_PER_SECTION` | no | `6` / `24` / `2` | Sources kept, candidates fetched, per-section cap |
+| `RAG_K` / `RAG_FETCH_K` | no | `6` / `24` | Sections sent to the model, candidates fetched |
+| `RAG_CONTEXT_TOKENS` / `RAG_EVIDENCE_TOKENS` | no | `1500` / `6000` | Most text around one matched clause, and in one prompt |
 | `RAG_MAX_INPUT_CHARS` / `LLM_MAX_NEW_TOKENS` | no | `2000` / `1024` | Input and output caps |
 | `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_BASE_URL` | no | off | Langfuse tracing |
 | `LANGCHAIN_TRACING_V2` / `LANGCHAIN_API_KEY` / `LANGCHAIN_PROJECT` | no | off | LangSmith tracing |
@@ -340,7 +339,7 @@ python pdf_to_chromadb.py push-index --public <user>/<repo>  # publish the index
 
 # evaluation and tests
 python eval_retrieval.py --verbose              # retrieval quality (--no-rerank to compare, --strict for CI)
-pytest                                          # 68 tests, ~1s, no network
+pytest                                          # 81 tests, ~1s, no network
 
 # chat history
 python store.py list                            # saved conversations

@@ -8,8 +8,8 @@
   "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
   "source_pdf": "RBI_IT_OUTSOURCING_DIRECTIONS.pdf",
   "sha256": "dcef635ce9c93f58199e6715a65212524230b49d34d35e6a8f44e63a3e95e8d4",
-  "parsed_at": "2026-10-29T07:49:18.902833+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:52.305466+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 21,

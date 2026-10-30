@@ -148,7 +148,7 @@ Embeddings are also an API now: Cohere `embed-v4.0` at 1536 dimensions, in
 [`vectorstore.py`](vectorstore.py), with `rerank-v3.5` from the same key. Until
 29 October BGE ran locally; it moved so the deployed app installs no torch.
 The cost of that is a call budget: the free trial key allows 1,000 calls a
-month, a full build is ~45 of them, and each question costs two (embed +
+month, a full build is ~69 of them, and each question costs two (embed +
 rerank). The index records the model and dimension it was built with, and the
 app refuses to open an index built with others.
 
@@ -243,49 +243,47 @@ before concluding tracing is misconfigured.
 
 ---
 
-## The corpus is already chunked — split only what overruns
+## Chunking: structure-aware, then widened at question time
 
-> **Historical (August, `ingest.py`).** This describes the pre-chunked
-> 2,602-chunk corpus and BGE's 512-token limit. Since 29 October the corpus is
-> chunked from the PDFs by `pdf_to_chromadb.py` with every chunk ≤ 512
-> `cl100k_base` tokens — see the 29 October section. The `embed_text` /
-> `text` split below still holds.
+Each section is split at its own numbering — sub-section `(1)` or paragraph
+`1.` — so one record is one numbered clause, the unit a regulation is cited
+by. The document's structure decides where a record ends; three guards in
+`pdf_to_chromadb.py` only bound it:
 
-`data/all_chunks.json` ships 2,602 retrieval-ready chunks, each carrying two text
-fields that are **not** interchangeable:
+- a piece over `CLAUSE_MAX_TOKENS` (800) splits again at `(a)` or `a.`, or at
+  line breaks when it has no numbering (tables);
+- a piece under `CLAUSE_MIN_TOKENS` (40) merges into its neighbour;
+- no record, header included, exceeds `EMBED_LIMIT` (1,024), so the reranker
+  (~4K tokens per query and passage) always reads it whole.
+
+Provisos and explanations carry no number, so they stay with their rule.
+Records do not overlap: they are disjoint slices of the section, and a
+section's records rejoin into its full text — `tests/test_pdf_to_chromadb.py`
+pins that, and the whole corpus was checked against it.
+
+Every record is embedded with a header: `[framework | regulator | date]`, the
+`Framework > Chapter > Section` breadcrumb and, for a sub-clause, the lead-in
+it completes (`clause_context`, e.g. *"A notice shall contain—"*). Two text
+fields are **not** interchangeable:
 
 | Field | Use |
 | --- | --- |
-| `embed_text` | Embed this. `text` with `[framework \| regulator \| date]` and the breadcrumb prefixed |
-| `text` | Display this. Clean clause text |
+| `embed_text` | Embed this: header + `text` |
+| `text` | Display this: the clause alone |
 
-The header is the point: it encodes *where* a clause sits, not only what it says.
-Re-cutting the corpus with a plain text splitter would throw that away, so
-[`ingest.py`](ingest.py) does not re-chunk. It splits only what it must.
+Display text is recovered by slicing the header off using `header_chars`.
 
-What it must split is substantial. Measured with the embedder's own tokenizer —
-not the corpus's `token_estimate`, which is `char_count/4` and drifts — **1,271 of
-2,602 chunks (48.8%) exceed bge-base's 512-token limit**, the largest at 2,724.
-Indexed as-is, everything past token 512 is silently dropped and becomes
-unretrievable. Roughly half the corpus would have been quietly unsearchable.
+**At question time the model reads more than the match.** A clause matches a
+question precisely, but alone it loses the proviso after it.
+`rag.expand()` widens each matched clause with its neighbours from the same
+section — the clauses after it first, then before — up to
+`RAG_CONTEXT_TOKENS` (1,500) per section and `RAG_EVIDENCE_TOKENS` (6,000) per
+prompt, taking one block per section. The block keeps the matched clause's
+distance, rerank score and header, so the floor, trace and citation still
+describe the clause that matched; only the text and page span widen.
 
-So oversized chunks are split on the **body only**, with the header re-applied to
-each part, and every part keeps a `parent_chunk_id` back to one citable section.
-Ids are deterministic (`chunk_id`, or `chunk_id#pN`), so re-running ingest upserts
-in place rather than duplicating.
-
-Two invariants worth knowing before touching this:
-
-- `embed_text` ends with `text` for all 2,602 chunks, which is how the header is
-  recovered by slicing. `header_of()` raises if that ever stops holding, rather
-  than indexing a mangled header.
-- Chroma stores `str | int | float | bool` only. This corpus breaks that twice:
-  `chapter` is `None` on most chunks, and `section_path` is a list. Both are
-  normalised in `clean_metadata()`; a new corpus field of another type will fail
-  at insert.
-
-Display text is recovered by slicing the header back off using `header_chars`,
-rather than storing all 13 MB of clause text a second time.
+Chroma stores `str | int | float | bool` only; lists and `None` are normalised
+in `to_record()`.
 
 ---
 
@@ -385,11 +383,11 @@ Three limits to be honest about:
 
 ---
 
-## Rebuilding the index costs ~45 Cohere calls
+## Rebuilding the index costs ~69 Cohere calls
 
-A full `pdf_to_chromadb.py build --reset` embeds 4,299 chunks in ~45 calls of 96
-texts, paced at 80k of the trial key's 100k tokens a minute — roughly 15–20
-minutes. That is ~5% of the month's 1,000 calls, shared with reranking and every
+A full `pdf_to_chromadb.py build --reset` embeds 6,533 clauses in ~69 calls of 96
+texts, paced at 80k of the trial key's 100k tokens a minute — roughly 20
+minutes. That is ~7% of the month's 1,000 calls, shared with reranking and every
 question asked in the app. `pdf_to_chromadb.py chunk` on its own is a few
 minutes, local and free.
 
@@ -924,6 +922,40 @@ Digital Personal Data Protection Act?"* scored 0.406 and retrieved §1. A
 three-word question with an abbreviation carries little for the embedding to
 match, while every chunk header spells the full name. Candidate fix, not yet
 made: append the detected framework's full name to the search query.
+
+### Structure-aware rebuild — 30 October 2026
+
+The 29 October migration to Cohere kept the 512-token chunk cap, which existed
+only because BGE truncated at 512 tokens. Nothing about Cohere needed it, so
+chunking was redone and the index rebuilt from scratch; the 512-based index
+and the August BGE backup were deleted.
+
+- **Chunking** is now by structure (see *Chunking* above): 2,816 sections →
+  6,533 clauses, median 151 tokens, largest 932 including the header. Every
+  section rejoins exactly from its clauses.
+- **Retrieval** widens each matched clause into its section (`rag.expand`).
+- **Eval** reports two views: *search match* (did the matched clause hold the
+  answer) and *model reads* (is the answer anywhere in what the model gets).
+
+| | This build |
+| --- | --- |
+| Answerable, answer reaches the model | 25 / 26 |
+| Model reads: Hit@1 · MRR | 96% · 0.962 |
+| Search match: Hit@1 · MRR | 92% · 0.923 |
+| Refused correctly | 4 / 4 |
+| Evidence per question | 5.9 sources, ~3,200 tokens |
+
+**One test case was changed.** The SEBI *"Who must a … Security Operations
+Centre report to?"* case expected the phrase *"security operations centre"*,
+which 19 chunks in 4 frameworks contain while none states the reporting line —
+so it could pass without the answer being retrieved. It now expects the SEBI
+sentence that does state it (*"…functional efficacy of Market SOC shall be
+provided by BSE and NSE…"*). It fails: those passages are not in the top 200
+search results, because the search reads "report to" as incident reporting and
+the SEBI text writes "SOC". It stays as the one known miss rather than being
+reworded to pass.
+
+Costs: ~69 Cohere calls for the build, ~60 for the eval and diagnosis.
 
 ---
 

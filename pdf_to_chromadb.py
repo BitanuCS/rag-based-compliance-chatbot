@@ -32,9 +32,13 @@ check the answer against the source. So, per document:
    finds the most plausible headings. Chapters, parts and schedules are
    recognised in every style. Section numbers must run in sequence, which is
    what keeps a numbered list inside a section from passing for new sections.
-3. **Split each section** into chunks of at most 512 tokens (header included),
-   on paragraph → line → sentence → clause boundaries with a 64-token overlap.
-   A section that fits is one chunk; most do.
+3. **Split each section into clauses** at its own numbering — (1) or 1. —
+   so one record is one obligation, the unit a regulation is cited by. A
+   clause is split further, at (a) or a., only when it is too long for one
+   record (CLAUSE_MAX_TOKENS); text with no numbering, like a table, splits at
+   line breaks. Provisos carry no number, so they stay with their rule. Parts
+   do not overlap: the app rejoins neighbouring clauses into the surrounding
+   section for the model to read (rag.expand).
 4. **Prefix a locating header** to every chunk — `[framework | regulator |
    date]` and the breadcrumb `framework > Chapter > Section` — and embed that.
    A clause is only findable by what it *is about* if the embedding knows where
@@ -77,11 +81,36 @@ CORPUS_DIR = ROOT / "data"
 FRAMEWORKS_DIR = CORPUS_DIR / "frameworks"
 ALL_CHUNKS = CORPUS_DIR / "all_chunks.json"
 
-PARSER = "pdf_to_chromadb.py/structure-aware-v1"
+PARSER = "pdf_to_chromadb.py/structure-aware-v2-clauses"
 
-# Overlap between consecutive parts of one long section, so a sentence that
-# straddles a split is whole in at least one of them.
-OVERLAP = 64
+# Clause splitting is by structure: every section is split at its first level
+# of numbering — sub-section (1) or paragraph 1. — so one record is one
+# obligation, the unit a regulation is cited by. Two guards bound that, and
+# nothing else decides where a record ends:
+#   - a piece over CLAUSE_MAX_TOKENS is split at its next numbering level, (a)
+#     or a., or at line breaks if it has none (tables). The limit keeps every
+#     record, header included, under EMBED_LIMIT, which the reranker reads whole;
+#   - a piece under CLAUSE_MIN_TOKENS ("(b) a body corporate;") is merged into
+#     its neighbour, since alone it would match everything and say nothing.
+# Parts do not overlap: they are disjoint slices of the section, so the app can
+# rejoin neighbours into the surrounding context (rag.expand).
+CLAUSE_MAX_TOKENS = 800
+CLAUSE_MIN_TOKENS = 40
+
+# Clause numbering, outermost first. Each must start a line — reflow() puts a
+# break before every list item — and a level is used only where it occurs at
+# least twice, so a stray "(a)" in prose never splits anything. Provisos and
+# explanations carry no number and so stay with the rule they qualify.
+CLAUSE_MARKERS = (
+    re.compile(r"^\(\d{1,3}[A-Z]?\)\s", re.M),   # (1)  sub-section
+    re.compile(r"^\d{1,3}\.\s", re.M),             # 1.   numbered paragraph
+    re.compile(r"^\([a-z]{1,4}\)\s", re.M),        # (a)  clause, (iv) sub-clause
+    re.compile(r"^[a-z]\.\s", re.M),               # a.   clause in circulars
+)
+
+# The lead-in a sub-clause depends on ("A Data Fiduciary shall—") is repeated in
+# each sub-clause's embedding header, keeping its last this-many characters.
+CONTEXT_CHARS = 300
 
 # Records per Chroma write: progress granularity, and small enough that one
 # failed batch costs seconds to retry rather than minutes.
@@ -866,16 +895,92 @@ def breadcrumb(framework_name, section):
     return " > ".join(p[:MAX_TITLE_CHARS] for p in parts)
 
 
-def _splitter(budget):
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
+def split_clauses(body, start=0, end=None, level=0, context=""):
+    """A section body → [(start, end, context)], disjoint and in order.
 
-    return RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        encoding_name="cl100k_base",
-        chunk_size=budget,
-        chunk_overlap=OVERLAP,
-        # Legal prose degrades gracefully: paragraph, line, sentence, clause.
-        separators=["\n\n", "\n", ". ", "; ", ", ", " ", ""],
-    )
+    The section (level 0) is always split at its first numbering level. Each
+    piece is split again at the next level only if it is over
+    CLAUSE_MAX_TOKENS; one with no numbering left falls back to line, then
+    sentence, boundaries. `context` is the lead-in a sub-clause hangs from,
+    for its embedding header.
+    """
+    end = len(body) if end is None else end
+    segment = body[start:end]
+    if level > 0 and token_length(segment) <= CLAUSE_MAX_TOKENS:
+        return [(start, end, context)]
+
+    for depth in range(level, len(CLAUSE_MARKERS)):
+        cuts = [m.start() for m in CLAUSE_MARKERS[depth].finditer(segment)]
+        if len(cuts) < 2:
+            continue
+        spans = []
+        lead_in = segment[: cuts[0]].strip()
+        if lead_in:
+            # Usually a heading or a stem, but in a schedule or table it can be
+            # pages long, so it is split like any other span.
+            spans.extend(split_clauses(body, start, start + cuts[0], depth + 1, context))
+        # A lead-in that ends in a dash or colon is a stem the clauses complete:
+        # "(b) the purpose" is meaningless without "A notice shall contain—".
+        # Any other lead-in is a heading the breadcrumb already carries.
+        # Gazette titles end ".—" ("General obligations.—"); a stem does not.
+        tail = lead_in.rstrip()
+        is_stem = tail.endswith(("—", "–", "-", ":")) and not tail[:-1].endswith(".")
+        child_context = " ".join(lead_in.split())[-CONTEXT_CHARS:] if is_stem else context
+        bounds = cuts + [len(segment)]
+        for a, b in zip(bounds, bounds[1:]):
+            spans.extend(split_clauses(body, start + a, start + b, depth + 1, child_context))
+        return _merge_small(body, spans)
+
+    if token_length(segment) <= CLAUSE_MAX_TOKENS:
+        return [(start, end, context)]
+    return _merge_small(body, _split_unnumbered(body, start, end, context))
+
+
+def _split_unnumbered(body, start, end, context):
+    """Greedy split of text with no clause numbering: whole lines, then sentences."""
+    for separator in ("\n", ". ", "; ", " "):
+        pieces, at = [], start
+        while at < end:
+            found = body.find(separator, at, end)
+            stop = end if found < 0 else found + len(separator)
+            pieces.append((at, stop))
+            at = stop
+        if len(pieces) > 1:
+            break
+    else:
+        # One unbroken run of characters: cut by length. Never seen in this
+        # corpus, but the alternative is an unbounded record.
+        width = CLAUSE_MAX_TOKENS * 3
+        return [(a, min(a + width, end), context) for a in range(start, end, width)]
+
+    spans, open_at = [], pieces[0][0]
+    for a, b in pieces:
+        if a > open_at and token_length(body[open_at:b]) > CLAUSE_MAX_TOKENS:
+            spans.append((open_at, a))
+            open_at = a
+    spans.append((open_at, end))
+
+    out = []
+    for a, b in spans:
+        if token_length(body[a:b]) > CLAUSE_MAX_TOKENS:
+            out.extend(_split_unnumbered(body, a, b, context))
+        else:
+            out.append((a, b, context))
+    return out
+
+
+def _merge_small(body, spans):
+    """Fold fragments under CLAUSE_MIN_TOKENS into the following span (the last into the previous)."""
+    out = []
+    for span in spans:
+        if out and token_length(body[out[-1][0]:out[-1][1]]) < CLAUSE_MIN_TOKENS:
+            a, _, ctx = out.pop()
+            span = (a, span[1], ctx)
+        out.append(span)
+    if len(out) > 1 and token_length(body[out[-1][0]:out[-1][1]]) < CLAUSE_MIN_TOKENS:
+        b = out.pop()[1]
+        out[-1] = (out[-1][0], b, out[-1][2])
+    return out
 
 
 def chunk_document(pdf_path, meta, doc_id):
@@ -896,7 +1001,6 @@ def chunk_document(pdf_path, meta, doc_id):
         number = len(doc_sections) + 1
         section_id = f"{doc_id}-{number:04d}"
         crumb = breadcrumb(meta["framework_name"], section)
-        header = f"{header_line}\n{crumb}\n\n"
         pages = [page for page, _ in section["lines"]]
         doc_sections.append({
             "section_id": section_id,
@@ -910,14 +1014,14 @@ def chunk_document(pdf_path, meta, doc_id):
             "text": body,
         })
 
-        budget = EMBED_LIMIT - token_length(header)
-        parts = [body] if token_length(body) <= budget else _splitter(budget).split_text(body)
+        spans = [(a, b, ctx) for a, b, ctx in split_clauses(body) if body[a:b].strip()]
         line_pages = _line_page_offsets(section["lines"], body)
-        cursor = 0
-        for part_index, part in enumerate(parts, start=1):
-            at = body.find(part[:80], max(0, cursor - 2000))
-            at = at if at >= 0 else cursor
-            cursor = at + len(part)
+        for part_index, (at, stop, context) in enumerate(spans, start=1):
+            part = body[at:stop].strip()
+            # The lead-in rides in the header: embedded, so "(b) the purpose"
+            # is found by what it is the purpose *of*, but never displayed or
+            # repeated when neighbouring clauses are rejoined.
+            record_header = f"{header_line}\n{crumb}\n" + (f"{context}\n" if context else "") + "\n"
             chunks.append({
                 "chunk_id": f"{section_id}-c{part_index:02d}",
                 "framework_id": meta["framework_id"],
@@ -935,13 +1039,14 @@ def chunk_document(pdf_path, meta, doc_id):
                 "chapter": section["chapter"],
                 "breadcrumb": crumb,
                 "page_start": _page_at(line_pages, at),
-                "page_end": _page_at(line_pages, max(at, cursor - 1)),
+                "page_end": _page_at(line_pages, max(at, stop - 1)),
                 "part_index": part_index,
-                "part_total": len(parts),
+                "part_total": len(spans),
+                "clause_context": context,
                 "text": part,
-                "embed_text": header + part,
+                "embed_text": record_header + part,
                 "char_count": len(part),
-                "token_estimate": token_length(header + part),
+                "token_estimate": token_length(record_header + part),
             })
 
     stats.update({"sections_dropped_heading_only": dropped})

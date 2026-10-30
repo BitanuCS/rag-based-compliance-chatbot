@@ -72,23 +72,22 @@ def hf_token():
     """
     return os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-# Records are capped at this many tokens. embed-v4.0 accepts far more, so this
-# is no longer the model's limit but a chosen granularity: one record is one
-# citable passage, short enough that the reranker scores the clause rather than
-# the section around it, and that six of them fit the prompt with room for
-# history. The chunker in pdf_to_chromadb.py sizes itself against the same number.
-EMBED_LIMIT = 512
+# Hard ceiling on one record, header included. Not the chunk size: records are
+# cut at the document's own clause numbering (see pdf_to_chromadb.py), and this
+# only guards against a clause no numbering or line break could split. embed-v4.0
+# accepts far more; rerank-v3.5 reads ~4K tokens of query plus passage, so a
+# record under 1,024 is always read whole by the reranker.
+EMBED_LIMIT = 1024
 
 
 @lru_cache(maxsize=1)
 def get_tokenizer():
-    """Token counter for the 512-token record cap.
+    """Token counter for the chunker's size guards and the embedder's pacing.
 
     cl100k_base stands in for Cohere's tokenizer, which is not available
-    offline. Nothing here needs Cohere's exact count: embed-v4.0 accepts far
-    longer inputs than 512 tokens, so the cap is a chosen granularity, not a
-    truncation cliff. Still far better than the corpus's own token_estimate,
-    which was char_count/4.
+    offline. Nothing here needs Cohere's exact count: the guards only bound
+    clauses the document's structure produced, and embed-v4.0 accepts far
+    longer inputs than any of them.
     """
     import tiktoken
 

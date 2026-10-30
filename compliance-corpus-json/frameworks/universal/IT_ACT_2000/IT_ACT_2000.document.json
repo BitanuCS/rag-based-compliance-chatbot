@@ -8,8 +8,8 @@
   "source_url": "https://www.meity.gov.in/content/information-technology-act",
   "source_pdf": "IT_ACT_2000.pdf",
   "sha256": "645e37dc0d249d15ef4fc4e36b453f1ecd992d7ef5342dc3348dda1c134cc81b",
-  "parsed_at": "2026-10-29T08:38:33.168479+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:44.918699+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 94,

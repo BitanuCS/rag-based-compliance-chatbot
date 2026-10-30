@@ -8,8 +8,8 @@
   "source_url": "https://www.iso.org/standard/27001",
   "source_pdf": "ISO_27001_2022.pdf",
   "sha256": "843a6728009540947b2c5531f94b4cf1fb698d5bf3b51b324c8801e3e01c5b78",
-  "parsed_at": "2026-10-29T07:50:04.175859+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:38.284632+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 1,

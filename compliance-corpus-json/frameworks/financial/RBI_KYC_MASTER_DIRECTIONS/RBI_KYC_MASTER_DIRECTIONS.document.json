@@ -8,8 +8,8 @@
   "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
   "source_pdf": "RBI_KYC_MASTER_DIRECTIONS.pdf",
   "sha256": "e525b18753fd08ffad04898202402cad37ad9be10ffa088b7ec2a37e288670ad",
-  "parsed_at": "2026-10-29T07:49:25.354421+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:59.415435+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 82,

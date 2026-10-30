@@ -8,8 +8,8 @@
   "source_url": "https://irdai.gov.in/web/guest/regulations",
   "source_pdf": "IRDAI_CYBER_SECURITY_GUIDELINES_2023.pdf",
   "sha256": "f96ff0108b898e984209066f680893561b6b52c3cca9f09d5cbfc468cc0e59e1",
-  "parsed_at": "2026-10-29T07:48:35.663138+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:07.169644+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 18,

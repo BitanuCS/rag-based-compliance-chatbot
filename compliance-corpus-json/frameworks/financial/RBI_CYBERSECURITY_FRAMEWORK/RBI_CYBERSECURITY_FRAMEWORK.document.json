@@ -8,8 +8,8 @@
   "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=10435",
   "source_pdf": "RBI_CYBERSECURITY_FRAMEWORK.pdf",
   "sha256": "e31db04429b1f5b4e188eccf6792409aad498cbd05dbf630918dab87f36950f7",
-  "parsed_at": "2026-10-29T07:49:16.493617+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:49.790768+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 23,

@@ -8,8 +8,8 @@
   "source_url": "https://www.pcisecuritystandards.org/document_library/",
   "source_pdf": "PCI_PTS_POI_SRs_v7.0_supplementary.pdf",
   "sha256": "0c9bfb394b4af14b26a0a456090bacc1cbf3690e5ebf6bc24ad2d66397896a1c",
-  "parsed_at": "2026-10-29T07:49:10.835605+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:43.621341+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 3,

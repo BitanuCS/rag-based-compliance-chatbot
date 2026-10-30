@@ -322,3 +322,71 @@ def test_a_short_token_needs_capitals(frameworks):
     # "it" is a pronoun far more often than it is the Information Technology Act.
     assert rag.detect_framework("is it mandatory to encrypt data") is None
     assert rag.detect_framework("under the IT Act, what is section 43A") == "IT_ACT_2000"
+
+
+# --- small-to-big expansion --------------------------------------------------
+#
+# The index matches single clauses; the model reads each one inside its
+# neighbours. A fake section stands in for the Chroma lookup.
+
+
+def _clause(n, text, page=None):
+    header = "[DPDP Act | MeitY | 2023]\nDPDP Act > 8 Obligations\n\n"
+    return Document(
+        page_content=header + text,
+        metadata={"chunk_id": f"S8-c{n:02d}", "parent_chunk_id": "S8", "split_index": n,
+                  "header_chars": len(header), "page_start": page or n, "page_end": page or n,
+                  "breadcrumb": "DPDP Act > 8 Obligations", "framework_id": "DPDP_ACT_2023"},
+    )
+
+
+SECTION_8 = [
+    _clause(1, "(1) A Data Fiduciary shall be responsible for compliance."),
+    _clause(2, "(2) A Data Fiduciary may engage a Data Processor."),
+    _clause(3, "Provided that the contract binds the Processor."),
+    _clause(4, "(4) A Data Fiduciary shall implement safeguards."),
+]
+
+
+def test_a_clause_is_widened_with_the_text_after_it_first():
+    from vectorstore import token_length
+    one = token_length("(2) A Data Fiduciary may engage a Data Processor.")
+    proviso = token_length("Provided that the contract binds the Processor.")
+    # Room for the match and exactly one neighbour: the proviso after it wins
+    # over sub-section (1) before it.
+    first, last, _ = rag.widen(SECTION_8, 1, one + proviso)
+    assert (first, last) == (1, 2)
+
+
+def test_a_block_carries_the_section_around_the_match():
+    [(block, distance)] = rag.expand([(SECTION_8[1], 0.31)], clauses_of=lambda d: SECTION_8)
+    text = rag.display_text(block)
+    assert text.startswith("(1)") and text.endswith("shall implement safeguards.")
+    assert distance == 0.31
+    assert (block.metadata["page_start"], block.metadata["page_end"]) == (1, 4)
+    assert block.metadata["clauses"] == 4
+    # The header is the matched clause's, so the citation still names the right place.
+    assert block.page_content.startswith("[DPDP Act")
+
+
+def test_the_matched_clause_survives_a_tiny_budget():
+    [(block, _)] = rag.expand([(SECTION_8[1], 0.3)], per_block=1, clauses_of=lambda d: SECTION_8)
+    assert rag.display_text(block) == "(2) A Data Fiduciary may engage a Data Processor."
+
+
+def test_blocks_stop_when_the_evidence_budget_is_spent():
+    other = _clause(1, "(1) Another section entirely, rather long " * 5)
+    other.metadata.update(chunk_id="S9-c01", parent_chunk_id="S9")
+    sections = {"S8": SECTION_8, "S9": [other]}
+    blocks = rag.expand(
+        [(SECTION_8[0], 0.2), (other, 0.3)],
+        budget=20,
+        clauses_of=lambda d: sections[d.metadata["parent_chunk_id"]],
+    )
+    assert len(blocks) == 1
+
+
+def test_a_clause_missing_from_its_section_passes_through():
+    stray = _clause(9, "(9) Not in the lookup.")
+    [(block, _)] = rag.expand([(stray, 0.4)], clauses_of=lambda d: SECTION_8)
+    assert rag.display_text(block) == "(9) Not in the lookup."

@@ -1,7 +1,7 @@
 # Deploying to Streamlit Community Cloud
 
 The app is a RAG chat over a Chroma index built from the source PDFs by
-`pdf_to_chromadb.py` — OCR of the scanned documents, then Cohere embeddings (about 45
+`pdf_to_chromadb.py` — OCR of the scanned documents, then Cohere embeddings (about 69
 API calls on a free trial key). A Community Cloud container starts with an empty disk on
 every cold start, so the index cannot be built there — it is built locally,
 published to a Hugging Face dataset repo, and downloaded once per container by

@@ -8,8 +8,8 @@
   "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx",
   "source_pdf": "RBI_DIGITAL_LENDING_2025.pdf",
   "sha256": "49b9c2d6b8ce2884e7eb4e26e29b5f58bc6e706d8377a447b60db98344608a14",
-  "parsed_at": "2026-10-29T07:49:17.572505+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:50.855362+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 30,

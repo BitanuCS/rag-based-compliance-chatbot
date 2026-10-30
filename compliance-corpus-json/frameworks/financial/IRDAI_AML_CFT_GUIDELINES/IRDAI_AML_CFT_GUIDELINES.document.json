@@ -8,8 +8,8 @@
   "source_url": "https://irdai.gov.in/web/guest/regulations",
   "source_pdf": "IRDAI_AML_CFT_GUIDELINES.pdf",
   "sha256": "c30108032e680460d999860405ebd07f642b02cd61d3e57205d3c688d667da18",
-  "parsed_at": "2026-10-29T07:48:18.720860+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:50:49.165573+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 21,

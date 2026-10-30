@@ -8,8 +8,8 @@
   "source_url": "https://www.sebi.gov.in/legal/regulations.html",
   "source_pdf": "SEBI_INVESTMENT_ADVISER_REGS_2013.pdf",
   "sha256": "e46c39a70713f743b277adda4436470946f8e25dbdeb47c24ecdc46a2db27ce6",
-  "parsed_at": "2026-10-29T07:49:53.111290+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:26.898412+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 35,

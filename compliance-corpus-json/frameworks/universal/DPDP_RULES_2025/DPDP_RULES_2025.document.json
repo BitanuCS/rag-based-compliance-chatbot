@@ -8,8 +8,8 @@
   "source_url": "https://www.meity.gov.in/",
   "source_pdf": "DPDP_RULES_2025.pdf",
   "sha256": "63bc7ca508ae4ebbbbf8731d336914d94ee6067e918b719d019193371fcc0763",
-  "parsed_at": "2026-10-29T08:40:36.621172+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:42.064743+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 23,

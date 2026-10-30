@@ -8,8 +8,8 @@
   "source_url": "https://www.meity.gov.in/content/information-technology-intermediary-guidelines-and-digital-media-ethics-code-rules-2021",
   "source_pdf": "IT_RULES_2011.pdf",
   "sha256": "43767447421ec64eaf44d4e64bbbebcc645260147947c377a36f6be637e67c4c",
-  "parsed_at": "2026-10-29T07:50:11.029384+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:45.422679+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 7,

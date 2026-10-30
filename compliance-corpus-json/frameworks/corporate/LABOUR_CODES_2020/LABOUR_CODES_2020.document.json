@@ -8,8 +8,8 @@
   "source_url": "https://labour.gov.in/",
   "source_pdf": "LABOUR_CODES_2020.pdf",
   "sha256": "bbc851624beb6011c550fa6b8c6b6f29f0c5add6be6b8f5be5e9bc2f3b0288ec",
-  "parsed_at": "2026-10-29T08:40:29.615237+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:50:44.524745+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 4,

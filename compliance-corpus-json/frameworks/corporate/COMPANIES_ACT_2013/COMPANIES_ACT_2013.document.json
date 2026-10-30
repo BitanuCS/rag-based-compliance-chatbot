@@ -8,8 +8,8 @@
   "source_url": "https://www.mca.gov.in/content/mca/global/en/acts-rules/ebooks/acts.html",
   "source_pdf": "COMPANIES_ACT_2013.pdf",
   "sha256": "d6e286d2a3feec89a7d432a5a572e91af9f0135411b03e57f72b7a8ef72139af",
-  "parsed_at": "2026-10-29T08:40:28.064798+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:50:42.876372+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 519,

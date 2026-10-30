@@ -137,7 +137,8 @@
     {
       "question": "Who must a SEBI-regulated entity's Security Operations Centre report to?",
       "expect_framework": "SEBI_CYBERSECURITY_FRAMEWORK_2024",
-      "expect_text": "security operations centre"
+      "expect_text": "functional efficacy of market SOC shall be provided by BSE and NSE",
+      "note": "Was 'security operations centre', which 19 chunks in 4 frameworks contain while none states the reporting line; the SEBI text writes 'SOC'. Changed 30 Oct 2026."
     },
     {
       "question": "Does an insurer need a Chief Information Security Officer?",

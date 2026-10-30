@@ -8,8 +8,8 @@
   "source_url": "https://www.pcisecuritystandards.org/document_library/",
   "source_pdf": "PCI_DSS_V4.pdf",
   "sha256": "5e6b9093b84007b973097d20126a3768ea2f0a1d4200255c849b0fb3bf04ebc7",
-  "parsed_at": "2026-10-29T07:49:05.940016+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:38.549648+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "decimal",
   "structure_scores": {
     "gazette": 10,

@@ -221,3 +221,86 @@ def test_sub_section_numbers_in_prose_are_not_a_column_row():
     prose = [_w(120, 135, 100, "(1)"), _w(140, 300, 100, "Where"), _w(310, 325, 100, "(2)"),
              _w(132, 139, 130, "1."), _w(132, 139, 150, "2.")]
     assert P._column_number_table(_Page(prose)) is None
+
+
+# --- clause splitting -------------------------------------------------------------
+#
+# A record is one clause by the document's own numbering. Limits are shrunk here
+# so a few lines exercise what a 2,000-token section does in the real corpus.
+
+
+import pytest
+
+from vectorstore import token_length
+
+
+@pytest.fixture
+def small_limits(monkeypatch):
+    monkeypatch.setattr(P, "CLAUSE_MAX_TOKENS", 40)
+    monkeypatch.setattr(P, "CLAUSE_MIN_TOKENS", 10)
+
+
+def _parts(body):
+    return [body[a:b].strip() for a, b, _ in P.split_clauses(body)]
+
+
+SECTION = (
+    "8. General obligations.—\n"
+    "(1) A Data Fiduciary shall be responsible for complying with the provisions of this Act.\n"
+    "(2) A Data Fiduciary may engage a Data Processor only under a valid contract.\n"
+    "Provided that the contract shall bind the Data Processor to these obligations.\n"
+    "(3) Where personal data is likely to be—\n"
+    "(a) used to make a decision that affects the Data Principal; or\n"
+    "(b) disclosed to another Data Fiduciary, the data shall be complete and accurate.\n"
+)
+
+
+def test_a_section_splits_at_its_numbering_whatever_its_size(small_limits):
+    body = (
+        "(1) A Data Fiduciary shall maintain the accuracy of personal data it processes.\n"
+        "(2) A Data Fiduciary shall erase personal data once its purpose is served.\n"
+    )
+    assert [p[:3] for p in _parts(body)] == ["(1)", "(2)"]
+
+
+def test_tiny_numbered_pieces_are_merged_back_together():
+    body = "(1) A short rule.\n(2) Another short rule.\n"
+    assert _parts(body) == [body.strip()]
+
+
+def test_a_section_without_numbering_stays_whole():
+    body = "This guideline applies to every regulated entity.\nIt takes effect at once.\n"
+    assert _parts(body) == [body.strip()]
+
+
+def test_sections_split_at_their_numbering_and_rejoin_exactly(small_limits):
+    spans = P.split_clauses(SECTION)
+    assert "".join(SECTION[a:b] for a, b, _ in spans) == SECTION
+    assert [p[:3] for p in _parts(SECTION)] == ["8. ", "(2)", "(3)", "(a)", "(b)"]
+
+
+def test_a_proviso_stays_with_the_rule_it_qualifies(small_limits):
+    (two,) = [p for p in _parts(SECTION) if p.startswith("(2)")]
+    assert two.endswith("bind the Data Processor to these obligations.")
+
+
+def test_sub_clauses_carry_the_stem_they_complete(small_limits):
+    spans = P.split_clauses(SECTION)
+    contexts = {SECTION[a:b].strip()[:3]: ctx for a, b, ctx in spans}
+    assert contexts["(b)"].endswith("is likely to be—")
+    # A heading is not a stem: the breadcrumb already says where (2) sits.
+    assert contexts["(2)"] == ""
+
+
+def test_fragments_merge_into_their_neighbour(small_limits):
+    parts = _parts(SECTION)
+    # "8. General obligations.—" alone is under the minimum; it opens (1)'s part.
+    assert parts[0].startswith("8. General obligations.—\n(1)")
+
+
+def test_unnumbered_text_splits_at_lines_within_the_limit(small_limits):
+    body = "\n".join(f"Row {n} | control objective text for testing purposes here" for n in range(12))
+    parts = _parts(body)
+    assert len(parts) > 1
+    assert all(token_length(p) <= P.CLAUSE_MAX_TOKENS for p in parts)
+    assert all(p.startswith("Row ") for p in parts)

@@ -8,8 +8,8 @@
   "source_url": "https://www.sebi.gov.in/legal/circulars.html",
   "source_pdf": "SEBI_ALGO_TRADING_CIRCULAR_2025.pdf",
   "sha256": "c4cb25b37b98e3cbd9244361324a5fe040755c172e372cdcbd71b3e6bd848cc4",
-  "parsed_at": "2026-10-29T07:49:25.894855+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:51:59.956779+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "gazette",
   "structure_scores": {
     "gazette": 10,

@@ -28,10 +28,11 @@ import re
 from collections import Counter
 from functools import lru_cache
 
+from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from observability import annotate, observe
-from vectorstore import cohere_api_key, display_text, get_store
+from vectorstore import cohere_api_key, display_text, get_store, token_length
 
 # Cosine distance, so lower is closer — and specific to the embedding model.
 # Measured on this corpus with embed-v4.0 (29 Oct 2026): the answering passage
@@ -62,6 +63,20 @@ RERANK_TIMEOUT = float(os.getenv("RERANK_TIMEOUT", "10"))
 # an obligation and its proviso are often split across consecutive parts, and
 # dropping the second would cut a rule in half.
 MAX_PER_SECTION = int(os.getenv("RAG_MAX_PER_SECTION", "2"))
+
+# Small-to-big. The index holds single clauses, because a clause matches a
+# question far more precisely than a whole section does; but a clause read alone
+# loses the proviso after it and the definition before it. So once the best
+# clauses are chosen, each is widened into its neighbouring clauses from the same
+# section before the model reads it. One block per section, so one section is
+# never read twice.
+EXPAND = os.getenv("RAG_EXPAND", "true").strip().lower() != "false"
+# Most of a section one block may carry. Room is given to the clauses after the
+# match first — that is where provisos and exceptions sit — then before it.
+CONTEXT_TOKENS = int(os.getenv("RAG_CONTEXT_TOKENS", "1500"))
+# All evidence in one prompt. Blocks are added best-first until this is spent,
+# so a question answered by short sections gets more of them.
+EVIDENCE_TOKENS = int(os.getenv("RAG_EVIDENCE_TOKENS", "6000"))
 
 # Input cap. A question is a question; anything longer is a pasted document, which
 # inflates cost, and — once history and six sources are added — can push the
@@ -364,6 +379,80 @@ def diversify(scored, k=RETRIEVAL_K, max_per_section=MAX_PER_SECTION):
     return kept
 
 
+def section_clauses(doc):
+    """Every clause of doc's section, in document order. A local lookup, no API call."""
+    section_id = doc.metadata.get("parent_chunk_id")
+    if not section_id:
+        return [doc]
+    found = get_store().get(where={"parent_chunk_id": section_id}, include=["documents", "metadatas"])
+    clauses = [
+        Document(page_content=text, metadata=meta)
+        for text, meta in zip(found["documents"], found["metadatas"])
+    ]
+    clauses.sort(key=lambda d: d.metadata.get("split_index", 0))
+    return clauses or [doc]
+
+
+def widen(clauses, at, room):
+    """(first, last) indices of the run of clauses around `at` that fits in `room` tokens.
+
+    Grows one clause at a time, the next one before the previous one, so a rule
+    picks up the proviso that follows it before the preamble above it. The
+    matched clause is always included, even alone over budget.
+    """
+    sizes = [token_length(display_text(c)) for c in clauses]
+    first = last = at
+    used = sizes[at]
+    grew = True
+    while grew:
+        grew = False
+        for step in (last + 1, first - 1):
+            if 0 <= step < len(clauses) and used + sizes[step] <= room:
+                used += sizes[step]
+                first, last = min(first, step), max(last, step)
+                grew = True
+    return first, last, used
+
+
+def expand(hits, budget=EVIDENCE_TOKENS, per_block=CONTEXT_TOKENS, clauses_of=section_clauses):
+    """Matched clauses → blocks of their section's surrounding text, best first.
+
+    Each hit becomes one block: the clause plus as many neighbours as fit in
+    per_block, while the blocks together stay within budget. The block keeps the
+    hit's distance, rerank score and header, so the floor, the trace and the
+    citation all still describe the clause that matched; only the text and page
+    span widen. A hit whose section has nothing more to add is passed through.
+    """
+    blocks, used = [], 0
+    for doc, distance in hits:
+        room = min(per_block, budget - used)
+        clauses = clauses_of(doc)
+        ids = [c.metadata.get("chunk_id") for c in clauses]
+        at = ids.index(doc.metadata.get("chunk_id")) if doc.metadata.get("chunk_id") in ids else None
+        if at is None:
+            clauses, at = [doc], 0
+        first, last, size = widen(clauses, at, room)
+        if blocks and size > room:
+            break  # not even the matched clause fits what is left
+        span = clauses[first : last + 1]
+        header = doc.page_content[: doc.metadata.get("header_chars", 0)]
+        text = "\n".join(display_text(c).strip() for c in span)
+        meta = {
+            **doc.metadata,
+            "header_chars": len(header),
+            "page_start": min(c.metadata["page_start"] for c in span),
+            "page_end": max(c.metadata["page_end"] for c in span),
+            "clauses": len(span),
+            "clauses_in_section": len(clauses),
+            # In memory only, never stored: lets the eval tell what the search
+            # matched apart from what the model was given around it.
+            "matched_text": display_text(doc),
+        }
+        blocks.append((Document(page_content=header + text, metadata=meta), distance))
+        used += size
+    return blocks
+
+
 def rerank_enabled():
     return RERANK and bool(cohere_api_key())
 
@@ -437,8 +526,10 @@ def retrieve(
     max_distance=MAX_DISTANCE,
     fetch_k=FETCH_K,
     use_rerank=None,
+    use_expand=None,
 ):
-    """Nearest chunks that clear the distance floor, reranked, thinned for variety.
+    """Nearest chunks that clear the distance floor, reranked, thinned for variety,
+    then widened into their surrounding section (see expand).
 
     Returns (hits, best_distance). best_distance is reported even when everything
     is filtered out, so a near-miss is debuggable rather than an unexplained
@@ -447,7 +538,10 @@ def retrieve(
 
     The floor runs before the reranker, not after: it is the refusal gate, and a
     cross-encoder score is not calibrated to say "nothing here answers this".
-    use_rerank=None means "whatever RAG_RERANK and the key say".
+    use_rerank=None means "whatever RAG_RERANK and the key say", and
+    use_expand=None "whatever RAG_EXPAND says". Expanding keeps one hit per
+    section, since the block around it already carries that section's other
+    clauses.
     """
     from vectorstore import build_filter
 
@@ -463,7 +557,10 @@ def retrieve(
     reranked = use_rerank if use_rerank is not None else rerank_enabled()
     if reranked and near:
         near = rerank(question, near)
-    hits = diversify(near, k)
+    expanding = EXPAND if use_expand is None else use_expand
+    hits = diversify(near, k, max_per_section=1 if expanding else MAX_PER_SECTION)
+    if expanding:
+        hits = expand(hits)
 
     annotate(
         output=_trace_hits(hits),
@@ -473,6 +570,8 @@ def retrieve(
             "best_distance": round(best, 4),
             "floor": max_distance,
             "reranked": bool(reranked and near),
+            "expanded": expanding,
+            "evidence_tokens": sum(token_length(display_text(d)) for d, _ in hits),
             "framework": framework,
         },
     )

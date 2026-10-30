@@ -8,8 +8,8 @@
   "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32016R0679",
   "source_pdf": "GDPR_2018.pdf",
   "sha256": "bd84e63f5b622b739a83389afc3b30d240f792bb88d8eb03a816c9a82b0c2499",
-  "parsed_at": "2026-10-29T07:50:02.294645+00:00",
-  "parser": "pdf_to_chromadb.py/structure-aware-v1",
+  "parsed_at": "2026-10-30T07:52:36.380791+00:00",
+  "parser": "pdf_to_chromadb.py/structure-aware-v2-clauses",
   "structure_strategy": "article",
   "structure_scores": {
     "gazette": 12,
